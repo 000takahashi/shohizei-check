@@ -3,417 +3,2104 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>消費税1%チェッカー</title>
-<meta name="description" content="令和9年4月から2年間、食料品の消費税が1%に下がります。飲食店と食品の仕入れ先が、本則課税・簡易課税・免税のどれで申告すると税が少ないかを試算し、届出の期限を出します。">
+<title>消費税1%チェッカー｜食料品1%の申告方式と届出の期限</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="令和9年4月からの食料品の消費税1%（案）で、飲食店・食品の卸・小売の税額が本則課税・簡易課税・免税でいくらになるかを比べ、出す届出と期限の目安を出す無料ツールです。">
+<meta property="og:title" content="消費税1%チェッカー｜食料品1%の申告方式と届出の期限">
+<meta property="og:description" content="食料品の消費税が1%になる2年間、本則・簡易・免税のどれが少ないか。届出の期限まで目安を出します。">
+<meta property="og:type" content="website">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@400;500;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=M+PLUS+2:wght@400;500;700&display=swap">
 <style>
-/* Layout: 輸入利益チェッカーと同じ姉妹の型。入力（左）→ 試算書（右・固定）。スマホでは1列。 */
 :root {
-  --bg: #ffffff;
-  --field: #f6f8f4;
-  --soft: #f4f7f1;
+  --bg: #f3f6f9;
   --paper: #ffffff;
-  --ink: #1b2615;
-  --muted: #5a6652;
-  --line: #d8dfd2;
-  --accent: #46651f;       /* 青菜の緑。食料品の姉妹サイトの色 */
-  --accent-soft: #eaf1e0;
-  --good: #1f7a3f;
-  --bad: #b3261e;
-  --warn-bg: #fff6e0;
-  --warn-fg: #7a5200;
+  --paper-subtle: #f8fafc;
+  --field: #f8fafc;
+  --field-hover: #f1f5f9;
+  --soft: #f1f5f9;
+  --ink: #0f172a;
+  --ink-secondary: #334155;
+  --muted: #64748b;
+  --line: #e2e8f0;
+  --line-strong: #cbd5e1;
+  --accent: #0d7480;
+  --accent-hover: #0a5c66;
+  --accent-soft: #e6f4f6;
+  --accent-ring: rgb(13 116 128 / 0.18);
+  --good: #15803d;
+  --good-soft: #dcfce7;
+  --good-border: #86efac;
+  --bad: #b91c1c;
+  --bad-soft: #fee2e2;
+  --bad-border: #fca5a5;
+  --warn-bg: #fef9c3;
+  --warn-fg: #854d0e;
+  --warn-border: #fde047;
+  --bar-cost: #3b82f6;
+  --bar-tax: #f59e0b;
+  --bar-fee: #8b5cf6;
+  --bar-profit: #10b981;
   --font-body: "IBM Plex Sans JP", "Hiragino Sans", "Noto Sans JP", "Yu Gothic", system-ui, sans-serif;
   --font-num: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
-  --radius: 10px;
+  --radius: 14px;
+  --radius-sm: 10px;
+  --shadow-card: 0 1px 3px rgb(15 23 42 / 0.04), 0 4px 12px rgb(15 23 42 / 0.03);
+  --shadow-float: 0 10px 30px -5px rgb(15 23 42 / 0.12), 0 4px 12px -2px rgb(15 23 42 / 0.06);
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #11160e; --field: #11160e; --soft: #161d12; --paper: #1a2216; --ink: #e8eee2; --muted: #a1ad97; --line: #2f3a28;
-    --accent: #a6c97a; --accent-soft: #24311a; --good: #6fcf8f; --bad: #ff8a80; --warn-bg: #3a2e12; --warn-fg: #f3d58a;
+    --bg: #0b1017;
+    --paper: #131b26;
+    --paper-subtle: #182230;
+    --field: #0f1620;
+    --field-hover: #172130;
+    --soft: #1a2433;
+    --ink: #f1f5f9;
+    --ink-secondary: #cbd5e1;
+    --muted: #94a3b8;
+    --line: #233042;
+    --line-strong: #334155;
+    --accent: #38bdf8;
+    --accent-hover: #7dd3fc;
+    --accent-soft: #132a3e;
+    --accent-ring: rgb(56 189 248 / 0.22);
+    --good: #4ade80;
+    --good-soft: #112e21;
+    --good-border: #166534;
+    --bad: #f87171;
+    --bad-soft: #351619;
+    --bad-border: #7f1d1d;
+    --warn-bg: #2e2410;
+    --warn-fg: #fde047;
+    --warn-border: #713f12;
+    --bar-cost: #60a5fa;
+    --bar-tax: #fbbf24;
+    --bar-fee: #a78bfa;
+    --bar-profit: #34d399;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #11160e; --field: #11160e; --soft: #161d12; --paper: #1a2216; --ink: #e8eee2; --muted: #a1ad97; --line: #2f3a28;
-  --accent: #a6c97a; --accent-soft: #24311a; --good: #6fcf8f; --bad: #ff8a80; --warn-bg: #3a2e12; --warn-fg: #f3d58a;
+  --bg: #0b1017;
+  --paper: #131b26;
+  --paper-subtle: #182230;
+  --field: #0f1620;
+  --field-hover: #172130;
+  --soft: #1a2433;
+  --ink: #f1f5f9;
+  --ink-secondary: #cbd5e1;
+  --muted: #94a3b8;
+  --line: #233042;
+  --line-strong: #334155;
+  --accent: #38bdf8;
+  --accent-hover: #7dd3fc;
+  --accent-soft: #132a3e;
+  --accent-ring: rgb(56 189 248 / 0.22);
+  --good: #4ade80;
+  --good-soft: #112e21;
+  --good-border: #166534;
+  --bad: #f87171;
+  --bad-soft: #351619;
+  --bad-border: #7f1d1d;
+  --warn-bg: #2e2410;
+  --warn-fg: #fde047;
+  --warn-border: #713f12;
+  --bar-cost: #60a5fa;
+  --bar-tax: #fbbf24;
+  --bar-fee: #a78bfa;
+  --bar-profit: #34d399;
   color-scheme: dark;
 }
+
 * { box-sizing: border-box; }
+/* hidden を付けた要素は、display を指定したクラスより優先して必ず隠す */
 [hidden] { display: none !important; }
-body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 17px; line-height: 1.75; }
-.wrap {
-  max-width: 1120px; margin: 0 auto; padding-block: 24px 48px;
-  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  /* 日本語を文節で折り返す（対応ブラウザのみ）。長い英数字だけは枠の中で折る（anywhere は表の列幅を1文字まで縮めるので使わない） */
+  word-break: auto-phrase;
+  line-break: strict;
+  overflow-wrap: break-word;
 }
-header.top { display: flex; flex-direction: column; gap: 6px; margin-bottom: 20px; }
+h1, h2, h3, legend, label, .verdict b, .hint { text-wrap: pretty; }
+.nw { white-space: nowrap; }
+.wrap {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding-block: 20px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+/* Header */
+header.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.brand-group { display: flex; flex-direction: column; gap: 4px; }
+.brand-badge-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.tagline {
+  margin: 0;
+  font-weight: 700;
+  color: var(--accent);
+  font-size: .78rem;
+  letter-spacing: .06em;
+  background: var(--accent-soft);
+  padding: 2px 10px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+}
 .brand { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
-h1 { font-size: 1.75rem; margin: 0; letter-spacing: .02em; text-wrap: balance; }
-.rate { font-family: var(--font-num); font-size: .95rem; color: var(--accent); border: 1px solid var(--accent); border-radius: 6px; padding: 0 8px; }
-.lead { margin: 0; color: var(--muted); max-width: 62ch; }
-.draft { margin: 6px 0 0; font-size: .9rem; background: var(--warn-bg); color: var(--warn-fg); border-radius: 8px; padding: 6px 12px; max-width: 70ch; }
-.grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 440px); gap: 20px; align-items: start; }
-@media (max-width: 880px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+h1 { font-size: 1.65rem; font-weight: 700; margin: 0; letter-spacing: .01em; line-height: 1.3; }
+.brand .en { font-family: var(--font-num); font-size: .8rem; color: var(--muted); letter-spacing: .08em; }
+.lead { margin: 2px 0 0; color: var(--muted); font-size: .92rem; max-width: 64ch; }
+
+.top-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: inherit;
+  font-size: .85rem;
+  font-weight: 500;
+  color: var(--ink-secondary);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: all .15s ease;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.03);
+}
+.action-btn:hover { background: var(--soft); border-color: var(--line-strong); color: var(--ink); }
+
+/* Example Mode Banner */
+.example-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--accent-soft);
+  border: 1px solid color-mix(in srgb, var(--accent) 28%, transparent);
+  color: var(--ink);
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  font-size: .88rem;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.example-banner[hidden] { display: none; }
+.example-banner-text { display: flex; align-items: center; gap: 8px; }
+.example-pill {
+  background: var(--accent);
+  color: #fff;
+  font-size: .75rem;
+  font-weight: 700;
+  padding: 1px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+:root[data-theme="dark"] .example-pill { color: #0b1017; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .example-pill { color: #0b1017; } }
+.example-actions { display: flex; gap: 6px; }
+.mini-btn {
+  font: inherit;
+  font-size: .8rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--line-strong);
+  background: var(--paper);
+  color: var(--ink);
+  cursor: pointer;
+}
+.mini-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Main 2-Column Grid */
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 440px);
+  gap: 22px;
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Input Cards (Fieldsets) */
 .inputs { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
-fieldset { margin: 0; border: 1px solid var(--line); border-radius: var(--radius); background: var(--paper); padding: 16px 18px 18px; min-width: 0; }
-legend { float: left; width: 100%; padding: 0 0 10px; margin: 0 0 14px; border-bottom: 1px solid var(--line); font-weight: 700; font-size: 1.1rem; display: flex; align-items: baseline; gap: 8px; }
+fieldset {
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--paper);
+  padding: 18px 20px 20px;
+  min-width: 0;
+  box-shadow: var(--shadow-card);
+}
+legend {
+  float: left;
+  width: 100%;
+  padding: 0 0 12px;
+  margin: 0 0 14px;
+  border-bottom: 1px solid var(--line);
+  font-weight: 700;
+  font-size: 1.08rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 legend + * { clear: both; }
-legend .no { display: inline-flex; align-items: center; justify-content: center; flex: none; align-self: center; width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: var(--paper); font-family: var(--font-num); font-size: .9rem; font-weight: 600; }
-legend small { font-weight: 400; color: var(--muted); font-size: .9rem; }
-.row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px 14px; }
-.field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-.field label { font-size: .95rem; font-weight: 500; }
-.field .hint { font-size: .85rem; color: var(--muted); line-height: 1.5; }
-input[type="text"], select { width: 100%; font: inherit; color: var(--ink); background: var(--field); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; min-height: 46px; }
-input.money { font-family: var(--font-num); font-variant-numeric: tabular-nums; text-align: right; }
-input:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.suffix { display: flex; align-items: center; gap: 6px; }
-.suffix span { font-size: .95rem; color: var(--muted); white-space: nowrap; }
-.radios { display: flex; gap: 16px; flex-wrap: wrap; font-size: .95rem; min-height: 46px; align-items: center; }
-.radios label { display: flex; gap: 6px; align-items: center; }
+legend .no {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  font-family: var(--font-num);
+  font-size: .9rem;
+  font-weight: 700;
+}
+:root[data-theme="dark"] legend .no { color: var(--bg); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) legend .no { color: var(--bg); } }
+legend small { font-weight: 400; color: var(--muted); font-size: .86rem; margin-left: auto; }
+
+/* Form Grid & Fields */
+.row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.row.cols-3 {
+  grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
+}
+@media (max-width: 540px) {
+  fieldset { padding: 14px 14px 16px; }
+  .row { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .field.full-mobile { grid-column: 1 / -1; }
+  /* スマホでの折り返しを整える */
+  .top-actions { width: 100%; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+  .action-btn { justify-content: center; padding: 6px 4px; font-size: .78rem; white-space: nowrap; }
+  .example-banner { flex-direction: column; align-items: flex-start; gap: 6px; }
+  details.breakdown > summary small { display: none; }
+  .example-banner-text { flex-direction: column; align-items: flex-start; gap: 4px; }
+  .sheet-head { flex-wrap: wrap; }
+  .sheet-head h2 { white-space: nowrap; }
+  /* 早押しボタンは同じ幅でそろえ、指で押しやすい高さにする */
+  .inputs .preset-row { display: grid; gap: 6px; }
+  .inputs .preset-btn { min-height: 34px; padding: 2px 4px; font-size: .78rem; white-space: normal; line-height: 1.25; }
+  #curPresets, #marginPresets { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  #qtyPresets { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  #feePresets { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #domShipPresets { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 380px) {
+  /* 狭い画面では、たたんだ行の中身を見出しの下へ回す */
+  details.fold > summary { flex-wrap: wrap; row-gap: 2px; padding-block: 6px; }
+  .inputs details.fold > summary .fv { order: 3; margin-left: 0; flex-basis: 100%; text-align: left; background: none; padding: 0; }
+  .inputs details.fold > summary::after { margin-left: auto; }
+}
+.field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.field-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  min-height: 24px;
+}
+.field label, .field .field-label {
+  font-size: .9rem;
+  font-weight: 600;
+  color: var(--ink-secondary);
+}
+.field .hint {
+  font-size: .8rem;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+/* Segmented Mode Switch (e.g., 単価 vs 合計) */
+.seg-switch {
+  display: inline-flex;
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  padding: 2px;
+  gap: 2px;
+}
+.seg-btn {
+  font: inherit;
+  font-size: .75rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all .12s;
+  white-space: nowrap;
+}
+.seg-btn.active {
+  background: var(--paper);
+  color: var(--accent);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.08);
+}
+
+/* Modern Input Box with Inline Unit Suffix */
+.input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+input[type="number"], input[type="text"], input[type="date"], select {
+  width: 100%;
+  font: inherit;
+  font-size: 1rem;
+  color: var(--ink);
+  background: var(--field);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  padding: 9px 12px;
+  min-height: 44px;
+  transition: border-color .15s, background-color .15s, box-shadow .15s;
+}
+input[type="number"]:hover, input[type="text"]:hover, input[type="date"]:hover, select:hover {
+  background: var(--field-hover);
+}
+input[type="number"] {
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  -moz-appearance: textfield;
+}
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.input-wrap input {
+  padding-right: 52px;
+}
+.input-wrap.wide-unit input {
+  padding-right: 76px;
+}
+.input-unit {
+  position: absolute;
+  right: 8px;
+  pointer-events: none;
+  font-size: .82rem;
+  font-weight: 600;
+  color: var(--muted);
+  background: var(--soft);
+  padding: 2px 7px;
+  border-radius: 6px;
+  font-family: var(--font-num);
+  white-space: nowrap;
+}
+input:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}
+
+/* Quick Preset Pills / Chips */
+.preset-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin-top: 2px;
+}
+.preset-btn {
+  font: inherit;
+  font-size: .76rem;
+  font-weight: 500;
+  color: var(--ink-secondary);
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 2px 9px;
+  cursor: pointer;
+  transition: all .12s;
+  white-space: nowrap;
+}
+.preset-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+.preset-btn.active {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* Category Tabs & Searchable Item Selector */
+.cat-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.cat-tabs::-webkit-scrollbar { display: none; }
+.cat-tab {
+  font: inherit;
+  font-size: .82rem;
+  font-weight: 600;
+  color: var(--muted);
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 5px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all .15s;
+}
+.cat-tab:hover { color: var(--ink); border-color: var(--line-strong); }
+.cat-tab.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+:root[data-theme="dark"] .cat-tab.active { color: #0b1017; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .cat-tab.active { color: #0b1017; } }
+
+.search-box {
+  position: relative;
+}
+.search-box input {
+  padding-left: 36px;
+  padding-right: 34px;
+}
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  pointer-events: none;
+  font-size: .95rem;
+}
+.search-clear {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 0;
+  background: var(--soft);
+  color: var(--muted);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: .8rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.search-clear[hidden] { display: none; }
+
+/* 選んだ品目の行（一覧はたたんでおく） */
+.picked {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius-sm);
+  background: var(--paper-subtle);
+}
+.picked .pk-label { display: block; font-size: .78rem; color: var(--muted); }
+.picked .pk-name { display: block; font-weight: 600; line-height: 1.45; }
+.picked .mini-btn { flex-shrink: 0; }
+.picker { display: flex; flex-direction: column; gap: 10px; }
+.sheet-head .example-pill { margin-left: 8px; vertical-align: middle; }
+
+/* Quick Item Grid (Visual Picker) */
+.item-quick-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 6px;
+  max-height: 188px;
+  overflow-y: auto;
+  padding: 4px;
+  background: var(--paper-subtle);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+}
+@media (max-width: 540px) {
+  .item-quick-list {
+    grid-template-columns: 1fr;
+    max-height: 165px;
+  }
+}
+.item-card-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  text-align: left;
+  font: inherit;
+  padding: 7px 10px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: var(--paper);
+  color: var(--ink);
+  cursor: pointer;
+  transition: all .12s;
+}
+.item-card-btn:hover {
+  border-color: var(--line-strong);
+  background: var(--field-hover);
+}
+.item-card-btn.selected {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.item-card-name {
+  font-size: .84rem;
+  font-weight: 500;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.item-card-rate {
+  flex: none;
+  font-family: var(--font-num);
+  font-size: .75rem;
+  font-weight: 600;
+  color: var(--accent);
+  background: var(--soft);
+  padding: 2px 6px;
+  border-radius: 5px;
+}
+.item-card-btn.selected .item-card-rate {
+  background: var(--paper);
+}
+
+.iteminfo {
+  margin-top: 10px;
+  background: var(--paper-subtle);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: .86rem;
+}
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip {
+  font-size: .78rem;
+  font-weight: 600;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 2px 9px;
+  background: var(--paper);
+  white-space: nowrap;
+}
+.chip.on {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+.chip.warn {
+  border-color: var(--warn-border);
+  color: var(--warn-fg);
+  background: var(--warn-bg);
+}
+.stack { display: flex; flex-direction: column; gap: 10px; }
+
+.check {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: .9rem;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--paper-subtle);
+  border: 1px solid var(--line);
+  cursor: pointer;
+}
+.check input { margin-top: 4px; accent-color: var(--accent); width: 16px; height: 16px; flex: none; }
+.radios { display: flex; gap: 12px; flex-wrap: wrap; font-size: .9rem; margin-top: 4px; }
+.radios label { display: flex; gap: 6px; align-items: center; cursor: pointer; }
 .radios input { accent-color: var(--accent); }
-.rate-tag { font-family: var(--font-num); font-size: .78rem; border-radius: 4px; padding: 0 6px; margin-left: 4px; background: var(--soft); border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
-.rate-tag.cut { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
-details.more { border-top: 1px dashed var(--line); margin-top: 14px; padding-top: 10px; }
-details.more summary { cursor: pointer; font-size: .95rem; color: var(--accent); }
-details.more .row { margin-top: 10px; }
-.err { color: var(--bad); font-size: .85rem; }
 
-/* 試算書 */
-.sheet { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; min-width: 0; }
-@media (max-width: 880px) { .sheet { position: static; } }
-.sheet-head { padding: 14px 18px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
-.sheet-head h2 { margin: 0; font-size: 1.1rem; }
-.sheet-head span { font-size: .85rem; color: var(--muted); }
-.verdict { padding: 14px 18px; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 4px; background: var(--soft); }
-.verdict .k { font-size: .85rem; color: var(--muted); }
-.verdict b { font-size: 1.25rem; line-height: 1.4; }
-.verdict p { margin: 0; font-size: .92rem; }
-.verdict.switch { background: color-mix(in srgb, var(--accent) 14%, var(--paper)); }
-.summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: var(--line); border-bottom: 1px solid var(--line); }
-.summary div { background: var(--paper); padding: 10px 14px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.summary .k { font-size: .8rem; color: var(--muted); line-height: 1.4; }
-.summary .v { font-family: var(--font-num); font-size: 1.15rem; font-weight: 600; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
-.summary .d { font-family: var(--font-num); font-size: .82rem; font-variant-numeric: tabular-nums; }
-.pos { color: var(--bad); } .neg { color: var(--good); }
-.lines { padding: 8px 18px 14px; }
-.lines h3 { font-size: .85rem; letter-spacing: .06em; color: var(--muted); margin: 14px 0 2px; font-weight: 500; }
-.lines table { width: 100%; border-collapse: collapse; font-size: .95rem; }
-.lines td { padding: 7px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+/* Calculated Sub-value Pill inside Goods Field */
+.calc-sub-pill {
+  font-size: .8rem;
+  font-family: var(--font-num);
+  color: var(--accent);
+  background: var(--accent-soft);
+  padding: 3px 8px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+}
+
+/* Right Column: Result Sheet */
+.sheet {
+  position: sticky;
+  top: calc(env(safe-area-inset-top, 0px) + 14px);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  min-width: 0;
+  box-shadow: var(--shadow-float);
+}
+@media (max-width: 900px) {
+  .sheet { position: static; }
+}
+.sheet-head {
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  background: var(--paper-subtle);
+}
+.sheet-head h2 { margin: 0; font-size: 1rem; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+.sheet-head-right { display: flex; align-items: center; gap: 6px; }
+
+/* Verdict Banner */
+.verdict {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: var(--soft);
+}
+.verdict-icon {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1rem;
+  background: var(--paper);
+  color: var(--muted);
+  margin-top: 2px;
+}
+.verdict-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.verdict b { font-size: 1.08rem; line-height: 1.35; }
+.verdict span { font-size: .86rem; color: var(--ink-secondary); line-height: 1.45; }
+.verdict.good { background: var(--good-soft); border-bottom-color: var(--good-border); }
+.verdict.good b { color: var(--good); }
+.verdict.good .verdict-icon { background: var(--good); color: #fff; }
+.verdict.warn { background: var(--warn-bg); border-bottom-color: var(--warn-border); }
+.verdict.warn b { color: var(--warn-fg); }
+.verdict.warn .verdict-icon { background: var(--warn-fg); color: #fff; }
+.verdict.bad { background: var(--bad-soft); border-bottom-color: var(--bad-border); }
+.verdict.bad b { color: var(--bad); }
+.verdict.bad .verdict-icon { background: var(--bad); color: #fff; }
+
+/* Hero KPI Row (Profit & Margin) */
+.hero-kpi {
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  gap: 1px;
+  background: var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.hero-cell {
+  background: var(--paper);
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.hero-cell .k {
+  font-size: .8rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+.hero-cell .v {
+  font-family: var(--font-num);
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: break-word;
+}
+.hero-cell .v.pos { color: var(--good); }
+.hero-cell .v.neg { color: var(--bad); }
+.hero-cell .sub-v {
+  font-size: .78rem;
+  color: var(--muted);
+  font-family: var(--font-num);
+  margin-top: 2px;
+}
+
+/* Visual Cost Structure Bar (売上構成バー) */
+.cost-bar-wrap {
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--line);
+  background: var(--paper-subtle);
+}
+.cost-bar-Wrap[hidden] { display: none; }
+.cost-bar-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: .78rem;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.cost-bar-track {
+  height: 10px;
+  width: 100%;
+  background: var(--soft);
+  border-radius: 999px;
+  overflow: hidden;
+  display: flex;
+  gap: 1px;
+}
+.cost-seg { height: 100%; transition: width .25s ease; }
+.cost-seg.c-cost { background: var(--bar-cost); }
+.cost-seg.c-tax { background: var(--bar-tax); }
+.cost-seg.c-fee { background: var(--bar-fee); }
+.cost-seg.c-profit { background: var(--bar-profit); }
+.cost-legend {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px 10px;
+  margin-top: 8px;
+  font-size: .76rem;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--ink-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex: none;
+}
+.legend-val {
+  margin-left: auto;
+  font-family: var(--font-num);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* Sub-metrics 2x2 Grid */
+.summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.summary div {
+  background: var(--paper);
+  padding: 11px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.summary .k { font-size: .78rem; color: var(--muted); font-weight: 500; }
+.summary .v {
+  font-family: var(--font-num);
+  font-size: 1.18rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: break-word;
+  color: var(--ink);
+}
+.summary .sub-k {
+  font-size: .73rem;
+  color: var(--muted);
+}
+
+/* Breakdown Table */
+.lines { padding: 6px 18px 14px; }
+.lines table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+.lines td { padding: 5px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
 .lines td.num { text-align: right; font-family: var(--font-num); font-variant-numeric: tabular-nums; white-space: nowrap; padding-left: 10px; }
-.lines tr.best td { font-weight: 700; }
-.lines tr.off td { color: var(--muted); }
-.pill { font-size: .75rem; border-radius: 999px; padding: 0 8px; margin-left: 6px; white-space: nowrap; font-weight: 500; }
-.pill.best { background: var(--accent); color: var(--paper); }
-.pill.now { border: 1px solid var(--line); color: var(--muted); }
-.pill.off { border: 1px dashed var(--line); color: var(--muted); }
-.todo { margin: 6px 0 0; padding: 12px 14px; border-radius: 8px; border: 1px solid var(--accent); background: var(--accent-soft); display: flex; flex-direction: column; gap: 4px; font-size: .92rem; }
-.todo .form { font-weight: 700; }
-.todo .date { font-family: var(--font-num); font-size: 1.05rem; font-weight: 600; }
-.todo.none { border-color: var(--line); background: var(--soft); }
-ul.notes { margin: 6px 0 0; padding-left: 1.2em; font-size: .9rem; display: flex; flex-direction: column; gap: 4px; }
-.fine { font-size: .8rem; color: var(--muted); margin: 12px 0 0; line-height: 1.6; }
+.lines tr.sub td { color: var(--muted); font-size: .8rem; padding-top: 0; border-bottom-style: dashed; }
+.lines tr.total td { font-weight: 700; border-bottom: 2px solid var(--ink); }
+.lines h3 { font-size: .8rem; letter-spacing: .06em; color: var(--muted); margin: 14px 0 4px; font-weight: 600; }
 
-/* 解説 */
-.guide { margin-top: 32px; display: flex; flex-direction: column; gap: 0; max-width: 760px; border-top: 1px solid var(--line); }
-.guide details { border-bottom: 1px solid var(--line); }
-.guide summary { cursor: pointer; padding: 14px 4px; font-weight: 700; list-style-position: inside; }
-.guide .body { padding: 0 4px 16px; font-size: .97rem; }
-.guide .body p { margin: 0 0 10px; }
-.guide table { border-collapse: collapse; font-size: .92rem; min-width: 420px; }
-.guide th, .guide td { border-bottom: 1px solid var(--line); padding: 6px 10px 6px 0; text-align: left; }
-.scroll { overflow-x: auto; }
-footer { margin-top: 28px; font-size: .85rem; color: var(--muted); max-width: 70ch; }
-footer a { color: var(--accent); }
-@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+.linkbtn {
+  align-self: flex-start;
+  font: inherit;
+  font-size: .8rem;
+  font-weight: 600;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  padding: 3px 10px;
+  cursor: pointer;
+}
+.notice {
+  margin: 12px 16px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--warn-bg);
+  border: 1px solid var(--warn-border);
+  color: var(--warn-fg);
+  font-size: .84rem;
+  line-height: 1.55;
+}
+.notice[hidden] { display: none; }
+.disclaimer { font-size: .78rem; color: var(--muted); padding: 0 18px 16px; margin: 0; line-height: 1.5; }
+
+/* Foldable Sections */
+.muted { color: var(--muted); }
+details.fold {
+  background: none;
+  border: 0;
+  border-top: 1px dashed var(--line-strong);
+  border-radius: 0;
+  padding: 0;
+  margin-top: 14px;
+}
+details.fold + details.fold { margin-top: 0; }
+details.fold > summary, details.breakdown > summary, details.topic > summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 46px;
+  cursor: pointer;
+  user-select: none;
+}
+details.fold > summary::-webkit-details-marker,
+details.breakdown > summary::-webkit-details-marker,
+details.topic > summary::-webkit-details-marker { display: none; }
+details.fold > summary::after,
+details.breakdown > summary::after,
+details.topic > summary::after {
+  content: "";
+  flex: none;
+  width: 7px;
+  height: 7px;
+  margin-left: 4px;
+  margin-right: 4px;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: rotate(45deg) translateY(-2px);
+  transition: transform .15s ease;
+}
+details[open].fold > summary::after,
+details[open].breakdown > summary::after,
+details[open].topic > summary::after {
+  transform: rotate(225deg) translateY(-2px);
+}
+details.fold .ft { font-size: .9rem; font-weight: 600; color: var(--ink-secondary); flex: none; }
+details.fold .fv {
+  margin-left: auto;
+  font-size: .82rem;
+  color: var(--muted);
+  background: var(--soft);
+  padding: 2px 8px;
+  border-radius: 6px;
+  text-align: right;
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  min-width: 0;
+  overflow-wrap: break-word;
+  line-height: 1.4;
+}
+details.fold > .row, details.fold > .stack { padding-bottom: 8px; padding-top: 4px; }
+details.fold.has-err > summary .ft { color: var(--bad); }
+
+details.breakdown { background: none; border: 0; border-radius: 0; padding: 0 18px; }
+details.breakdown > summary { font-weight: 600; font-size: .92rem; color: var(--accent); }
+details.breakdown > summary small { font-weight: 400; color: var(--muted); font-size: .8rem; margin-right: auto; }
+details.breakdown .lines { padding: 0 0 14px; }
+
+/* Validation Errors */
+.field.err input, .field.err select {
+  border-color: var(--bad);
+  background: var(--bad-soft);
+}
+.errmsg { font-size: .8rem; color: var(--bad); font-weight: 600; }
+.errmsg:empty { display: none; }
+.sheet.invalid .hero-cell .v, .sheet.invalid .summary .v { color: var(--muted); }
+
+/* Mobile Floating Bottom Dock & Jump Buttons */
+.jump { display: none; }
+.mbar { display: none; }
+@media (max-width: 900px) {
+  .jump {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font: inherit;
+    font-size: .9rem;
+    font-weight: 600;
+    min-height: 42px;
+    padding: 0 16px;
+    border-radius: 10px;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    background: var(--accent-soft);
+    cursor: pointer;
+  }
+  .sheet .jump { margin: 0 18px 14px; width: calc(100% - 36px); }
+  .mbar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 30;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 8px max(14px, env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(14px, env(safe-area-inset-left, 0px));
+    background: color-mix(in srgb, var(--paper) 94%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid var(--line-strong);
+    box-shadow: 0 -6px 24px rgb(15 23 42 / 0.14);
+  }
+  .mbar[hidden] { display: none; }
+  .mbar-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .mbar .mtext { display: flex; flex-direction: column; min-width: 0; line-height: 1.3; }
+  .mbar .mtext b { font-size: .85rem; }
+  .mbar .mtext span { font-family: var(--font-num); font-size: 1.1rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .mbar.good b { color: var(--good); }
+  .mbar.warn b { color: var(--warn-fg); }
+  .mbar.bad b { color: var(--bad); }
+  .mbar .jump { flex: none; min-height: 38px; padding: 0 14px; font-size: .84rem; background: var(--accent); color: #fff; }
+  :root[data-theme="dark"] .mbar .jump { color: #0b1017; }
+  .mbar-bar {
+    height: 4px;
+    width: 100%;
+    background: var(--soft);
+    border-radius: 999px;
+    overflow: hidden;
+    display: flex;
+  }
+  body { padding-bottom: 92px; }
+}
+
+/* Explanations & Reference Section */
+.content { margin-top: 44px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; max-width: 820px; }
+.content-title { margin: 0 0 4px; font-size: .85rem; font-weight: 700; color: var(--muted); letter-spacing: .06em; }
+.topics {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 0 18px;
+  box-shadow: var(--shadow-card);
+}
+details.topic { background: none; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; padding: 0; margin: 0; }
+details.topic:last-child { border-bottom: 0; }
+details.topic > summary h2 { font-size: 1.02rem; margin: 0; flex: 1; font-weight: 600; }
+details.topic > summary { min-height: 54px; }
+.topic-body { padding: 4px 0 18px; font-size: .94rem; }
+.content p, .content li { max-width: 68ch; }
+.content p { margin: 0 0 10px; }
+.formula {
+  font-family: var(--font-num);
+  font-size: .85rem;
+  background: var(--paper-subtle);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  overflow-x: auto;
+  white-space: pre;
+  line-height: 1.75;
+  margin-bottom: 10px;
+}
+.tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--paper); }
+.tablewrap table { border-collapse: collapse; width: 100%; font-size: .88rem; min-width: 460px; }
+.tablewrap th, .tablewrap td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--line); }
+.tablewrap th { font-size: .82rem; color: var(--muted); font-weight: 600; background: var(--paper-subtle); }
+.tablewrap td.num { font-family: var(--font-num); white-space: nowrap; }
+.topic-body details { background: var(--paper-subtle); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 10px 14px; }
+.topic-body details + details { margin-top: 8px; }
+.topic-body summary { cursor: pointer; font-weight: 600; font-size: .92rem; }
+.topic-body details p { margin: 8px 0 0; font-size: .9rem; color: var(--ink-secondary); }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.pr { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.pr a { display: block; background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 12px 14px; text-decoration: none; color: var(--ink); }
+.pr a b { display: block; color: var(--accent); }
+.pr a span { font-size: .86rem; color: var(--muted); }
+footer { margin-top: 40px; font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 16px; line-height: 1.6; }
+.adslot { margin: 32px 0 0; text-align: center; }
+.adslot[hidden] { display: none; }
+.adslot .adlabel { display: block; font-size: .75rem; color: var(--muted); letter-spacing: .08em; margin-bottom: 4px; text-align: left; }
+.adslot .adbox { min-height: 100px; border-radius: 8px; }
+.adslot.preview .adbox { border: 1px dashed var(--line); background: var(--soft); display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: .85rem; }
+.history { margin: 0; padding-left: 1.2em; font-size: .88rem; }
+.history li { margin-bottom: 6px; }
+
+/* ===== 仕上げ（2026-11）：色・文字・角の丸み・影を落ち着いた形にそろえる ===== */
+:root {
+  --bg: #f6f7f9;
+  --paper: #ffffff;
+  --paper-subtle: #fafbfc;
+  --field: #ffffff;
+  --field-hover: #fafbfc;
+  --soft: #f2f4f7;
+  --ink: #101828;
+  --ink-secondary: #344054;
+  --muted: #667085;
+  --line: #e4e7ec;
+  --line-strong: #d0d5dd;
+  --accent: #0b6b75;
+  --accent-hover: #08545c;
+  --accent-soft: #eef6f7;
+  --accent-ring: rgb(11 107 117 / 0.16);
+  --good: #067647;
+  --good-soft: #f0faf4;
+  --good-border: #c6ebd5;
+  --bad: #b42318;
+  --bad-soft: #fef5f4;
+  --bad-border: #fbd5d1;
+  --warn-bg: #fffaeb;
+  --warn-fg: #93370d;
+  --warn-border: #fde3a7;
+  --bar-cost: #475467;
+  --bar-tax: #d39b45;
+  --bar-fee: #9b8dd1;
+  --bar-profit: #12917f;
+  /* 英数字は Inter、日本語は M PLUS 2（どちらも Google Fonts） */
+  --font-body: "Inter", "M PLUS 2", "Hiragino Sans", "Noto Sans JP", "Yu Gothic", system-ui, sans-serif;
+  --font-num: "Inter", "M PLUS 2", "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow-card: 0 1px 2px rgb(16 24 40 / 0.04);
+  --shadow-float: 0 1px 2px rgb(16 24 40 / 0.04), 0 12px 32px -12px rgb(16 24 40 / 0.10);
+}
+body { letter-spacing: .02em; font-variant-numeric: tabular-nums; }
+.ic { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+/* 見出しとロゴ */
+header.top { align-items: center; margin-bottom: 24px; }
+.brand { align-items: center; gap: 12px; flex-wrap: nowrap; }
+.logo { width: 40px; height: 40px; border-radius: 10px; flex: none; }
+.brand-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+h1 { font-size: 1.5rem; letter-spacing: .04em; line-height: 1.25; }
+.tagline { background: none; padding: 0; border-radius: 0; color: var(--muted); font-weight: 500; font-size: .76rem; letter-spacing: .06em; display: flex; flex-wrap: wrap; gap: 0 10px; }
+.tagline .en { font-size: .7rem; letter-spacing: .14em; color: var(--muted); opacity: .8; }
+.lead { margin-top: 10px; font-size: .9rem; }
+.action-btn { border-radius: 8px; box-shadow: none; padding: 7px 12px; gap: 6px; font-weight: 500; }
+.action-btn .ic { width: 15px; height: 15px; color: var(--muted); }
+.action-btn:hover .ic { color: var(--accent); }
+
+/* 計算例の帯 */
+.example-banner { background: var(--paper); border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: var(--radius-sm); padding: 10px 14px; }
+.example-pill { background: var(--accent-soft); color: var(--accent); border-radius: 4px; font-weight: 600; letter-spacing: .04em; }
+:root[data-theme="dark"] .example-pill { color: var(--accent); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .example-pill { color: var(--accent); } }
+
+/* 入力の枠 */
+fieldset { padding: 22px 24px 24px; }
+legend { font-size: 1rem; letter-spacing: .04em; padding-bottom: 14px; margin-bottom: 18px; }
+legend .no { width: 24px; height: 24px; border-radius: 6px; background: var(--accent-soft); color: var(--accent); font-size: .8rem; }
+:root[data-theme="dark"] legend .no { color: var(--accent); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) legend .no { color: var(--accent); } }
+legend small { font-size: .8rem; letter-spacing: .02em; }
+label, .field-head label { letter-spacing: .03em; }
+input[type="number"] { font-weight: 500; }
+input[type="number"]:focus, input[type="text"]:focus, input[type="date"]:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-ring); outline: none; }
+.preset-btn { border-radius: 6px; background: var(--paper); border-color: var(--line); color: var(--ink-secondary); padding: 3px 10px; }
+.preset-btn b { font-weight: 600; letter-spacing: .04em; margin-right: 2px; }
+.preset-btn:hover { background: var(--paper-subtle); }
+.cat-tab { border-radius: 6px; background: var(--paper); font-weight: 500; color: var(--ink-secondary); }
+.cat-tab.active { background: var(--ink); border-color: var(--ink); color: #fff; }
+:root[data-theme="dark"] .cat-tab.active { background: var(--accent); border-color: var(--accent); color: #0b1017; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .cat-tab.active { background: var(--accent); border-color: var(--accent); color: #0b1017; } }
+.search-icon { display: inline-flex; }
+.chip { border-radius: 6px; }
+.picked { background: var(--paper); }
+
+/* 判定の欄 */
+.sheet-head { background: var(--paper); padding: 14px 20px; }
+.sheet-head h2 { font-size: .95rem; letter-spacing: .06em; }
+.verdict { padding: 16px 20px; }
+.verdict-icon { width: 30px; height: 30px; }
+.verdict-icon .ic { width: 18px; height: 18px; stroke-width: 2.4; }
+.verdict b { letter-spacing: .03em; }
+.hero-cell { padding: 16px 20px; }
+.hero-cell .v { font-weight: 600; font-size: 1.9rem; letter-spacing: -.01em; }
+.hero-cell .k { letter-spacing: .04em; }
+.cost-bar-wrap { background: var(--paper); }
+@media (max-width: 540px) {
+  fieldset { padding: 16px 16px 18px; }
+  .tagline .en { display: none; }
+  h1 { font-size: 1.35rem; }
+}
+@media (max-width: 360px) { .action-btn .ic { display: none; } }
+
+/* アプリの枠（2026-11）：上のバーと、左のタブで機能を切り替える */
+.wrap { max-width: none; padding: 0 0 56px; }
+.appbar { position: sticky; top: 0; z-index: 40; background: color-mix(in srgb, var(--paper) 90%, transparent); -webkit-backdrop-filter: saturate(1.4) blur(10px); backdrop-filter: saturate(1.4) blur(10px); border-bottom: 1px solid var(--line); }
+.appbar-in { max-width: 1440px; margin: 0 auto; min-height: 60px; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); display: flex; align-items: center; gap: 20px; }
+.appbar .brand { display: flex; align-items: center; gap: 11px; text-decoration: none; color: var(--ink); flex: none; }
+.appbar .logo { width: 34px; height: 34px; border-radius: 9px; }
+.brand-text { display: flex; flex-direction: column; gap: 1px; }
+.brand-name { font-weight: 700; font-size: 1.06rem; letter-spacing: .07em; line-height: 1.2; }
+.brand-sub { font-family: "Inter", system-ui, sans-serif; font-size: .6rem; font-weight: 600; letter-spacing: .22em; color: var(--muted); line-height: 1.2; }
+.appbar-meta { margin-left: auto; display: flex; align-items: center; gap: 18px; font-size: .76rem; color: var(--muted); white-space: nowrap; }
+.meta-item { display: inline-flex; align-items: center; }
+.meta-item b { color: var(--ink-secondary); font-weight: 600; margin-left: 6px; }
+.meta-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--good); margin-right: 7px; box-shadow: 0 0 0 3px color-mix(in srgb, var(--good) 18%, transparent); }
+.appbar-actions { display: flex; align-items: center; gap: 8px; flex: none; }
+.appbar-meta + .appbar-actions { margin-left: 0; }
+.menu-btn { display: none; }
+
+.shell { max-width: 1440px; margin: 0 auto; padding: 28px max(20px, env(safe-area-inset-right, 0px)) 0 max(20px, env(safe-area-inset-left, 0px)); display: grid; grid-template-columns: 204px minmax(0, 1fr); gap: 32px; align-items: start; }
+.sidenav { position: sticky; top: 88px; display: flex; flex-direction: column; gap: 2px; }
+.nav-label { margin: 18px 12px 6px; font-size: .68rem; font-weight: 700; letter-spacing: .16em; color: var(--muted); }
+.nav-label:first-child { margin-top: 0; }
+.nav-item { position: relative; display: flex; align-items: center; gap: 11px; min-height: 40px; padding: 8px 12px; border-radius: 8px; color: var(--ink-secondary); text-decoration: none; font-size: .92rem; font-weight: 500; letter-spacing: .03em; }
+.nav-item:hover { background: var(--soft); color: var(--ink); }
+.nav-item .ic { width: 18px; height: 18px; color: var(--muted); }
+.nav-item[aria-current="page"] { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.nav-item[aria-current="page"] .ic { color: var(--accent); }
+.nav-item[aria-current="page"]::before { content: ""; position: absolute; left: 0; top: 9px; bottom: 9px; width: 3px; border-radius: 0 3px 3px 0; background: var(--accent); }
+.nav-item:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.nav-foot { margin-top: 22px; padding: 12px 14px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--paper); font-size: .74rem; line-height: 1.6; color: var(--muted); }
+.nav-foot p { margin: 0; }
+.nav-foot-title { font-weight: 700; color: var(--ink-secondary); margin-bottom: 4px !important; letter-spacing: .04em; }
+
+.views { min-width: 0; }
+.view[hidden] { display: none !important; }
+.page-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px 24px; flex-wrap: wrap; padding-bottom: 22px; margin-bottom: 22px; border-bottom: 1px solid var(--line); }
+.page-head-text { min-width: 0; flex: 1 1 420px; }
+.kicker { margin: 0 0 6px; font-size: .72rem; font-weight: 700; letter-spacing: .18em; color: var(--accent); }
+.page-head h1, .page-title { font-size: 1.75rem; font-weight: 700; letter-spacing: .05em; line-height: 1.3; margin: 0; }
+.page-head .lead { margin: 8px 0 0; color: var(--muted); font-size: .92rem; max-width: 60ch; }
+.trust { list-style: none; display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 14px 0 0; padding: 0; font-size: .8rem; color: var(--ink-secondary); }
+.trust li { display: inline-flex; align-items: center; gap: 6px; }
+.trust .ic { width: 14px; height: 14px; color: var(--good); stroke-width: 2.6; }
+.page-head .top-actions { flex: none; }
+
+.doc-card { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px 24px; box-shadow: var(--shadow-card); max-width: 940px; }
+.doc-card + .doc-card { margin-top: 16px; }
+.doc-card h3 { margin: 0 0 14px; font-size: 1.02rem; font-weight: 700; letter-spacing: .04em; }
+.doc p, .doc li { max-width: 72ch; }
+.doc p { margin: 0 0 10px; font-size: .94rem; }
+.doc-card details { background: var(--paper-subtle); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 12px 16px; }
+.doc-card details + details { margin-top: 8px; }
+.doc-card details summary { cursor: pointer; font-weight: 600; font-size: .94rem; }
+.doc-card details p { margin: 8px 0 0; font-size: .9rem; color: var(--ink-secondary); }
+.doc-tools { display: flex; align-items: center; gap: 12px; margin: 0 0 12px; flex-wrap: wrap; }
+.doc-tools .search-box { flex: 1 1 260px; max-width: 420px; }
+.doc-count { font-size: .8rem; color: var(--muted); }
+.doc-note { font-size: .84rem; color: var(--muted); margin-top: 12px !important; }
+.doc .tablewrap td { vertical-align: middle; }
+.doc .tablewrap .r { text-align: right; }
+.doc .tablewrap .act { text-align: right; white-space: nowrap; width: 1%; }
+.doc .tablewrap .act .mini-btn { white-space: nowrap; }
+.doc .tablewrap tr:last-child td { border-bottom: 0; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.views > .adslot, .views > #prSection { margin-top: 32px; max-width: 940px; }
+footer { max-width: 1440px; margin: 40px auto 0; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
+
+@media (max-width: 1180px) { .appbar-meta { display: none; } .appbar-actions { margin-left: auto; } }
+@media (max-width: 1199px) {
+  .shell { grid-template-columns: minmax(0, 1fr); padding-top: 20px; }
+  .menu-btn { display: inline-flex; }
+  .sidenav { display: none; position: fixed; top: 61px; left: 0; right: 0; z-index: 39; max-height: calc(100dvh - 61px); overflow-y: auto; background: var(--paper); border-bottom: 1px solid var(--line); box-shadow: var(--shadow-float); padding: 14px max(16px, env(safe-area-inset-left, 0px)) 18px; }
+  body.nav-open .sidenav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px 8px; align-content: start; }
+  body.nav-open .sidenav .nav-label, body.nav-open .sidenav .nav-foot { grid-column: 1 / -1; }
+  .nav-label { margin-top: 12px; }
+  .nav-foot { margin-top: 12px; }
+}
+@media (max-width: 540px) {
+  .appbar-in { padding-left: 16px; padding-right: 16px; gap: 12px; }
+  .brand-sub { display: none; }
+  .brand-name { font-size: 1rem; }
+  .shell { padding-left: 16px; padding-right: 16px; }
+  .page-head { padding-bottom: 16px; margin-bottom: 16px; }
+  .page-head h1, .page-title { font-size: 1.4rem; }
+  .page-head .lead { font-size: .88rem; }
+  .trust { gap: 4px 12px; font-size: .76rem; margin-top: 10px; }
+  .page-head .top-actions { width: 100%; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .doc-card { padding: 16px; }
+  .doc .tablewrap table { min-width: 0; }
+  .doc .hide-sm { display: none; }
+  footer { padding-left: 16px; padding-right: 16px; }
+  .appbar-actions .action-btn { padding: 7px 10px; }
+}
+.doc .page-head .kicker { font-size: .72rem; margin-bottom: 6px; }
+.doc .page-head .lead { font-size: .92rem; margin: 8px 0 0; }
+.nav-item:hover, .appbar .brand:hover { text-decoration: none; }
+.appbar .brand { min-width: 0; }
+#v-items .tablewrap td:nth-child(n+4), .doc .tablewrap th { white-space: nowrap; }
+#v-items .tablewrap td.num { white-space: normal; min-width: 7em; }
+#v-rates .tablewrap td { white-space: nowrap; }
+body.nav-open .mbar { display: none; }
+.doc .tablewrap { position: relative; }
+@media (max-width: 360px) { .appbar-actions .action-btn .lbl { display: none; } .brand-name { font-size: .95rem; letter-spacing: .04em; } }
+@media (max-width: 540px) {
+  .appbar-actions #btnTheme .lbl { display: none; }
+  .appbar-actions .action-btn { padding: 7px 9px; }
+}
+
+/* 折り返しを整える（2026-11） */
+body { text-wrap: pretty; }
+h1, h2, h3, legend, .page-title, .page-head .lead, .verdict b, .kicker, .sheet-head h2 { text-wrap: balance; }
+.page-head .lead { max-width: none; }
+details.fold .fv { white-space: nowrap; }
+#feePresets { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+#domShipPresets { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+#domShipPresets .preset-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.25; padding: 4px 4px; white-space: nowrap; }
+#domShipPresets .pn { font-size: .72rem; color: var(--muted); }
+#domShipPresets .pv { font-weight: 600; }
+#domShipPresets .preset-btn.active .pn { color: inherit; }
+.nf-row { display: flex; flex-direction: column; }
+.nf-row + .nf-row { margin-top: 6px !important; }
+.nf-row b { color: var(--ink-secondary); font-weight: 600; }
+footer p { margin: 0 0 6px; max-width: 110ch; }
+@media (min-width: 600px) { .nwl { white-space: nowrap; } }
+.foot-links { display: flex; flex-wrap: wrap; gap: 4px 20px; }
+.doc .tablewrap td:first-child { min-width: 15em; }
+@media (max-width: 540px) { .doc .tablewrap td:first-child { min-width: 9em; } }
+@media (min-width: 901px) { .sheet { top: 76px; } }
+@media (min-width: 1200px) and (max-width: 1399px) { details.breakdown > summary small { display: none; } }
+@media (min-width: 1200px) { .grid { grid-template-columns: minmax(0, 1fr) minmax(0, min(440px, 42%)); } }
+@media (max-width: 540px) {
+  /* スマホの品目一覧は、表ではなく1品目1枠で見せる（横にずらさない） */
+  #v-items .tablewrap { border: 0; background: none; overflow: visible; }
+  #v-items .tablewrap table, #v-items .tablewrap tbody { display: block; min-width: 0; }
+  #v-items .tablewrap thead { display: none; }
+  #v-items .tablewrap tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+  #v-items .tablewrap tr[hidden] { display: none; }
+  #v-items .tablewrap td { padding: 0; border: 0; min-width: 0 !important; white-space: normal !important; }
+  #v-items .tablewrap .c-name { grid-column: 1; font-weight: 600; font-size: .92rem; }
+  #v-items .tablewrap .c-gen, #v-items .tablewrap .c-simple { grid-column: 1; font-size: .82rem; color: var(--ink-secondary); }
+  #v-items .tablewrap .c-gen::before { content: "一般税率 "; color: var(--muted); }
+  #v-items .tablewrap .c-simple::before { content: "簡易税率 "; color: var(--muted); }
+  #v-items .tablewrap .act { grid-column: 2; grid-row: 1 / span 3; align-self: center; width: auto; }
+}
+@media (max-width: 540px) {
+  #v-rates .tablewrap { border: 0; background: none; overflow: visible; }
+  #v-rates .tablewrap table, #v-rates .tablewrap tbody { display: block; min-width: 0; }
+  #v-rates .tablewrap thead { display: none; }
+  #v-rates .tablewrap tr { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; column-gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  #v-rates .tablewrap tr[hidden] { display: none; }
+  #v-rates .tablewrap td { padding: 0; border: 0; }
+  #v-rates .tablewrap td:nth-child(1) { grid-column: 1; grid-row: 1; white-space: normal; font-weight: 600; font-size: .92rem; }
+  #v-rates .tablewrap td:nth-child(2) { grid-column: 1; grid-row: 2; font-size: .76rem; color: var(--muted); }
+  #v-rates .tablewrap td:nth-child(3) { grid-column: 2; grid-row: 1 / span 2; font-weight: 600; }
+  #v-rates .tablewrap td:nth-child(4) { grid-column: 3; grid-row: 1 / span 2; }
+  #v-rates .tablewrap td[colspan] { grid-column: 1 / -1; white-space: normal; }
+}
+
+/* ---- 消費税1%チェッカーで足した部品 ---- */
+[hidden] { display: none !important; }
+.opt-bars { display: grid; gap: 10px; margin: 14px 0 4px; }
+.opt-row { display: grid; grid-template-columns: 7.5em 1fr auto; align-items: center; gap: 10px; font-size: .92rem; }
+.opt-name { color: var(--ink-secondary); font-weight: 500; }
+.opt-track { position: relative; height: 12px; border-radius: 999px; background: var(--soft); overflow: hidden; }
+.opt-fill { position: absolute; inset: 0 auto 0 0; border-radius: 999px; background: var(--line-strong); }
+.opt-fill.refund { background: var(--bar-profit); }
+.opt-val { font-family: var(--font-num); font-variant-numeric: tabular-nums; text-align: right; min-width: 7em; }
+.opt-row.best .opt-name, .opt-row.best .opt-val { color: var(--good); font-weight: 700; }
+.opt-row.best .opt-fill { background: var(--good); }
+.opt-row.off { opacity: .5; }
+.todo { display: grid; gap: 4px; margin: 14px 0; padding: 14px 16px; border: 1px solid var(--accent); border-radius: var(--radius-sm); background: var(--accent-soft); }
+.todo.none { border-color: var(--line); background: var(--paper-subtle); }
+.todo-k { font-size: .78rem; font-weight: 700; color: var(--accent); letter-spacing: .04em; }
+.todo b { font-size: 1.02rem; }
+.todo-date { font-family: var(--font-num); font-weight: 700; color: var(--ink); }
+.todo p { margin: 2px 0 0; font-size: .9rem; color: var(--ink-secondary); }
+.notice p { margin: 0 0 6px; }
+.notice p:last-child { margin-bottom: 0; }
+.todo > span:last-child:not(.todo-date):not(.todo-k) { font-size: .9rem; color: var(--ink-secondary); }
+@media (max-width: 640px) {
+  #kindPresets { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .opt-row { grid-template-columns: 1fr auto; row-gap: 4px; }
+  .opt-track { grid-column: 1 / -1; grid-row: 2; }
+  .opt-val { min-width: 0; }
+  .hero-cell .v { font-size: 1.5rem; white-space: nowrap; }
+}
 </style>
 </head>
 <body>
-
 <div class="wrap">
-  <header class="top">
-    <div class="brand">
-      <h1>消費税1%チェッカー</h1>
-      <span class="rate">8% → 1%</span>
+<header class="appbar">
+  <div class="appbar-in">
+    <a class="brand" href="#calc" data-view="calc">
+      <img class="logo" src="favicon.svg" alt="" width="34" height="34">
+      <span class="brand-text"><span class="brand-name">消費税1%チェッカー</span><span class="brand-sub">FOOD TAX 1% CHECKER</span></span>
+    </a>
+    <div class="appbar-meta" aria-label="制度の状態">
+      <span class="meta-item"><span class="meta-dot" aria-hidden="true"></span>対象期間<b>2027/4/1〜2029/3/31</b></span>
+      <span class="meta-item">国税庁の案内<b>令和8年9月版</b></span>
     </div>
-    <p class="lead">令和9年4月から2年間、食料品の消費税が1%に下がります。店内飲食は10%のままです。あなたのお店や会社は、本則課税・簡易課税・免税のどれで申告すると税が少ないかを試算し、出す届出と期限を示します。</p>
-    <p class="draft">はじめは例として、年商4,000万円ほどの店内飲食中心の飲食店の数字が入っています。自分の数字に書きかえてください。<br>国税庁の案内（令和8年9月）にもとづく試算です。法案はまだ国会で成立していません。</p>
-  </header>
+    <div class="appbar-actions">
+      <button type="button" class="action-btn" id="btnTheme" title="ライト／ダーク表示切替" aria-label="テーマ切替"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor" stroke="none"/></svg><span class="lbl">表示</span></button>
+      <button type="button" class="action-btn menu-btn" id="btnMenu" aria-expanded="false" aria-controls="sidenav"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="lbl">メニュー</span></button>
+    </div>
+  </div>
+</header>
 
-  <form class="grid" id="f" novalidate>
-    <div class="inputs">
+<div class="shell">
+  <nav class="sidenav" id="sidenav" aria-label="機能の切り替え">
+    <p class="nav-label">ツール</p>
+      <a class="nav-item" href="#calc" data-view="calc"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h2M12 11h2M8 15h2M12 15h2M8 18h2M12 18h4"/></svg><span>申告方式の試算</span></a>
+      <a class="nav-item" href="#deadline" data-view="deadline"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4M8 14h3"/></svg><span>届出と期限</span></a>
+    <p class="nav-label">資料</p>
+      <a class="nav-item" href="#changes" data-view="changes"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h13l-3-3M20 16H7l3 3"/></svg><span>何が変わるか</span></a>
+      <a class="nav-item" href="#howto" data-view="howto"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5M9 7h5M9 11h5"/></svg><span>計算のしくみ</span></a>
+      <a class="nav-item" href="#faq" data-view="faq"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7M12 17h0"/></svg><span>よくある質問</span></a>
+    <p class="nav-label">このサイト</p>
+      <a class="nav-item" href="#about" data-view="about"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>運営者・更新履歴</span></a>
+      <a class="nav-item" href="https://yunyu-rieki.com/" target="_blank" rel="noopener"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg><span>輸入利益チェッカー</span></a>
+    <div class="nav-foot">
+      <p class="nav-foot-title">もとにしている資料</p>
+      <p class="nf-row"><span>国税庁のパンフレット</span><b>令和8年9月</b></p>
+      <p class="nf-row"><span>法案</span><b>国会での審議前</b></p>
+    </div>
+  </nav>
+
+  <main class="views" id="views">
+  <section class="view" id="v-calc" data-view="calc">
+  <div class="page-head">
+    <div class="page-head-text">
+      <p class="kicker">申告方式の試算</p>
+      <h1>食料品1%の申告方式チェック</h1>
+      <p class="lead">令和9年4月から2年間、食料品の消費税が1%に下がります。<span class="nw">本則課税・簡易課税・免税の</span><span class="nw">どれで申告すると税が少ないか、</span><span class="nw">届出の期限まで</span>試算します。</p>
+      <ul class="trust">
+        <li><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>国税庁の計算例と同じ結果</li>
+        <li><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>届出の種類と期限まで表示</li>
+        <li><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>登録不要・無料</li>
+      </ul>
+    </div>
+    <div class="top-actions">
+      <button type="button" class="action-btn" id="btnResetExample" title="計算例（年商4,000万円の飲食店）に戻す"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg><span class="lbl">計算例</span></button>
+      <button type="button" class="action-btn" id="btnClearForm" title="数値をクリアしてゼロから入力する"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg><span class="lbl">クリア</span></button>
+      <button type="button" class="action-btn" id="btnShareUrl" title="現在の条件のURLをコピー"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg><span class="lbl">URL共有</span></button>
+    </div>
+  </div>
+
+  <div class="example-banner" id="exampleNote">
+    <div class="example-banner-text">
+      <span class="example-pill">計算例を表示中</span>
+      <span>年商4,000万円ほどの、店内飲食が中心の個人の飲食店の例が入っています。</span>
+    </div>
+    <div class="example-actions">
+      <button type="button" class="mini-btn" id="btnClearBanner">数値をクリアして入力</button>
+    </div>
+  </div>
+
+  <div class="grid">
+    <form class="inputs" id="form" autocomplete="off">
+      <!-- 1. 事業 -->
       <fieldset>
-        <legend><span class="no">1</span>お店・会社</legend>
-        <div class="row">
+        <legend><span class="no" aria-hidden="true">1</span>お店・会社<small>どんな事業ですか</small></legend>
+        <div class="stack">
           <div class="field">
-            <label for="kind">業種</label>
+            <div class="field-head"><label for="kind">業種</label></div>
             <select id="kind"></select>
+            <div class="preset-row" id="kindPresets"></div>
           </div>
-          <div class="field">
-            <label for="current">今の申告のしかた</label>
-            <select id="current">
-              <option value="general">本則課税（一般課税）</option>
-              <option value="simple">簡易課税</option>
-              <option value="exempt">免税事業者</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>事業のかたち</label>
-            <div class="radios">
-              <label><input type="radio" name="who" id="who-ind" value="individual" checked>個人</label>
-              <label><input type="radio" name="who" id="who-corp" value="corporate">法人</label>
+          <div class="row">
+            <div class="field full-mobile">
+              <div class="field-head"><label for="current">今の申告のしかた</label></div>
+              <select id="current">
+                <option value="general">本則課税（一般課税）</option>
+                <option value="simple">簡易課税</option>
+                <option value="exempt">免税事業者</option>
+              </select>
+            </div>
+            <div class="field full-mobile">
+              <div class="field-head">
+                <label for="baseSales">2年前の課税売上高</label>
+              </div>
+              <div class="input-wrap">
+                <input type="number" id="baseSales" inputmode="numeric" step="1" min="0">
+                <span class="input-unit">円</span>
+              </div>
+              <span class="hint">1,000万円以下なら免税、5,000万円以下なら簡易課税も比べます。</span>
             </div>
           </div>
-          <div class="field" id="endMonthBox" hidden>
-            <label for="endMonth">決算月</label>
-            <select id="endMonth"></select>
-          </div>
-          <div class="field">
-            <label for="baseSales">2年前の課税売上高</label>
-            <div class="suffix"><input type="text" inputmode="numeric" class="money" id="baseSales"><span>円</span></div>
-            <span class="hint">1,000万円以下なら免税、5,000万円以下なら簡易課税も比べます。</span>
-          </div>
         </div>
+        <details class="fold" id="foldWho">
+          <summary><span class="ft">個人・法人と決算月</span><span class="fv" id="fvWho"></span></summary>
+          <div class="row">
+            <div class="field full-mobile">
+              <div class="field-head">
+                <label id="whoLabel">事業のかたち</label>
+                <div class="seg-switch" role="group" aria-labelledby="whoLabel">
+                  <button type="button" class="seg-btn active" id="whoInd" data-who="individual">個人</button>
+                  <button type="button" class="seg-btn" id="whoCorp" data-who="corporate">法人</button>
+                </div>
+              </div>
+              <span class="hint">個人の課税期間は1月〜12月です。</span>
+            </div>
+            <div class="field full-mobile" id="endMonthField" hidden>
+              <div class="field-head"><label for="endMonth">決算月</label></div>
+              <select id="endMonth"></select>
+            </div>
+          </div>
+        </details>
       </fieldset>
 
+      <!-- 2. 売上 -->
       <fieldset>
-        <legend><span class="no">2</span>売上<small>税抜き・1年分</small></legend>
-        <div class="row">
-          <div class="field">
-            <label for="eatIn">店内飲食・ケータリング<span class="rate-tag">10%のまま</span></label>
-            <div class="suffix"><input type="text" inputmode="numeric" class="money" id="eatIn"><span>円</span></div>
+        <legend><span class="no" aria-hidden="true">2</span>売上<small>税抜き</small></legend>
+        <div class="stack">
+          <div class="field-head">
+            <span class="hint">金額の入れ方</span>
+            <div class="seg-switch" role="group" aria-label="金額の入れ方">
+              <button type="button" class="seg-btn active" id="perYear" data-per="year">1年分</button>
+              <button type="button" class="seg-btn" id="perMonth" data-per="month">1か月の平均</button>
+            </div>
           </div>
-          <div class="field">
-            <label for="foodSales">食料品の販売<span class="rate-tag cut">8%→1%</span></label>
-            <div class="suffix"><input type="text" inputmode="numeric" class="money" id="foodSales"><span>円</span></div>
-            <span class="hint">持ち帰り・出前・卸・小売。</span>
-          </div>
-          <div class="field">
-            <label for="otherSales">その他の売上<span class="rate-tag">10%</span></label>
-            <div class="suffix"><input type="text" inputmode="numeric" class="money" id="otherSales"><span>円</span></div>
-            <span class="hint">お酒・雑貨など。</span>
+          <div class="row">
+            <div class="field full-mobile">
+              <div class="field-head"><label for="eatIn">店内飲食・ケータリング</label><span class="chip">10%のまま</span></div>
+              <div class="input-wrap">
+                <input type="number" id="eatIn" inputmode="numeric" step="1" min="0">
+                <span class="input-unit">円</span>
+              </div>
+              <span class="hint yearly" data-for="eatIn"></span>
+            </div>
+            <div class="field full-mobile">
+              <div class="field-head"><label for="foodSales">食料品の販売</label><span class="chip on">8%→1%</span></div>
+              <div class="input-wrap">
+                <input type="number" id="foodSales" inputmode="numeric" step="1" min="0">
+                <span class="input-unit">円</span>
+              </div>
+              <span class="hint">持ち帰り・出前・卸・小売</span>
+              <span class="hint yearly" data-for="foodSales"></span>
+            </div>
           </div>
         </div>
+        <details class="fold" id="foldOther">
+          <summary><span class="ft">その他の売上（お酒・雑貨など）</span><span class="fv" id="fvOther"></span></summary>
+          <div class="row">
+            <div class="field full-mobile">
+              <div class="field-head"><label for="otherSales">その他の売上</label><span class="chip">10%</span></div>
+              <div class="input-wrap">
+                <input type="number" id="otherSales" inputmode="numeric" step="1" min="0">
+                <span class="input-unit">円</span>
+              </div>
+              <span class="hint yearly" data-for="otherSales"></span>
+            </div>
+          </div>
+        </details>
       </fieldset>
 
+      <!-- 3. 仕入れ -->
       <fieldset>
-        <legend><span class="no">3</span>仕入れ・経費<small>税抜き・1年分</small></legend>
+        <legend><span class="no" aria-hidden="true">3</span>仕入れ・経費<small>税抜き</small></legend>
         <div class="row">
-          <div class="field">
-            <label for="foodBuy">食材・食品の仕入れ<span class="rate-tag cut">8%→1%</span></label>
-            <div class="suffix"><input type="text" inputmode="numeric" class="money" id="foodBuy"><span>円</span></div>
+          <div class="field full-mobile">
+            <div class="field-head"><label for="foodBuy">食材・食品の仕入れ</label><span class="chip on">8%→1%</span></div>
+            <div class="input-wrap">
+              <input type="number" id="foodBuy" inputmode="numeric" step="1" min="0">
+              <span class="input-unit">円</span>
+            </div>
+            <span class="hint yearly" data-for="foodBuy"></span>
           </div>
-          <div class="field">
-            <label for="otherBuy">10%の仕入れ・経費<span class="rate-tag">10%</span></label>
-            <div class="suffix"><input type="text" inputmode="numeric" class="money" id="otherBuy"><span>円</span></div>
+          <div class="field full-mobile">
+            <div class="field-head"><label for="otherBuy">10%の仕入れ・経費</label><span class="chip">10%</span></div>
+            <div class="input-wrap">
+              <input type="number" id="otherBuy" inputmode="numeric" step="1" min="0">
+              <span class="input-unit">円</span>
+            </div>
             <span class="hint">お酒・消耗品・家賃・光熱費・設備など。給料と保険は入れません。</span>
+            <span class="hint yearly" data-for="otherBuy"></span>
           </div>
         </div>
-        <details class="more" id="kubunBox">
-          <summary>簡易課税の事業区分（業種から自動で選んでいます）</summary>
+        <details class="fold" id="foldKubun">
+          <summary><span class="ft">簡易課税の事業区分</span><span class="fv" id="fvKubun"></span></summary>
           <div class="row">
             <div class="field"><label for="foodKubun">食料品の販売</label><select id="foodKubun" data-kubun></select></div>
             <div class="field"><label for="eatInKubun">店内飲食</label><select id="eatInKubun" data-kubun></select></div>
             <div class="field"><label for="otherKubun">その他の売上</label><select id="otherKubun" data-kubun></select></div>
           </div>
+          <span class="hint">業種を選ぶと自動で入ります。1%の食料品の売上は、区分にかかわらず売上の税と同じ額を引けます（特例）。</span>
         </details>
       </fieldset>
-    </div>
 
-    <aside class="sheet" aria-live="polite">
-      <div class="sheet-head"><h2>試算書</h2><span id="periodLabel"></span></div>
-      <div class="verdict" id="verdict"></div>
+      <button type="button" class="jump" id="toResult">判定結果と内訳を見る ↓</button>
+    </form>
+
+    <!-- 右カラム：判定シート -->
+    <aside class="sheet" id="sheet" aria-live="polite">
+      <div class="sheet-head">
+        <h2>申告方式の判定<span class="example-pill" id="sheetExample" hidden>計算例</span></h2>
+        <div class="sheet-head-right">
+          <span class="chip on basis" id="periodChip">—</span>
+        </div>
+      </div>
+
+      <div class="verdict" id="verdict">
+        <div class="verdict-icon" id="verdictIcon"></div>
+        <div class="verdict-body">
+          <b id="verdictTitle">—</b>
+          <span id="verdictText"></span>
+        </div>
+      </div>
+
+      <div class="hero-kpi">
+        <div class="hero-cell">
+          <span class="k">1%の期間の納税（1年）</span>
+          <span class="v" id="sBest">—</span>
+          <span class="sub-v" id="sBestSub">—</span>
+        </div>
+        <div class="hero-cell">
+          <span class="k">方式を変えた時の差</span>
+          <span class="v" id="sSave">—</span>
+          <span class="sub-v" id="sSaveSub">—</span>
+        </div>
+      </div>
+
+      <div class="cost-bar-wrap">
+        <div class="cost-bar-head"><span>方式ごとの納税（1%の期間・1年）</span></div>
+        <div class="opt-bars" id="optBars"></div>
+      </div>
+
       <div class="summary">
-        <div><span class="k">今の納税<br>（食料品8%）</span><span class="v" id="sNow"></span></div>
-        <div><span class="k">1%の期間<br>今の方式のまま</span><span class="v" id="sStay"></span><span class="d" id="sStayD"></span></div>
-        <div><span class="k">1%の期間<br>一番少ない方式</span><span class="v" id="sBest"></span><span class="d" id="sBestD"></span></div>
+        <div>
+          <span class="k">今の納税（食料品8%）</span>
+          <span class="v" id="sNow">—</span>
+          <span class="sub-k" id="sNowSub">今の方式で計算</span>
+        </div>
+        <div>
+          <span class="k">今の方式のまま（1%）</span>
+          <span class="v" id="sStay">—</span>
+          <span class="sub-k" id="sStaySub">—</span>
+        </div>
       </div>
-      <div class="lines">
-        <h3>1%の期間の、方式ごとの納税（1年分）</h3>
-        <table><tbody id="opts"></tbody></table>
-        <h3>出す届出と期限</h3>
-        <div id="todo"></div>
-        <h3>気づいたこと</h3>
-        <ul class="notes" id="notes"></ul>
-        <p class="fine">国と地方を合わせた税率での目安です。端数処理、簡易課税の75%ルール、インボイスの2割・3割特例、8%のままになる定期便などは入れていません。実際の申告と届出は、税理士か税務署に確かめてください。</p>
-      </div>
-    </aside>
-  </form>
 
-  <section class="guide" aria-label="解説">
-    <details>
-      <summary>何が変わるのか</summary>
-      <div class="body">
-        <p>令和9年4月1日から令和11年3月31日まで、食料品の消費税が8%から1%（国0.78%・地方0.22%）に下がります。持ち帰り・出前も1%です。店内飲食とケータリングは10%のままです。</p>
-        <div class="scroll"><table>
-          <tr><th>取引</th><th>今</th><th>令和9年4月から2年間</th></tr>
-          <tr><td>食料品の販売・持ち帰り・出前</td><td>8%</td><td>1%</td></tr>
-          <tr><td>店内飲食・ケータリング</td><td>10%</td><td>10%</td></tr>
-          <tr><td>お酒・雑貨・家賃・光熱費</td><td>10%</td><td>10%</td></tr>
-        </table></div>
-      </div>
-    </details>
-    <details>
-      <summary>飲食店は、なぜ納税が増えるのか</summary>
-      <div class="body">
-        <p>消費税は、売上の税から仕入れの税を引いて納めます。店内飲食の売上は10%のままなのに、食材の仕入れの税が8%から1%に減ります。引ける税が減るので、本則課税のままだと納税が増えます。</p>
-        <p>簡易課税は、売上の税にみなし仕入率をかけて引くので、食材の税率が下がっても引ける額は変わりません。店内飲食が中心のお店は、簡易課税の方が少なくなることがあります。</p>
-      </div>
-    </details>
-    <details>
-      <summary>食品の卸・小売は、なぜ還付が出るのか</summary>
-      <div class="body">
-        <p>売上が1%になる一方で、家賃・光熱費・設備などの経費は10%のままです。仕入れの税の方が大きくなると、本則課税なら差額が戻ります。簡易課税や免税では戻りません。</p>
-      </div>
-    </details>
-    <details>
-      <summary>届出の特例と期限</summary>
-      <div class="body">
-        <p>ふつうは、方式を変える届出を課税期間が始まる前に出します。今回は特例があり、令和9年4月1日を含む課税期間の中に出せば、その期間から変えられます。届出の参考事項の欄に「飲食料品特例」と書きます。</p>
-        <div class="scroll"><table>
-          <tr><th>移り方</th><th>届出</th><th>特例</th></tr>
-          <tr><td>免税 → 課税（還付を受ける）</td><td>課税事業者選択届出書</td><td>あり</td></tr>
-          <tr><td>簡易 → 本則（還付を受ける）</td><td>簡易課税制度選択不適用届出書</td><td>あり（2年縛りなし）</td></tr>
-          <tr><td>本則 → 簡易</td><td>簡易課税制度選択届出書</td><td>なし（前の期間のうちに）</td></tr>
-        </table></div>
-        <p>このほか、中間申告の特例と、令和9年2月1日から5月31日までの値札（総額表示）の特例があります。</p>
-      </div>
-    </details>
+      <div class="todo" id="todo"></div>
+
+      <div class="notice" id="notice" hidden></div>
+
+      <details class="breakdown" id="breakdown">
+        <summary><span class="nw">くわしい計算内訳を見る</span><small>売上の税・仕入れの税・控除</small></summary>
+        <div class="lines" id="lines"></div>
+      </details>
+
+      <button type="button" class="jump" id="toInput">↑ 入力欄に戻る</button>
+      <p class="disclaimer">結果は目安です。国と地方を合わせた税率で計算し、端数処理・75%ルール・インボイスの2割特例や3割特例・8%のまま残る取引は入れていません。届出と申告は、税理士か<a href="https://www.nta.go.jp/" target="_blank" rel="noopener">税務署</a>に確かめてください。</p>
+    </aside>
+  </div>
   </section>
 
+  <section class="view doc" id="v-deadline" data-view="deadline" hidden>
+    <div class="page-head"><div class="page-head-text"><p class="kicker">届出と期限</p><h2 class="page-title">届出と期限</h2><p class="lead">決算月を選ぶと、令和9年4月1日を含む課税期間と、届出ごとの期限が出ます。</p></div></div>
+    <section class="doc-card">
+      <h3>あなたの期限</h3>
+      <div class="row">
+        <div class="field">
+          <label for="dlWho">事業のかたち</label>
+          <select id="dlWho"><option value="individual">個人（1月〜12月）</option><option value="corporate">法人</option></select>
+        </div>
+        <div class="field">
+          <label for="dlMonth">決算月（法人）</label>
+          <select id="dlMonth"></select>
+        </div>
+      </div>
+      <div class="tablewrap" style="margin-top:12px">
+        <table>
+          <thead><tr><th>移り方</th><th>届出</th><th>期限</th></tr></thead>
+          <tbody id="dlRows"></tbody>
+        </table>
+      </div>
+      <p class="hint" id="dlPeriod" style="margin-top:8px"></p>
+    </section>
+    <section class="doc-card">
+      <h3>特例のポイント</h3>
+      <p>ふつうは、方式を変える届出を課税期間が始まる前に出します。今回は特例があり、免税から課税へ、簡易課税から本則課税へ移る届出は、令和9年4月1日を含む課税期間の中に出せば、その期間から変えられます。届出の参考事項の欄に「飲食料品特例」と書きます。</p>
+      <p>本則課税から簡易課税へ移る届出には特例がありません。使いたい課税期間が始まる前の日までに出します。</p>
+    </section>
+  </section>
+
+  <section class="view doc" id="v-changes" data-view="changes" hidden>
+    <div class="page-head"><div class="page-head-text"><p class="kicker">何が変わるか</p><h2 class="page-title">何が変わるか</h2><p class="lead">令和9年4月1日から令和11年3月31日までの2年間の税率です。</p></div></div>
+    <section class="doc-card">
+      <h3>税率</h3>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>取引</th><th>今</th><th>2年間</th></tr></thead>
+          <tbody>
+            <tr><td>食料品の販売・持ち帰り・出前</td><td class="num">8%</td><td class="num">1%</td></tr>
+            <tr><td>食料品の輸入（保税地域からの引取り）</td><td class="num">8%</td><td class="num">1%</td></tr>
+            <tr><td>店内飲食・ケータリング</td><td class="num">10%</td><td class="num">10%</td></tr>
+            <tr><td>お酒・雑貨・家賃・光熱費</td><td class="num">10%</td><td class="num">10%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>1%は国0.78%と地方0.22%を合わせた率です。1%の対象は、今8%の対象になっている飲食料品と同じ範囲です。</p>
+    </section>
+    <section class="doc-card">
+      <h3>業種ごとの影響</h3>
+      <p><b>店内飲食が中心の飲食店</b>：売上の税は10%のままで、食材の仕入れの税だけが減ります。引ける税が減るので、本則課税のままだと納税が増えます。簡易課税は売上の税にみなし仕入率をかけて引くので、影響を受けにくくなります。</p>
+      <p><b>食品の卸・小売</b>：売上の税が1%になる一方で、家賃・光熱費・設備などの経費は10%のままです。本則課税なら還付が出ることがあります。</p>
+      <p>店内飲食（10%）と持ち帰り（1%）の差は9%に広がります。値付けとレジの設定も見直す時期です。</p>
+    </section>
+  </section>
+
+  <section class="view doc" id="v-howto" data-view="howto" hidden>
+    <div class="page-head"><div class="page-head-text"><p class="kicker">計算のしくみ</p><h2 class="page-title">計算のしくみ</h2><p class="lead">国税庁のパンフレットの計算例と同じ結果になることを確かめています。</p></div></div>
+    <section class="doc-card">
+      <h3>本則課税（一般課税）</h3>
+      <div class="formula">納税額 = 売上の税 − 仕入れの税       （マイナスなら還付）
+売上の税 = 店内飲食 × 10% + 食料品の販売 × 1% + その他 × 10%
+仕入れの税 = 食材の仕入れ × 1% + 10%の仕入れ・経費 × 10%</div>
+    </section>
+    <section class="doc-card">
+      <h3>簡易課税</h3>
+      <div class="formula">納税額 = 売上の税 − 控除できる税     （還付はない）
+控除できる税 = 食料品の販売の税（同じ額を引ける特例）
+             + 店内飲食の税 × みなし仕入率（第4種 60%）
+             + その他の売上の税 × みなし仕入率</div>
+      <p>例：食料品の小売2,000万円（税20万円）・雑貨の小売300万円（税30万円）・イートイン100万円（税10万円）なら、60万円 −（20万円 + 30万円×80% + 10万円×60%）= 10万円です（国税庁のパンフレット6ページの例）。</p>
+    </section>
+    <section class="doc-card">
+      <h3>免税事業者</h3>
+      <p>納税はありません。2年前の課税売上高が1,000万円以下で、インボイスの登録をしていない場合です。還付は受けられません。取引先が事業者の場合は、取引先が仕入れの税を引けなくなります。</p>
+    </section>
+  </section>
+
+  <section class="view doc" id="v-faq" data-view="faq" hidden>
+    <div class="page-head"><div class="page-head-text"><p class="kicker">よくある質問</p><h2 class="page-title">よくある質問</h2></div></div>
+    <section class="doc-card">
+      <details>
+        <summary>いつから1%になりますか？</summary>
+        <p>令和9年4月1日から令和11年3月31日までの2年間です。いまは閣議決定された大綱の段階で、法案が国会で成立することが前提です。</p>
+      </details>
+      <details>
+        <summary>飲食店のテイクアウトも1%ですか？</summary>
+        <p>はい。持ち帰りと出前は飲食料品の販売なので1%です。店内で食べる場合とケータリングは10%のままです。店内かテイクアウトかは、提供する時に客に確かめて決めます。</p>
+      </details>
+      <details>
+        <summary>なぜ飲食店は納税が増えるのですか？</summary>
+        <p>店内飲食の売上の税は10%のままなのに、食材の仕入れの税が8%から1%に減るためです。本則課税では仕入れの税を引いて納めるので、引ける額が減った分だけ納税が増えます。</p>
+      </details>
+      <details>
+        <summary>簡易課税に変えるには、いつまでに届出が要りますか？</summary>
+        <p>簡易課税制度選択届出書を、使いたい課税期間が始まる前の日までに出します。個人で令和9年分から使うなら、令和8年12月31日までです。今回の特例はありません。</p>
+      </details>
+      <details>
+        <summary>免税事業者ですが、還付を受けられますか？</summary>
+        <p>課税事業者を選び、本則課税で申告すれば受けられます。特例で、令和9年4月1日を含む課税期間の中に課税事業者選択届出書を出せば、その期間から課税事業者になれます。原則2年間は課税事業者のままです。</p>
+      </details>
+      <details>
+        <summary>2割特例や3割特例は入っていますか？</summary>
+        <p>入っていません。インボイスの登録で課税事業者になった方の特例は、この試算に含めていません。対象になる方は、税理士か税務署に確かめてください。</p>
+      </details>
+    </section>
+  </section>
+
+  <section class="view doc" id="v-about" data-view="about" hidden>
+    <div class="page-head"><div class="page-head-text"><p class="kicker">運営者・更新履歴</p><h2 class="page-title">運営者情報・更新履歴</h2></div></div>
+    <section class="doc-card">
+      <h3>運営者</h3>
+      <p>運営者：輸入利益チェッカー 編集室<br>連絡先：<a href="mailto:contact@yunyu-rieki.com">contact@yunyu-rieki.com</a>（計算の誤りのご指摘や、ご意見はこちらへ）</p>
+      <p>国税庁のパンフレット「飲食料品に係る2年間の消費税率引下げについて」（令和8年9月）をもとに作っています。法案の成立や内容の変更があれば、計算を直します。</p>
+      <ul class="history">
+        <li>2026年11月8日：見た目と使い方を姉妹サイトの輸入利益チェッカーにそろえました。計算例・クリア・URL共有、1か月の平均での入力、届出と期限のページを足しました。</li>
+        <li>2026年11月7日：最初の版を作りました。</li>
+      </ul>
+    </section>
+  </section>
+  </main>
+</div>
+
+  <!-- スマホ下部フローティングバー -->
+  <div class="mbar" id="mbar" hidden>
+    <div class="mbar-top">
+      <div class="mtext"><b id="mTitle">—</b><span id="mValue"></span></div>
+      <button type="button" class="jump" id="mJump">判定へ</button>
+    </div>
+  </div>
+
   <footer>
-    出典：国税庁「飲食料品に係る2年間の消費税率引下げについて」（令和8年9月）。この試算は一般的な目安で、個別の税務相談ではありません。姉妹サイト：<a href="https://yunyu-rieki.com/" target="_blank" rel="noopener">輸入利益チェッカー</a>
+    <p class="foot-links"><a href="#about">運営者情報・更新履歴</a><a href="https://yunyu-rieki.com/" target="_blank" rel="noopener">姉妹サイト：輸入利益チェッカー</a></p>
+    <p>出典：国税庁<span class="nwl">「飲食料品に係る2年間の消費税率引下げについて」（令和8年9月）</span>。法案は国会での審議前です。計算結果は一般的な目安で、個別の税務相談ではありません。このツールの利用によって生じた損害について責任を負いかねます。</p>
   </footer>
 </div>
 
 <script src="calc.js"></script>
 <script>
 (function () {
-  "use strict";
-  const S = window.Shokuhin;
-  const $ = (id) => document.getElementById(id);
-  const yen = (n) => (n < 0 ? "−" : "") + Math.round(Math.abs(n)).toLocaleString("ja-JP") + "円";
-  const man = (n) => {
-    const a = Math.abs(n);
-    const s = a >= 10000 ? (Math.round(a / 1000) / 10).toLocaleString("ja-JP") + "万円" : Math.round(a).toLocaleString("ja-JP") + "円";
-    return (n < 0 ? "−" : "") + s;
+  'use strict';
+  var S = window.Shokuhin;
+  var $ = function (id) { return document.getElementById(id); };
+  var STORE_KEY = 'shohizei-check:v1';
+  var LABEL = { general: '本則課税', simple: '簡易課税', exempt: '免税事業者' };
+  var MONEY = ['baseSales', 'eatIn', 'foodSales', 'otherSales', 'foodBuy', 'otherBuy'];
+  var FLOWS = ['eatIn', 'foodSales', 'otherSales', 'foodBuy', 'otherBuy']; // 1か月で入れられる金額
+  var FIELDS = MONEY.concat(['kind', 'current', 'who', 'endMonth', 'per', 'foodKubun', 'eatInKubun', 'otherKubun']);
+  var EXAMPLE = {
+    kind: 'restaurant', current: 'general', who: 'individual', endMonth: '3', per: 'year',
+    baseSales: 38000000, eatIn: 36000000, foodSales: 4000000, otherSales: 0, foodBuy: 12000000, otherBuy: 9000000,
+    foodKubun: '3', eatInKubun: '4', otherKubun: '4'
   };
-  const wa = (iso) => {
-    if (!iso) return "";
-    const [y, m, d] = iso.split("-").map(Number);
-    return `令和${y - 2018}年${m}月${d}日`;
-  };
-  const LABEL = { general: "本則課税", simple: "簡易課税", exempt: "免税事業者" };
 
-  // 選択肢を用意
-  for (const [k, v] of Object.entries(S.PRESETS)) $("kind").add(new Option(v.label, k));
-  for (const sel of document.querySelectorAll("[data-kubun]")) {
-    for (const [k, v] of Object.entries(S.KUBUN)) sel.add(new Option(`${v.name} ${Math.round(v.rate * 100)}%`, k));
+  var man = function (n) {
+    var a = Math.abs(n);
+    var s = a >= 10000 ? (Math.round(a / 1000) / 10).toLocaleString('ja-JP') + '万円' : Math.round(a).toLocaleString('ja-JP') + '円';
+    return (n < 0 ? '−' : '') + s;
+  };
+  var yen = function (n) { return (n < 0 ? '−' : '') + Math.round(Math.abs(n)).toLocaleString('ja-JP') + '円'; };
+  var taxText = function (n) { return n < 0 ? '還付 ' + man(-n) : man(n); };
+  var wa = function (iso) { var a = iso.split('-').map(Number); return '令和' + (a[0] - 2018) + '年' + a[1] + '月' + a[2] + '日'; };
+  var slash = function (iso) { var a = iso.split('-').map(Number); return a[0] + '/' + a[1] + '/' + a[2]; };
+
+  // 選択肢
+  Object.keys(S.PRESETS).forEach(function (k) {
+    $('kind').add(new Option(S.PRESETS[k].label, k));
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'preset-btn'; b.dataset.kind = k;
+    b.textContent = S.PRESETS[k].short || S.PRESETS[k].label.replace(/（.*）/, '');
+    $('kindPresets').appendChild(b);
+  });
+  document.querySelectorAll('[data-kubun]').forEach(function (sel) {
+    Object.keys(S.KUBUN).forEach(function (k) { sel.add(new Option(S.KUBUN[k].name + ' ' + Math.round(S.KUBUN[k].rate * 100) + '%', k)); });
+  });
+  for (var m = 1; m <= 12; m++) { $('endMonth').add(new Option(m + '月', m)); $('dlMonth').add(new Option(m + '月', m)); }
+  $('dlMonth').value = '3';
+
+  var state = { who: 'individual', per: 'year' };
+  function setSeg(kind, val) {
+    state[kind] = val;
+    document.querySelectorAll('[data-' + kind + ']').forEach(function (b) { b.classList.toggle('active', b.dataset[kind] === val); });
+    if (kind === 'who') $('endMonthField').hidden = val !== 'corporate';
   }
-  for (let m = 1; m <= 12; m++) $("endMonth").add(new Option(`${m}月`, m));
-  $("endMonth").value = "3";
-
-  const MONEY = ["baseSales", "eatIn", "foodSales", "otherSales", "foodBuy", "otherBuy"];
-  // 例：年商4,000万円ほどの、店内飲食が中心の個人の飲食店
-  const SAMPLE = { baseSales: 38000000, eatIn: 36000000, foodSales: 4000000, otherSales: 0, foodBuy: 12000000, otherBuy: 9000000 };
-  for (const id of MONEY) $(id).value = SAMPLE[id].toLocaleString("ja-JP");
 
   function applyPreset() {
-    const p = S.PRESETS[$("kind").value];
-    $("foodKubun").value = String(p.foodKubun);
-    $("eatInKubun").value = "4";
-    $("otherKubun").value = String(p.otherKubun);
+    var p = S.PRESETS[$('kind').value];
+    $('foodKubun').value = String(p.foodKubun);
+    $('eatInKubun').value = '4';
+    $('otherKubun').value = String(p.otherKubun);
   }
-  applyPreset();
 
-  function readMoney(id) {
-    const raw = $(id).value.replace(/[,，\s円]/g, "").replace(/[０-９]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xfee0));
-    if (raw === "") return { v: 0, empty: true };
-    const n = Number(raw);
-    return { v: Number.isFinite(n) && n >= 0 ? n : NaN, empty: false };
+  function readForm() {
+    var v = {};
+    FIELDS.forEach(function (f) { if ($(f)) v[f] = $(f).value; });
+    v.who = state.who; v.per = state.per;
+    return v;
   }
+  function writeForm(v) {
+    FIELDS.forEach(function (f) { if ($(f) && v[f] !== undefined && v[f] !== null) $(f).value = v[f]; });
+    if (!S.PRESETS[$('kind').value]) $('kind').value = 'restaurant';
+    setSeg('who', v.who === 'corporate' ? 'corporate' : 'individual');
+    setSeg('per', v.per === 'month' ? 'month' : 'year');
+  }
+
+  function showErrors(errs) {
+    document.querySelectorAll('.field.err').forEach(function (el) { el.classList.remove('err'); });
+    document.querySelectorAll('.errmsg').forEach(function (el) { el.textContent = ''; });
+    document.querySelectorAll('[aria-invalid]').forEach(function (el) { el.removeAttribute('aria-invalid'); });
+    errs.forEach(function (id) {
+      var input = $(id), field = input.closest('.field');
+      field.classList.add('err');
+      input.setAttribute('aria-invalid', 'true');
+      var fold = field.closest('details'); if (fold) fold.open = true;
+      var msg = field.querySelector('.errmsg');
+      if (!msg) { msg = document.createElement('span'); msg.className = 'errmsg'; msg.id = id + 'Err'; msg.setAttribute('role', 'alert'); field.appendChild(msg); input.setAttribute('aria-describedby', msg.id); }
+      msg.textContent = '0以上の金額を数字で入れてください';
+    });
+  }
+
+  function setVerdict(cls, title, text, mValue) {
+    var vb = $('verdict'), mb = $('mbar');
+    ['good', 'warn', 'bad'].forEach(function (c) { vb.classList.remove(c); mb.classList.remove(c); });
+    if (cls) { vb.classList.add(cls); mb.classList.add(cls); }
+    var IC = { good: '<path d="M5 12.5 10 17 19 7"/>', warn: '<path d="M12 7v6"/><path d="M12 17h.01"/>', bad: '<path d="M7 7l10 10M17 7 7 17"/>', '': '<path d="M12 11v6"/><path d="M12 7h.01"/>' };
+    $('verdictIcon').innerHTML = '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">' + (IC[cls] || IC['']) + '</svg>';
+    $('verdictTitle').textContent = title;
+    $('verdictText').textContent = text;
+    $('mTitle').textContent = (!$('exampleNote').hidden ? '計算例：' : '') + title;
+    $('mValue').textContent = mValue || '';
+  }
+
+  function foldSummaries(vals) {
+    $('fvWho').textContent = state.who === 'corporate' ? '法人・' + $('endMonth').value + '月決算' : '個人（1月〜12月）';
+    $('fvOther').textContent = vals.otherSales > 0 ? man(vals.otherSales) + '/年' : 'なし';
+    $('fvKubun').textContent = ['foodKubun', 'eatInKubun', 'otherKubun'].map(function (id) { return '第' + $(id).value + '種'; }).join('・');
+  }
+
+  function row(label, value, cls) { return '<tr' + (cls ? ' class="' + cls + '"' : '') + '><td>' + label + '</td><td class="num">' + value + '</td></tr>'; }
 
   function render() {
-    const who = document.querySelector('input[name="who"]:checked').value;
-    $("endMonthBox").hidden = who !== "corporate";
-    const vals = {};
-    let bad = false;
-    for (const id of MONEY) {
-      const r = readMoney(id);
-      $(id).setAttribute("aria-invalid", Number.isNaN(r.v) ? "true" : "false");
-      if (Number.isNaN(r.v)) bad = true;
-      vals[id] = r.empty ? (id === "baseSales" ? "" : 0) : r.v;
-    }
-    if (bad) {
-      $("verdict").className = "verdict";
-      $("verdict").innerHTML = '<span class="k">入力を確かめてください</span><b>金額は数字で入れてください</b><p>例：12,000,000</p>';
+    var v = readForm();
+    var errs = [];
+    var vals = {};
+    var mult = state.per === 'month' ? 12 : 1;
+    MONEY.forEach(function (id) {
+      var raw = v[id];
+      if (raw === '' || raw === undefined) { vals[id] = id === 'baseSales' ? '' : 0; return; }
+      var x = Number(raw);
+      if (!isFinite(x) || x < 0) { errs.push(id); vals[id] = 0; return; }
+      vals[id] = FLOWS.indexOf(id) >= 0 ? x * mult : x;
+    });
+    showErrors(errs);
+    document.querySelectorAll('.hint.yearly').forEach(function (el) {
+      var id = el.dataset.for;
+      el.textContent = state.per === 'month' && vals[id] > 0 ? '1年分 ' + man(vals[id]) : '';
+      el.hidden = !el.textContent;
+    });
+    foldSummaries(vals);
+    $('sheetExample').hidden = $('exampleNote').hidden;
+    if (errs.length) {
+      setVerdict('', '入力を確かめてください', '金額は0以上の数字で入れてください。', '');
       return;
     }
-    const current = $("current").value;
-    const c = S.compare(Object.assign({}, vals, {
-      current,
-      foodKubun: Number($("foodKubun").value), eatInKubun: Number($("eatInKubun").value), otherKubun: Number($("otherKubun").value),
-    }));
-    const st = S.steps(current, c.bestKey, who, Number($("endMonth").value));
-    $("periodLabel").textContent = `対象の課税期間 ${st.period.start.replaceAll("-", "/")}〜${st.period.end.replaceAll("-", "/")}`;
+    var current = v.current;
+    var c = S.compare({
+      eatIn: vals.eatIn, foodSales: vals.foodSales, otherSales: vals.otherSales,
+      foodBuy: vals.foodBuy, otherBuy: vals.otherBuy, baseSales: vals.baseSales, current: current,
+      foodKubun: Number(v.foodKubun), eatInKubun: Number(v.eatInKubun), otherKubun: Number(v.otherKubun)
+    });
+    var st = S.steps(current, c.bestKey, state.who, Number(v.endMonth));
+    $('periodChip').textContent = slash(st.period.start) + '〜' + slash(st.period.end);
 
     // 判定
-    const v = $("verdict");
+    var change = c.changeIfStay;
+    var changeText = '今より年に' + man(Math.abs(change)) + (change >= 0 ? '増えます' : '減ります');
     if (c.shouldSwitch) {
-      v.className = "verdict switch";
-      v.innerHTML = `<span class="k">1%の期間のおすすめ</span><b>${LABEL[c.bestKey]}に変えると、年に約${man(c.saveBySwitch)}少なくなります</b><p>${LABEL[current]}のままだと、今より年に${man(Math.abs(c.changeIfStay))}${c.changeIfStay >= 0 ? "増えます" : "減ります"}。</p>`;
+      setVerdict('warn', LABEL[c.bestKey] + 'に変えると、年に約' + man(c.saveBySwitch) + '少なくなります',
+        LABEL[current] + 'のままだと、' + changeText + '。' + (st.deadline ? '届出の期限は' + wa(st.deadline) + 'です。' : ''),
+        LABEL[c.bestKey] + 'で 年' + man(c.saveBySwitch) + '少なく');
     } else {
-      v.className = "verdict";
-      v.innerHTML = `<span class="k">1%の期間のおすすめ</span><b>今の${LABEL[current]}のままで大丈夫です</b><p>今と比べて、年に${man(Math.abs(c.changeIfStay))}${c.changeIfStay >= 0 ? "増えます" : "減ります"}。</p>`;
+      setVerdict('good', '今の' + LABEL[current] + 'のままが一番少なくなります', '食料品が1%になると、' + changeText + '。', LABEL[current] + 'のまま');
     }
 
-    const show = (el, n) => { $(el).textContent = n < 0 ? `還付 ${man(-n)}` : man(n); };
-    show("sNow", c.nowTax); show("sStay", c.stayTax); show("sBest", c.bestTax);
-    const diff = (el, n) => { const e = $(el); e.textContent = (n >= 0 ? "+" : "−") + man(Math.abs(n)).replace("−", ""); e.className = "d " + (n > 0 ? "pos" : n < 0 ? "neg" : ""); };
-    diff("sStayD", c.stayTax - c.nowTax); diff("sBestD", c.bestTax - c.nowTax);
+    $('sBest').textContent = taxText(c.bestTax);
+    $('sBest').className = 'v' + (c.bestTax < 0 ? ' pos' : '');
+    $('sBestSub').textContent = LABEL[c.bestKey] + '・今より ' + (c.bestTax - c.nowTax >= 0 ? '+' : '−') + man(Math.abs(c.bestTax - c.nowTax)).replace('−', '');
+    $('sSave').textContent = c.saveBySwitch >= 1 ? man(c.saveBySwitch) : '0円';
+    $('sSave').className = 'v' + (c.saveBySwitch >= 1 ? ' pos' : '');
+    $('sSaveSub').textContent = c.saveBySwitch >= 1 ? LABEL[current] + 'のままと比べて' : '今の方式が一番少ない';
+    $('sNow').textContent = taxText(c.nowTax);
+    $('sNowSub').textContent = LABEL[current] + 'で計算';
+    $('sStay').textContent = taxText(c.stayTax);
+    $('sStaySub').textContent = '今より ' + (change >= 0 ? '+' : '−') + man(Math.abs(change)).replace('−', '');
 
-    // 方式ごと
-    const tb = $("opts"); tb.textContent = "";
-    for (const o of c.cut.options) {
-      const tr = document.createElement("tr");
-      if (!o.allowed) tr.className = "off"; else if (o.key === c.bestKey) tr.className = "best";
-      const td1 = document.createElement("td");
-      td1.textContent = o.label;
-      const pill = (cls, t) => { const s = document.createElement("span"); s.className = "pill " + cls; s.textContent = t; td1.append(s); };
-      if (o.allowed && o.key === c.bestKey) pill("best", "一番少ない");
-      if (o.key === current) pill("now", "今");
-      if (!o.allowed) pill("off", o.key === "exempt" ? "2年前の売上が1,000万円超" : "2年前の売上が5,000万円超");
-      const td2 = document.createElement("td"); td2.className = "num";
-      td2.textContent = !o.allowed ? "—" : o.tax < 0 ? `還付 ${yen(-o.tax)}` : yen(o.tax);
-      tr.append(td1, td2); tb.append(tr);
-    }
+    // 方式ごとの棒
+    var allowed = c.cut.options.filter(function (o) { return o.allowed; });
+    var maxAbs = Math.max.apply(null, allowed.map(function (o) { return Math.abs(o.tax); }).concat([1]));
+    var bars = $('optBars'); bars.textContent = '';
+    c.cut.options.forEach(function (o) {
+      var r = document.createElement('div');
+      r.className = 'opt-row' + (!o.allowed ? ' off' : o.key === c.bestKey ? ' best' : '');
+      var name = document.createElement('span'); name.className = 'opt-name'; name.textContent = LABEL[o.key] + (o.key === current ? '（今）' : '');
+      var track = document.createElement('span'); track.className = 'opt-track';
+      var fill = document.createElement('span'); fill.className = 'opt-fill' + (o.tax < 0 ? ' refund' : '');
+      fill.style.width = o.allowed ? Math.max(o.tax === 0 ? 0 : 2, Math.abs(o.tax) / maxAbs * 100) + '%' : '0%';
+      track.appendChild(fill);
+      var val = document.createElement('span'); val.className = 'opt-val';
+      val.textContent = !o.allowed ? (o.key === 'exempt' ? '選べません（2年前が1,000万円超）' : '選べません（2年前が5,000万円超）') : taxText(o.tax);
+      r.appendChild(name); r.appendChild(track); r.appendChild(val);
+      bars.appendChild(r);
+    });
 
     // 届出
-    const t = $("todo");
-    if (!st.need) {
-      t.className = "todo none"; t.innerHTML = "";
-      t.append(Object.assign(document.createElement("span"), { textContent: st.text }));
-    } else {
-      t.className = "todo"; t.innerHTML = "";
-      if (st.form) t.append(Object.assign(document.createElement("span"), { className: "form", textContent: st.form }));
-      if (st.deadline) t.append(Object.assign(document.createElement("span"), { className: "date", textContent: `期限 ${wa(st.deadline)}（${st.deadline.replaceAll("-", "/")}）` }));
-      t.append(Object.assign(document.createElement("span"), { textContent: st.text }));
-    }
+    var t = $('todo'); t.textContent = '';
+    t.className = 'todo' + (st.need ? '' : ' none');
+    var h = document.createElement('span'); h.className = 'todo-k'; h.textContent = '出す届出と期限'; t.appendChild(h);
+    if (st.form) { var f = document.createElement('b'); f.textContent = st.form; t.appendChild(f); }
+    if (st.deadline) { var d = document.createElement('span'); d.className = 'todo-date'; d.textContent = '期限 ' + wa(st.deadline) + '（' + slash(st.deadline) + '）'; t.appendChild(d); }
+    var p = document.createElement('span'); p.textContent = st.text; t.appendChild(p);
 
-    const ul = $("notes"); ul.textContent = "";
-    const notes = c.cut.notes.length ? c.cut.notes : ["目立つ変化はありません。"];
-    for (const n of notes) ul.append(Object.assign(document.createElement("li"), { textContent: n }));
+    // 気づいたこと
+    var notes = c.cut.notes;
+    $('notice').hidden = !notes.length;
+    $('notice').innerHTML = '';
+    notes.forEach(function (n) { var el = document.createElement('p'); el.textContent = n; $('notice').appendChild(el); });
+
+    // 内訳
+    var cut = c.cut, now = c.now, html = '';
+    html += '<h3>売上の税（1%の期間）</h3><table>';
+    html += row('店内飲食 ' + yen(vals.eatIn) + ' × 10%', yen(cut.salesTax.eatIn));
+    html += row('食料品の販売 ' + yen(vals.foodSales) + ' × 1%', yen(cut.salesTax.food));
+    html += row('その他 ' + yen(vals.otherSales) + ' × 10%', yen(cut.salesTax.other));
+    html += row('売上の税 合計', yen(cut.salesTaxTotal), 'total') + '</table>';
+    html += '<h3>本則課税</h3><table>';
+    html += row('仕入れの税（食材 × 1% ＋ 経費 × 10%）', yen(cut.buyTax));
+    html += row('納税額', cut.general < 0 ? '還付 ' + yen(-cut.general) : yen(cut.general), 'total') + '</table>';
+    html += '<h3>簡易課税</h3><table>';
+    html += row('控除できる税（食料品の税と同額＋みなし仕入率）', yen(cut.deduct));
+    html += row('納税額', yen(cut.simple), 'total') + '</table>';
+    html += '<h3>今（食料品8%）</h3><table>';
+    html += row('本則課税', now.general < 0 ? '還付 ' + yen(-now.general) : yen(now.general));
+    html += row('簡易課税', yen(now.simple)) + '</table>';
+    $('lines').innerHTML = html;
+
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(v)); } catch (e) {}
   }
 
-  $("kind").addEventListener("change", () => { applyPreset(); render(); });
-  $("f").addEventListener("input", render);
-  $("f").addEventListener("change", render);
-  $("f").addEventListener("submit", (e) => e.preventDefault());
-  for (const id of MONEY) {
-    $(id).addEventListener("blur", () => { const r = readMoney(id); if (!r.empty && !Number.isNaN(r.v)) $(id).value = r.v.toLocaleString("ja-JP"); });
+  // 届出と期限のページ
+  function renderDeadline() {
+    var who = $('dlWho').value, mon = Number($('dlMonth').value);
+    $('dlMonth').disabled = who !== 'corporate';
+    var rows = [['免税 → 課税（還付を受ける）', 'exempt', 'general'], ['簡易 → 本則（還付を受ける）', 'simple', 'general'], ['本則 → 簡易', 'general', 'simple']];
+    var tb = $('dlRows'); tb.textContent = '';
+    var pr = S.period(who, mon);
+    rows.forEach(function (r) {
+      var st = S.steps(r[1], r[2], who, mon);
+      var tr = document.createElement('tr');
+      [r[0], st.form + (st.special ? '（特例）' : ''), wa(st.deadline) + '（' + slash(st.deadline) + '）'].forEach(function (txt, i) {
+        var td = document.createElement('td'); td.textContent = txt; if (i === 2) td.className = 'num'; tr.appendChild(td);
+      });
+      tb.appendChild(tr);
+    });
+    $('dlPeriod').textContent = '令和9年4月1日を含む課税期間：' + slash(pr.start) + '〜' + slash(pr.end);
   }
+  $('dlWho').addEventListener('change', renderDeadline);
+  $('dlMonth').addEventListener('change', renderDeadline);
+  renderDeadline();
+
+  // 初期値：URL ＞ 保存 ＞ 計算例
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(STORE_KEY) || 'null'); } catch (e) {}
+  var params = new URLSearchParams(location.search);
+  var fromUrl = null;
+  if (FIELDS.some(function (f) { return params.has(f); })) {
+    fromUrl = Object.assign({}, EXAMPLE);
+    FIELDS.forEach(function (f) { if (params.has(f)) fromUrl[f] = params.get(f); });
+  }
+  writeForm(fromUrl || saved || EXAMPLE);
+  if (saved || fromUrl) $('exampleNote').hidden = true;
   render();
+
+  // 操作
+  $('kind').addEventListener('change', function () { applyPreset(); render(); });
+  document.querySelectorAll('#kindPresets .preset-btn').forEach(function (b) {
+    b.addEventListener('click', function () { $('kind').value = b.dataset.kind; applyPreset(); render(); });
+  });
+  function syncKindButtons() {
+    document.querySelectorAll('#kindPresets .preset-btn').forEach(function (b) { b.classList.toggle('active', b.dataset.kind === $('kind').value); });
+  }
+  document.querySelectorAll('[data-who]').forEach(function (b) { b.addEventListener('click', function () { setSeg('who', b.dataset.who); render(); }); });
+  document.querySelectorAll('[data-per]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var to = b.dataset.per;
+      if (to === state.per) return;
+      // 入れた金額は、1年分⇄1か月で換算して残す
+      FLOWS.forEach(function (id) {
+        var x = Number($(id).value);
+        if ($(id).value !== '' && isFinite(x)) $(id).value = Math.round(to === 'month' ? x / 12 : x * 12);
+      });
+      setSeg('per', to); render();
+    });
+  });
+  $('form').addEventListener('input', function () { $('exampleNote').hidden = true; render(); syncKindButtons(); });
+  $('form').addEventListener('change', function () { render(); syncKindButtons(); });
+  $('form').addEventListener('submit', function (e) { e.preventDefault(); });
+  syncKindButtons();
+
+  $('btnResetExample').addEventListener('click', function () { writeForm(EXAMPLE); $('exampleNote').hidden = false; render(); syncKindButtons(); });
+  function clearForm() {
+    writeForm(Object.assign({}, EXAMPLE, { baseSales: '', eatIn: '', foodSales: '', otherSales: '', foodBuy: '', otherBuy: '' }));
+    $('exampleNote').hidden = true;
+    render(); syncKindButtons();
+    $('eatIn').focus();
+  }
+  $('btnClearForm').addEventListener('click', clearForm);
+  $('btnClearBanner').addEventListener('click', clearForm);
+
+  $('btnShareUrl').addEventListener('click', function () {
+    var v = readForm();
+    var u = new URL(location.href.split('?')[0]);
+    u.hash = '';
+    FIELDS.forEach(function (k) { if (v[k] !== '' && v[k] !== undefined && v[k] !== null) u.searchParams.set(k, v[k]); });
+    var lbl = $('btnShareUrl').querySelector('.lbl'), orig = lbl.textContent;
+    function flash(msg) { lbl.textContent = msg; setTimeout(function () { lbl.textContent = orig; }, 2200); }
+    function fallback() { try { history.replaceState(null, '', u.toString()); } catch (e) {} flash('アドレス欄のURLを共有してください'); }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(u.toString()).then(function () { flash('コピーしました'); }, fallback);
+    else fallback();
+  });
+
+  $('btnTheme').addEventListener('click', function () {
+    var root = document.documentElement, cur = root.getAttribute('data-theme');
+    var isDark = cur === 'dark' || (!cur && matchMedia('(prefers-color-scheme: dark)').matches);
+    root.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  });
+
+  // 左のタブ（スマホはメニュー）で画面を切り替える
+  var VIEWS = ['calc', 'deadline', 'changes', 'howto', 'faq', 'about'];
+  var currentView = 'calc';
+  var updMbar = function () {};
+  function setMenu(open) { document.body.classList.toggle('nav-open', open); $('btnMenu').setAttribute('aria-expanded', open ? 'true' : 'false'); }
+  function showView(name, push) {
+    if (VIEWS.indexOf(name) === -1) name = 'calc';
+    var changed = name !== currentView;
+    currentView = name;
+    document.querySelectorAll('.view').forEach(function (el) { el.hidden = el.dataset.view !== name; });
+    document.querySelectorAll('.nav-item[data-view]').forEach(function (a) { if (a.dataset.view === name) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
+    if (push) { var h = name === 'calc' ? location.pathname + location.search : '#' + name; try { history.pushState(null, '', h); } catch (e) { location.hash = name; } }
+    setMenu(false);
+    if (changed || push) window.scrollTo(0, 0);
+    updMbar();
+  }
+  function viewFromHash() { return location.hash.slice(1) || 'calc'; }
+  document.querySelectorAll('a[data-view]').forEach(function (a) {
+    a.addEventListener('click', function (e) { if (e.metaKey || e.ctrlKey || e.shiftKey || e.button) return; e.preventDefault(); showView(a.dataset.view, true); });
+  });
+  window.addEventListener('popstate', function () { showView(viewFromHash(), false); });
+  window.addEventListener('hashchange', function () { showView(viewFromHash(), false); });
+  $('btnMenu').addEventListener('click', function () { setMenu(!document.body.classList.contains('nav-open')); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') setMenu(false); });
+  document.addEventListener('click', function (e) { if (document.body.classList.contains('nav-open') && !e.target.closest('#sidenav') && !e.target.closest('#btnMenu')) setMenu(false); });
+  showView(viewFromHash(), false);
+
+  function goTo(el) { el.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }); }
+  $('toResult').addEventListener('click', function () { goTo($('sheet')); });
+  $('mJump').addEventListener('click', function () { goTo($('sheet')); });
+  $('toInput').addEventListener('click', function () { goTo($('form')); });
+  if ('IntersectionObserver' in window) {
+    var sheetSeen = false, contentSeen = false;
+    updMbar = function () { $('mbar').hidden = currentView !== 'calc' || sheetSeen || contentSeen; };
+    new IntersectionObserver(function (es) { sheetSeen = es[0].isIntersecting; updMbar(); }, { threshold: 0.15 }).observe($('sheet'));
+    new IntersectionObserver(function (es) { contentSeen = es[0].isIntersecting || es[0].boundingClientRect.top < 0; updMbar(); }).observe(document.querySelector('footer'));
+  } else {
+    updMbar = function () { $('mbar').hidden = currentView !== 'calc'; };
+  }
+  updMbar();
 })();
 </script>
 </body>
