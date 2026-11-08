@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>消費税1%チェッカー</title>
+<meta name="description" content="令和9年4月から2年間、食料品の消費税が1%に下がります。飲食店と食品の仕入れ先が、本則課税・簡易課税・免税のどれで申告すると税が少ないかを試算し、届出の期限を出します。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@400;500;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: 輸入利益チェッカーと同じ姉妹の型。入力（左）→ 試算書（右・固定）。スマホでは1列。 */
+:root {
+  --bg: #ffffff;
+  --field: #f6f8f4;
+  --soft: #f4f7f1;
+  --paper: #ffffff;
+  --ink: #1b2615;
+  --muted: #5a6652;
+  --line: #d8dfd2;
+  --accent: #46651f;       /* 青菜の緑。食料品の姉妹サイトの色 */
+  --accent-soft: #eaf1e0;
+  --good: #1f7a3f;
+  --bad: #b3261e;
+  --warn-bg: #fff6e0;
+  --warn-fg: #7a5200;
+  --font-body: "IBM Plex Sans JP", "Hiragino Sans", "Noto Sans JP", "Yu Gothic", system-ui, sans-serif;
+  --font-num: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --radius: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11160e; --field: #11160e; --soft: #161d12; --paper: #1a2216; --ink: #e8eee2; --muted: #a1ad97; --line: #2f3a28;
+    --accent: #a6c97a; --accent-soft: #24311a; --good: #6fcf8f; --bad: #ff8a80; --warn-bg: #3a2e12; --warn-fg: #f3d58a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11160e; --field: #11160e; --soft: #161d12; --paper: #1a2216; --ink: #e8eee2; --muted: #a1ad97; --line: #2f3a28;
+  --accent: #a6c97a; --accent-soft: #24311a; --good: #6fcf8f; --bad: #ff8a80; --warn-bg: #3a2e12; --warn-fg: #f3d58a;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 17px; line-height: 1.75; }
+.wrap {
+  max-width: 1120px; margin: 0 auto; padding-block: 24px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+header.top { display: flex; flex-direction: column; gap: 6px; margin-bottom: 20px; }
+.brand { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+h1 { font-size: 1.75rem; margin: 0; letter-spacing: .02em; text-wrap: balance; }
+.rate { font-family: var(--font-num); font-size: .95rem; color: var(--accent); border: 1px solid var(--accent); border-radius: 6px; padding: 0 8px; }
+.lead { margin: 0; color: var(--muted); max-width: 62ch; }
+.draft { margin: 6px 0 0; font-size: .9rem; background: var(--warn-bg); color: var(--warn-fg); border-radius: 8px; padding: 6px 12px; max-width: 70ch; }
+.grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 440px); gap: 20px; align-items: start; }
+@media (max-width: 880px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+.inputs { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+fieldset { margin: 0; border: 1px solid var(--line); border-radius: var(--radius); background: var(--paper); padding: 16px 18px 18px; min-width: 0; }
+legend { float: left; width: 100%; padding: 0 0 10px; margin: 0 0 14px; border-bottom: 1px solid var(--line); font-weight: 700; font-size: 1.1rem; display: flex; align-items: baseline; gap: 8px; }
+legend + * { clear: both; }
+legend .no { display: inline-flex; align-items: center; justify-content: center; flex: none; align-self: center; width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: var(--paper); font-family: var(--font-num); font-size: .9rem; font-weight: 600; }
+legend small { font-weight: 400; color: var(--muted); font-size: .9rem; }
+.row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px 14px; }
+.field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.field label { font-size: .95rem; font-weight: 500; }
+.field .hint { font-size: .85rem; color: var(--muted); line-height: 1.5; }
+input[type="text"], select { width: 100%; font: inherit; color: var(--ink); background: var(--field); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; min-height: 46px; }
+input.money { font-family: var(--font-num); font-variant-numeric: tabular-nums; text-align: right; }
+input:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.suffix { display: flex; align-items: center; gap: 6px; }
+.suffix span { font-size: .95rem; color: var(--muted); white-space: nowrap; }
+.radios { display: flex; gap: 16px; flex-wrap: wrap; font-size: .95rem; min-height: 46px; align-items: center; }
+.radios label { display: flex; gap: 6px; align-items: center; }
+.radios input { accent-color: var(--accent); }
+.rate-tag { font-family: var(--font-num); font-size: .78rem; border-radius: 4px; padding: 0 6px; margin-left: 4px; background: var(--soft); border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+.rate-tag.cut { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+details.more { border-top: 1px dashed var(--line); margin-top: 14px; padding-top: 10px; }
+details.more summary { cursor: pointer; font-size: .95rem; color: var(--accent); }
+details.more .row { margin-top: 10px; }
+.err { color: var(--bad); font-size: .85rem; }
+
+/* 試算書 */
+.sheet { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; min-width: 0; }
+@media (max-width: 880px) { .sheet { position: static; } }
+.sheet-head { padding: 14px 18px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.sheet-head h2 { margin: 0; font-size: 1.1rem; }
+.sheet-head span { font-size: .85rem; color: var(--muted); }
+.verdict { padding: 14px 18px; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 4px; background: var(--soft); }
+.verdict .k { font-size: .85rem; color: var(--muted); }
+.verdict b { font-size: 1.25rem; line-height: 1.4; }
+.verdict p { margin: 0; font-size: .92rem; }
+.verdict.switch { background: color-mix(in srgb, var(--accent) 14%, var(--paper)); }
+.summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: var(--line); border-bottom: 1px solid var(--line); }
+.summary div { background: var(--paper); padding: 10px 14px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.summary .k { font-size: .8rem; color: var(--muted); line-height: 1.4; }
+.summary .v { font-family: var(--font-num); font-size: 1.15rem; font-weight: 600; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.summary .d { font-family: var(--font-num); font-size: .82rem; font-variant-numeric: tabular-nums; }
+.pos { color: var(--bad); } .neg { color: var(--good); }
+.lines { padding: 8px 18px 14px; }
+.lines h3 { font-size: .85rem; letter-spacing: .06em; color: var(--muted); margin: 14px 0 2px; font-weight: 500; }
+.lines table { width: 100%; border-collapse: collapse; font-size: .95rem; }
+.lines td { padding: 7px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+.lines td.num { text-align: right; font-family: var(--font-num); font-variant-numeric: tabular-nums; white-space: nowrap; padding-left: 10px; }
+.lines tr.best td { font-weight: 700; }
+.lines tr.off td { color: var(--muted); }
+.pill { font-size: .75rem; border-radius: 999px; padding: 0 8px; margin-left: 6px; white-space: nowrap; font-weight: 500; }
+.pill.best { background: var(--accent); color: var(--paper); }
+.pill.now { border: 1px solid var(--line); color: var(--muted); }
+.pill.off { border: 1px dashed var(--line); color: var(--muted); }
+.todo { margin: 6px 0 0; padding: 12px 14px; border-radius: 8px; border: 1px solid var(--accent); background: var(--accent-soft); display: flex; flex-direction: column; gap: 4px; font-size: .92rem; }
+.todo .form { font-weight: 700; }
+.todo .date { font-family: var(--font-num); font-size: 1.05rem; font-weight: 600; }
+.todo.none { border-color: var(--line); background: var(--soft); }
+ul.notes { margin: 6px 0 0; padding-left: 1.2em; font-size: .9rem; display: flex; flex-direction: column; gap: 4px; }
+.fine { font-size: .8rem; color: var(--muted); margin: 12px 0 0; line-height: 1.6; }
+
+/* 解説 */
+.guide { margin-top: 32px; display: flex; flex-direction: column; gap: 0; max-width: 760px; border-top: 1px solid var(--line); }
+.guide details { border-bottom: 1px solid var(--line); }
+.guide summary { cursor: pointer; padding: 14px 4px; font-weight: 700; list-style-position: inside; }
+.guide .body { padding: 0 4px 16px; font-size: .97rem; }
+.guide .body p { margin: 0 0 10px; }
+.guide table { border-collapse: collapse; font-size: .92rem; min-width: 420px; }
+.guide th, .guide td { border-bottom: 1px solid var(--line); padding: 6px 10px 6px 0; text-align: left; }
+.scroll { overflow-x: auto; }
+footer { margin-top: 28px; font-size: .85rem; color: var(--muted); max-width: 70ch; }
+footer a { color: var(--accent); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <h1>消費税1%チェッカー</h1>
+      <span class="rate">8% → 1%</span>
+    </div>
+    <p class="lead">令和9年4月から2年間、食料品の消費税が1%に下がります。店内飲食は10%のままです。あなたのお店や会社は、本則課税・簡易課税・免税のどれで申告すると税が少ないかを試算し、出す届出と期限を示します。</p>
+    <p class="draft">はじめは例として、年商4,000万円ほどの店内飲食中心の飲食店の数字が入っています。自分の数字に書きかえてください。<br>国税庁の案内（令和8年9月）にもとづく試算です。法案はまだ国会で成立していません。</p>
+  </header>
+
+  <form class="grid" id="f" novalidate>
+    <div class="inputs">
+      <fieldset>
+        <legend><span class="no">1</span>お店・会社</legend>
+        <div class="row">
+          <div class="field">
+            <label for="kind">業種</label>
+            <select id="kind"></select>
+          </div>
+          <div class="field">
+            <label for="current">今の申告のしかた</label>
+            <select id="current">
+              <option value="general">本則課税（一般課税）</option>
+              <option value="simple">簡易課税</option>
+              <option value="exempt">免税事業者</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>事業のかたち</label>
+            <div class="radios">
+              <label><input type="radio" name="who" id="who-ind" value="individual" checked>個人</label>
+              <label><input type="radio" name="who" id="who-corp" value="corporate">法人</label>
+            </div>
+          </div>
+          <div class="field" id="endMonthBox" hidden>
+            <label for="endMonth">決算月</label>
+            <select id="endMonth"></select>
+          </div>
+          <div class="field">
+            <label for="baseSales">2年前の課税売上高</label>
+            <div class="suffix"><input type="text" inputmode="numeric" class="money" id="baseSales"><span>円</span></div>
+            <span class="hint">1,000万円以下なら免税、5,000万円以下なら簡易課税も比べます。</span>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend><span class="no">2</span>売上<small>税抜き・1年分</small></legend>
+        <div class="row">
+          <div class="field">
+            <label for="eatIn">店内飲食・ケータリング<span class="rate-tag">10%のまま</span></label>
+            <div class="suffix"><input type="text" inputmode="numeric" class="money" id="eatIn"><span>円</span></div>
+          </div>
+          <div class="field">
+            <label for="foodSales">食料品の販売<span class="rate-tag cut">8%→1%</span></label>
+            <div class="suffix"><input type="text" inputmode="numeric" class="money" id="foodSales"><span>円</span></div>
+            <span class="hint">持ち帰り・出前・卸・小売。</span>
+          </div>
+          <div class="field">
+            <label for="otherSales">その他の売上<span class="rate-tag">10%</span></label>
+            <div class="suffix"><input type="text" inputmode="numeric" class="money" id="otherSales"><span>円</span></div>
+            <span class="hint">お酒・雑貨など。</span>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend><span class="no">3</span>仕入れ・経費<small>税抜き・1年分</small></legend>
+        <div class="row">
+          <div class="field">
+            <label for="foodBuy">食材・食品の仕入れ<span class="rate-tag cut">8%→1%</span></label>
+            <div class="suffix"><input type="text" inputmode="numeric" class="money" id="foodBuy"><span>円</span></div>
+          </div>
+          <div class="field">
+            <label for="otherBuy">10%の仕入れ・経費<span class="rate-tag">10%</span></label>
+            <div class="suffix"><input type="text" inputmode="numeric" class="money" id="otherBuy"><span>円</span></div>
+            <span class="hint">お酒・消耗品・家賃・光熱費・設備など。給料と保険は入れません。</span>
+          </div>
+        </div>
+        <details class="more" id="kubunBox">
+          <summary>簡易課税の事業区分（業種から自動で選んでいます）</summary>
+          <div class="row">
+            <div class="field"><label for="foodKubun">食料品の販売</label><select id="foodKubun" data-kubun></select></div>
+            <div class="field"><label for="eatInKubun">店内飲食</label><select id="eatInKubun" data-kubun></select></div>
+            <div class="field"><label for="otherKubun">その他の売上</label><select id="otherKubun" data-kubun></select></div>
+          </div>
+        </details>
+      </fieldset>
+    </div>
+
+    <aside class="sheet" aria-live="polite">
+      <div class="sheet-head"><h2>試算書</h2><span id="periodLabel"></span></div>
+      <div class="verdict" id="verdict"></div>
+      <div class="summary">
+        <div><span class="k">今の納税<br>（食料品8%）</span><span class="v" id="sNow"></span></div>
+        <div><span class="k">1%の期間<br>今の方式のまま</span><span class="v" id="sStay"></span><span class="d" id="sStayD"></span></div>
+        <div><span class="k">1%の期間<br>一番少ない方式</span><span class="v" id="sBest"></span><span class="d" id="sBestD"></span></div>
+      </div>
+      <div class="lines">
+        <h3>1%の期間の、方式ごとの納税（1年分）</h3>
+        <table><tbody id="opts"></tbody></table>
+        <h3>出す届出と期限</h3>
+        <div id="todo"></div>
+        <h3>気づいたこと</h3>
+        <ul class="notes" id="notes"></ul>
+        <p class="fine">国と地方を合わせた税率での目安です。端数処理、簡易課税の75%ルール、インボイスの2割・3割特例、8%のままになる定期便などは入れていません。実際の申告と届出は、税理士か税務署に確かめてください。</p>
+      </div>
+    </aside>
+  </form>
+
+  <section class="guide" aria-label="解説">
+    <details>
+      <summary>何が変わるのか</summary>
+      <div class="body">
+        <p>令和9年4月1日から令和11年3月31日まで、食料品の消費税が8%から1%（国0.78%・地方0.22%）に下がります。持ち帰り・出前も1%です。店内飲食とケータリングは10%のままです。</p>
+        <div class="scroll"><table>
+          <tr><th>取引</th><th>今</th><th>令和9年4月から2年間</th></tr>
+          <tr><td>食料品の販売・持ち帰り・出前</td><td>8%</td><td>1%</td></tr>
+          <tr><td>店内飲食・ケータリング</td><td>10%</td><td>10%</td></tr>
+          <tr><td>お酒・雑貨・家賃・光熱費</td><td>10%</td><td>10%</td></tr>
+        </table></div>
+      </div>
+    </details>
+    <details>
+      <summary>飲食店は、なぜ納税が増えるのか</summary>
+      <div class="body">
+        <p>消費税は、売上の税から仕入れの税を引いて納めます。店内飲食の売上は10%のままなのに、食材の仕入れの税が8%から1%に減ります。引ける税が減るので、本則課税のままだと納税が増えます。</p>
+        <p>簡易課税は、売上の税にみなし仕入率をかけて引くので、食材の税率が下がっても引ける額は変わりません。店内飲食が中心のお店は、簡易課税の方が少なくなることがあります。</p>
+      </div>
+    </details>
+    <details>
+      <summary>食品の卸・小売は、なぜ還付が出るのか</summary>
+      <div class="body">
+        <p>売上が1%になる一方で、家賃・光熱費・設備などの経費は10%のままです。仕入れの税の方が大きくなると、本則課税なら差額が戻ります。簡易課税や免税では戻りません。</p>
+      </div>
+    </details>
+    <details>
+      <summary>届出の特例と期限</summary>
+      <div class="body">
+        <p>ふつうは、方式を変える届出を課税期間が始まる前に出します。今回は特例があり、令和9年4月1日を含む課税期間の中に出せば、その期間から変えられます。届出の参考事項の欄に「飲食料品特例」と書きます。</p>
+        <div class="scroll"><table>
+          <tr><th>移り方</th><th>届出</th><th>特例</th></tr>
+          <tr><td>免税 → 課税（還付を受ける）</td><td>課税事業者選択届出書</td><td>あり</td></tr>
+          <tr><td>簡易 → 本則（還付を受ける）</td><td>簡易課税制度選択不適用届出書</td><td>あり（2年縛りなし）</td></tr>
+          <tr><td>本則 → 簡易</td><td>簡易課税制度選択届出書</td><td>なし（前の期間のうちに）</td></tr>
+        </table></div>
+        <p>このほか、中間申告の特例と、令和9年2月1日から5月31日までの値札（総額表示）の特例があります。</p>
+      </div>
+    </details>
+  </section>
+
+  <footer>
+    出典：国税庁「飲食料品に係る2年間の消費税率引下げについて」（令和8年9月）。この試算は一般的な目安で、個別の税務相談ではありません。姉妹サイト：<a href="https://yunyu-rieki.com/" target="_blank" rel="noopener">輸入利益チェッカー</a>
+  </footer>
+</div>
+
+<script src="calc.js"></script>
+<script>
+(function () {
+  "use strict";
+  const S = window.Shokuhin;
+  const $ = (id) => document.getElementById(id);
+  const yen = (n) => (n < 0 ? "−" : "") + Math.round(Math.abs(n)).toLocaleString("ja-JP") + "円";
+  const man = (n) => {
+    const a = Math.abs(n);
+    const s = a >= 10000 ? (Math.round(a / 1000) / 10).toLocaleString("ja-JP") + "万円" : Math.round(a).toLocaleString("ja-JP") + "円";
+    return (n < 0 ? "−" : "") + s;
+  };
+  const wa = (iso) => {
+    if (!iso) return "";
+    const [y, m, d] = iso.split("-").map(Number);
+    return `令和${y - 2018}年${m}月${d}日`;
+  };
+  const LABEL = { general: "本則課税", simple: "簡易課税", exempt: "免税事業者" };
+
+  // 選択肢を用意
+  for (const [k, v] of Object.entries(S.PRESETS)) $("kind").add(new Option(v.label, k));
+  for (const sel of document.querySelectorAll("[data-kubun]")) {
+    for (const [k, v] of Object.entries(S.KUBUN)) sel.add(new Option(`${v.name} ${Math.round(v.rate * 100)}%`, k));
+  }
+  for (let m = 1; m <= 12; m++) $("endMonth").add(new Option(`${m}月`, m));
+  $("endMonth").value = "3";
+
+  const MONEY = ["baseSales", "eatIn", "foodSales", "otherSales", "foodBuy", "otherBuy"];
+  // 例：年商4,000万円ほどの、店内飲食が中心の個人の飲食店
+  const SAMPLE = { baseSales: 38000000, eatIn: 36000000, foodSales: 4000000, otherSales: 0, foodBuy: 12000000, otherBuy: 9000000 };
+  for (const id of MONEY) $(id).value = SAMPLE[id].toLocaleString("ja-JP");
+
+  function applyPreset() {
+    const p = S.PRESETS[$("kind").value];
+    $("foodKubun").value = String(p.foodKubun);
+    $("eatInKubun").value = "4";
+    $("otherKubun").value = String(p.otherKubun);
+  }
+  applyPreset();
+
+  function readMoney(id) {
+    const raw = $(id).value.replace(/[,，\s円]/g, "").replace(/[０-９]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xfee0));
+    if (raw === "") return { v: 0, empty: true };
+    const n = Number(raw);
+    return { v: Number.isFinite(n) && n >= 0 ? n : NaN, empty: false };
+  }
+
+  function render() {
+    const who = document.querySelector('input[name="who"]:checked').value;
+    $("endMonthBox").hidden = who !== "corporate";
+    const vals = {};
+    let bad = false;
+    for (const id of MONEY) {
+      const r = readMoney(id);
+      $(id).setAttribute("aria-invalid", Number.isNaN(r.v) ? "true" : "false");
+      if (Number.isNaN(r.v)) bad = true;
+      vals[id] = r.empty ? (id === "baseSales" ? "" : 0) : r.v;
+    }
+    if (bad) {
+      $("verdict").className = "verdict";
+      $("verdict").innerHTML = '<span class="k">入力を確かめてください</span><b>金額は数字で入れてください</b><p>例：12,000,000</p>';
+      return;
+    }
+    const current = $("current").value;
+    const c = S.compare(Object.assign({}, vals, {
+      current,
+      foodKubun: Number($("foodKubun").value), eatInKubun: Number($("eatInKubun").value), otherKubun: Number($("otherKubun").value),
+    }));
+    const st = S.steps(current, c.bestKey, who, Number($("endMonth").value));
+    $("periodLabel").textContent = `対象の課税期間 ${st.period.start.replaceAll("-", "/")}〜${st.period.end.replaceAll("-", "/")}`;
+
+    // 判定
+    const v = $("verdict");
+    if (c.shouldSwitch) {
+      v.className = "verdict switch";
+      v.innerHTML = `<span class="k">1%の期間のおすすめ</span><b>${LABEL[c.bestKey]}に変えると、年に約${man(c.saveBySwitch)}少なくなります</b><p>${LABEL[current]}のままだと、今より年に${man(Math.abs(c.changeIfStay))}${c.changeIfStay >= 0 ? "増えます" : "減ります"}。</p>`;
+    } else {
+      v.className = "verdict";
+      v.innerHTML = `<span class="k">1%の期間のおすすめ</span><b>今の${LABEL[current]}のままで大丈夫です</b><p>今と比べて、年に${man(Math.abs(c.changeIfStay))}${c.changeIfStay >= 0 ? "増えます" : "減ります"}。</p>`;
+    }
+
+    const show = (el, n) => { $(el).textContent = n < 0 ? `還付 ${man(-n)}` : man(n); };
+    show("sNow", c.nowTax); show("sStay", c.stayTax); show("sBest", c.bestTax);
+    const diff = (el, n) => { const e = $(el); e.textContent = (n >= 0 ? "+" : "−") + man(Math.abs(n)).replace("−", ""); e.className = "d " + (n > 0 ? "pos" : n < 0 ? "neg" : ""); };
+    diff("sStayD", c.stayTax - c.nowTax); diff("sBestD", c.bestTax - c.nowTax);
+
+    // 方式ごと
+    const tb = $("opts"); tb.textContent = "";
+    for (const o of c.cut.options) {
+      const tr = document.createElement("tr");
+      if (!o.allowed) tr.className = "off"; else if (o.key === c.bestKey) tr.className = "best";
+      const td1 = document.createElement("td");
+      td1.textContent = o.label;
+      const pill = (cls, t) => { const s = document.createElement("span"); s.className = "pill " + cls; s.textContent = t; td1.append(s); };
+      if (o.allowed && o.key === c.bestKey) pill("best", "一番少ない");
+      if (o.key === current) pill("now", "今");
+      if (!o.allowed) pill("off", o.key === "exempt" ? "2年前の売上が1,000万円超" : "2年前の売上が5,000万円超");
+      const td2 = document.createElement("td"); td2.className = "num";
+      td2.textContent = !o.allowed ? "—" : o.tax < 0 ? `還付 ${yen(-o.tax)}` : yen(o.tax);
+      tr.append(td1, td2); tb.append(tr);
+    }
+
+    // 届出
+    const t = $("todo");
+    if (!st.need) {
+      t.className = "todo none"; t.innerHTML = "";
+      t.append(Object.assign(document.createElement("span"), { textContent: st.text }));
+    } else {
+      t.className = "todo"; t.innerHTML = "";
+      if (st.form) t.append(Object.assign(document.createElement("span"), { className: "form", textContent: st.form }));
+      if (st.deadline) t.append(Object.assign(document.createElement("span"), { className: "date", textContent: `期限 ${wa(st.deadline)}（${st.deadline.replaceAll("-", "/")}）` }));
+      t.append(Object.assign(document.createElement("span"), { textContent: st.text }));
+    }
+
+    const ul = $("notes"); ul.textContent = "";
+    const notes = c.cut.notes.length ? c.cut.notes : ["目立つ変化はありません。"];
+    for (const n of notes) ul.append(Object.assign(document.createElement("li"), { textContent: n }));
+  }
+
+  $("kind").addEventListener("change", () => { applyPreset(); render(); });
+  $("f").addEventListener("input", render);
+  $("f").addEventListener("change", render);
+  $("f").addEventListener("submit", (e) => e.preventDefault());
+  for (const id of MONEY) {
+    $(id).addEventListener("blur", () => { const r = readMoney(id); if (!r.empty && !Number.isNaN(r.v)) $(id).value = r.v.toLocaleString("ja-JP"); });
+  }
+  render();
+})();
+</script>
+</body>
+</html>
