@@ -1876,6 +1876,18 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
 
   function row(label, value, cls) { return '<tr' + (cls ? ' class="' + cls + '"' : '') + '><td>' + label + '</td><td class="num">' + value + '</td></tr>'; }
 
+  // 入力に誤りがある時は、前の結果を残さない（今の条件の結果と取り違えないように）
+  function clearResults() {
+    ['sBest', 'sSave', 'sNow', 'sStay'].forEach(function (id) { $(id).textContent = '—'; $(id).className = 'v'; });
+    ['sBestSub', 'sSaveSub', 'sNowSub', 'sStaySub', 'optNote'].forEach(function (id) { $(id).textContent = ''; });
+    $('optBars').textContent = '';
+    var t = $('todo'); t.textContent = ''; t.className = 'todo none';
+    var h = document.createElement('span'); h.className = 'todo-k'; h.textContent = '出す届出と期限'; t.appendChild(h);
+    var p = document.createElement('span'); p.textContent = '入力を直すと表示します。'; t.appendChild(p);
+    $('notice').hidden = true; $('notice').textContent = '';
+    $('lines').textContent = '';
+  }
+
   function exemptWhy(base, v) {
     if (base === '' || base === undefined) return '2年前の売上が未入力';
     if (Number(base) > S.LIMIT.exempt) return '2年前が1,000万円超';
@@ -1905,6 +1917,7 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
     $('sheetExample').hidden = $('exampleNote').hidden;
     if (errs.length) {
       setVerdict('', '入力を確かめてください', '金額は0以上の数字で入れてください。', '');
+      clearResults();
       return;
     }
     var current = v.current;
@@ -2030,7 +2043,9 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
   var params = new URLSearchParams(location.search);
   var fromUrl = null;
   if (FIELDS.some(function (f) { return params.has(f); })) {
+    // 金額とチェックは空から組み立てる（URLに無い金額は空欄＝0。計算例の金額を混ぜない）
     fromUrl = Object.assign({}, EXAMPLE);
+    MONEY.concat(CHECKS).forEach(function (f) { fromUrl[f] = ''; });
     FIELDS.forEach(function (f) { if (params.has(f)) fromUrl[f] = params.get(f); });
   }
   writeForm(fromUrl || saved || EXAMPLE);
@@ -2077,7 +2092,8 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
     var v = readForm();
     var u = new URL(location.href.split('?')[0]);
     u.hash = '';
-    FIELDS.forEach(function (k) { if (v[k] !== '' && v[k] !== undefined && v[k] !== null) u.searchParams.set(k, v[k]); });
+    // 空欄も「空」として残す（受け取った側で計算例の金額に戻らないように）
+    FIELDS.forEach(function (k) { if (v[k] !== undefined && v[k] !== null) u.searchParams.set(k, v[k]); });
     var lbl = $('btnShareUrl').querySelector('.lbl'), orig = lbl.textContent;
     function flash(msg) { lbl.textContent = msg; setTimeout(function () { lbl.textContent = orig; }, 2200); }
     function fallback() { try { history.replaceState(null, '', u.toString()); } catch (e) {} flash('アドレス欄のURLを共有してください'); }
