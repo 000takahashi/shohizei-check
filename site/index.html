@@ -1349,6 +1349,7 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
 .todo b { font-size: 1.02rem; }
 .todo-date { font-family: var(--font-num); font-weight: 700; color: var(--ink); }
 .todo p { margin: 2px 0 0; font-size: .9rem; color: var(--ink-secondary); }
+.opt-note { margin: 8px 0 0; font-size: .8rem; color: var(--muted); line-height: 1.6; }
 .notice p { margin: 0 0 6px; }
 .notice p:last-child { margin-bottom: 0; }
 .todo > span:last-child:not(.todo-date):not(.todo-k) { font-size: .9rem; color: var(--ink-secondary); }
@@ -1459,6 +1460,10 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
               </div>
               <span class="hint">1,000万円以下なら免税、5,000万円以下なら簡易課税も比べます。</span>
             </div>
+          </div>
+          <div class="stack" id="exemptChecks">
+            <label class="check"><input type="checkbox" id="invoice"><span><b>インボイス発行事業者の登録をしている</b><br><small class="muted">登録している間は、免税事業者にはなれません。</small></span></label>
+            <label class="check"><input type="checkbox" id="specifiedOver"><span><b>前年の1〜6月の売上と給与が、どちらも1,000万円を超えた</b><br><small class="muted">法人は前の事業年度の最初の6か月です。超えると免税事業者にはなれません。</small></span></label>
           </div>
         </div>
         <details class="fold" id="foldWho">
@@ -1583,7 +1588,7 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
 
       <div class="hero-kpi">
         <div class="hero-cell">
-          <span class="k">1%の期間の納税（1年）</span>
+          <span class="k" id="kpiBestK">この期間の納税</span>
           <span class="v" id="sBest">—</span>
           <span class="sub-v" id="sBestSub">—</span>
         </div>
@@ -1595,18 +1600,19 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
       </div>
 
       <div class="cost-bar-wrap">
-        <div class="cost-bar-head"><span>方式ごとの納税（1%の期間・1年）</span></div>
+        <div class="cost-bar-head"><span id="barsHead">方式ごとの納税</span></div>
         <div class="opt-bars" id="optBars"></div>
+        <p class="opt-note" id="optNote"></p>
       </div>
 
       <div class="summary">
         <div>
-          <span class="k">今の納税（食料品8%）</span>
+          <span class="k">今の納税（食料品8%・1年）</span>
           <span class="v" id="sNow">—</span>
           <span class="sub-k" id="sNowSub">今の方式で計算</span>
         </div>
         <div>
-          <span class="k">今の方式のまま（1%）</span>
+          <span class="k">今の方式のまま（この期間）</span>
           <span class="v" id="sStay">—</span>
           <span class="sub-k" id="sStaySub">—</span>
         </div>
@@ -1699,7 +1705,7 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
     </section>
     <section class="doc-card">
       <h3>免税事業者</h3>
-      <p>納税はありません。2年前の課税売上高が1,000万円以下で、インボイスの登録をしていない場合です。還付は受けられません。取引先が事業者の場合は、取引先が仕入れの税を引けなくなります。</p>
+      <p>納税はありません。2年前の課税売上高が1,000万円以下で、前年の1〜6月（特定期間）も1,000万円を超えておらず、インボイスの登録をしていない場合です。還付は受けられません。取引先が事業者の場合は、取引先が仕入れの税を引けなくなります。</p>
     </section>
   </section>
 
@@ -1772,7 +1778,8 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
   var LABEL = { general: '本則課税', simple: '簡易課税', exempt: '免税事業者' };
   var MONEY = ['baseSales', 'eatIn', 'foodSales', 'otherSales', 'foodBuy', 'otherBuy'];
   var FLOWS = ['eatIn', 'foodSales', 'otherSales', 'foodBuy', 'otherBuy']; // 1か月で入れられる金額
-  var FIELDS = MONEY.concat(['kind', 'current', 'who', 'endMonth', 'per', 'foodKubun', 'eatInKubun', 'otherKubun']);
+  var CHECKS = ['invoice', 'specifiedOver'];
+  var FIELDS = MONEY.concat(['kind', 'current', 'who', 'endMonth', 'per', 'foodKubun', 'eatInKubun', 'otherKubun']).concat(CHECKS);
   var EXAMPLE = {
     kind: 'restaurant', current: 'general', who: 'individual', endMonth: '3', per: 'year',
     baseSales: 38000000, eatIn: 36000000, foodSales: 4000000, otherSales: 0, foodBuy: 12000000, otherBuy: 9000000,
@@ -1819,12 +1826,16 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
 
   function readForm() {
     var v = {};
-    FIELDS.forEach(function (f) { if ($(f)) v[f] = $(f).value; });
+    FIELDS.forEach(function (f) { if ($(f)) v[f] = CHECKS.indexOf(f) >= 0 ? ($(f).checked ? '1' : '') : $(f).value; });
     v.who = state.who; v.per = state.per;
     return v;
   }
   function writeForm(v) {
-    FIELDS.forEach(function (f) { if ($(f) && v[f] !== undefined && v[f] !== null) $(f).value = v[f]; });
+    FIELDS.forEach(function (f) {
+      if (!$(f)) return;
+      if (CHECKS.indexOf(f) >= 0) { $(f).checked = v[f] === '1' || v[f] === true; return; }
+      if (v[f] !== undefined && v[f] !== null) $(f).value = v[f];
+    });
     if (!S.PRESETS[$('kind').value]) $('kind').value = 'restaurant';
     setSeg('who', v.who === 'corporate' ? 'corporate' : 'individual');
     setSeg('per', v.per === 'month' ? 'month' : 'year');
@@ -1865,6 +1876,13 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
 
   function row(label, value, cls) { return '<tr' + (cls ? ' class="' + cls + '"' : '') + '><td>' + label + '</td><td class="num">' + value + '</td></tr>'; }
 
+  function exemptWhy(base, v) {
+    if (base === '' || base === undefined) return '2年前の売上が未入力';
+    if (Number(base) > S.LIMIT.exempt) return '2年前が1,000万円超';
+    if (v.invoice === '1') return 'インボイスに登録';
+    return '前年前半が1,000万円超';
+  }
+
   function render() {
     var v = readForm();
     var errs = [];
@@ -1890,21 +1908,25 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
       return;
     }
     var current = v.current;
+    var pr0 = S.period(state.who, Number(v.endMonth));
+    var months = S.cutMonths(pr0.start, pr0.end);
+    var share = months / 12;
     var c = S.compare({
       eatIn: vals.eatIn, foodSales: vals.foodSales, otherSales: vals.otherSales,
       foodBuy: vals.foodBuy, otherBuy: vals.otherBuy, baseSales: vals.baseSales, current: current,
-      foodKubun: Number(v.foodKubun), eatInKubun: Number(v.eatInKubun), otherKubun: Number(v.otherKubun)
+      foodKubun: Number(v.foodKubun), eatInKubun: Number(v.eatInKubun), otherKubun: Number(v.otherKubun),
+      invoice: v.invoice === '1', specifiedOver: v.specifiedOver === '1', share: share
     });
-    var st = S.steps(current, c.bestKey, state.who, Number(v.endMonth));
+    var st = S.steps(current, c.bestKey, state.who, Number(v.endMonth), vals.foodSales > 0);
     $('periodChip').textContent = slash(st.period.start) + '〜' + slash(st.period.end);
 
     // 判定
     var change = c.changeIfStay;
-    var changeText = '今より年に' + man(Math.abs(change)) + (change >= 0 ? '増えます' : '減ります');
+    var changeText = '今の1年分より' + man(Math.abs(change)) + (change >= 0 ? '増えます' : '減ります');
     if (c.shouldSwitch) {
-      setVerdict('warn', LABEL[c.bestKey] + 'に変えると、年に約' + man(c.saveBySwitch) + '少なくなります',
+      setVerdict('warn', LABEL[c.bestKey] + 'に変えると、この期間に約' + man(c.saveBySwitch) + '少なくなります',
         LABEL[current] + 'のままだと、' + changeText + '。' + (st.deadline ? '届出の期限は' + wa(st.deadline) + 'です。' : ''),
-        LABEL[c.bestKey] + 'で 年' + man(c.saveBySwitch) + '少なく');
+        LABEL[c.bestKey] + 'で ' + man(c.saveBySwitch) + '少なく');
     } else {
       setVerdict('good', '今の' + LABEL[current] + 'のままが一番少なくなります', '食料品が1%になると、' + changeText + '。', LABEL[current] + 'のまま');
     }
@@ -1921,10 +1943,10 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
     $('sStaySub').textContent = '今より ' + (change >= 0 ? '+' : '−') + man(Math.abs(change)).replace('−', '');
 
     // 方式ごとの棒
-    var allowed = c.cut.options.filter(function (o) { return o.allowed; });
+    var allowed = c.options.filter(function (o) { return o.allowed; });
     var maxAbs = Math.max.apply(null, allowed.map(function (o) { return Math.abs(o.tax); }).concat([1]));
     var bars = $('optBars'); bars.textContent = '';
-    c.cut.options.forEach(function (o) {
+    c.options.forEach(function (o) {
       var r = document.createElement('div');
       r.className = 'opt-row' + (!o.allowed ? ' off' : o.key === c.bestKey ? ' best' : '');
       var name = document.createElement('span'); name.className = 'opt-name'; name.textContent = LABEL[o.key] + (o.key === current ? '（今）' : '');
@@ -1933,10 +1955,18 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
       fill.style.width = o.allowed ? Math.max(o.tax === 0 ? 0 : 2, Math.abs(o.tax) / maxAbs * 100) + '%' : '0%';
       track.appendChild(fill);
       var val = document.createElement('span'); val.className = 'opt-val';
-      val.textContent = !o.allowed ? (o.key === 'exempt' ? '選べません（2年前が1,000万円超）' : '選べません（2年前が5,000万円超）') : taxText(o.tax);
+      val.textContent = !o.allowed ? '選べません（' + (o.key === 'exempt' ? exemptWhy(vals.baseSales, v) : '2年前が5,000万円超') + '）' : taxText(o.tax);
       r.appendChild(name); r.appendChild(track); r.appendChild(val);
       bars.appendChild(r);
     });
+
+    var fullBest = c.full.bestKey;
+    $('optNote').textContent = (months === 12
+      ? 'この期間は12か月すべてが1%です。'
+      : 'この期間で1%になるのは12か月のうち' + months + 'か月です（残りは8%のまま。1年を通して同じ割合で売れる目安で按分）。')
+      + '1%が丸1年続く期間なら、' + LABEL[fullBest] + 'が一番少なく' + taxText(c.full.bestTax) + 'です。';
+    $('kpiBestK').textContent = 'この期間の納税（1%は' + months + 'か月）';
+    $('barsHead').textContent = '方式ごとの納税（' + slash(st.period.start) + '〜' + slash(st.period.end) + '）';
 
     // 届出
     var t = $('todo'); t.textContent = '';
@@ -1954,7 +1984,7 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
 
     // 内訳
     var cut = c.cut, now = c.now, html = '';
-    html += '<h3>売上の税（1%の期間）</h3><table>';
+    html += '<h3>売上の税（1%が丸1年の時）</h3><table>';
     html += row('店内飲食 ' + yen(vals.eatIn) + ' × 10%', yen(cut.salesTax.eatIn));
     html += row('食料品の販売 ' + yen(vals.foodSales) + ' × 1%', yen(cut.salesTax.food));
     html += row('その他 ' + yen(vals.otherSales) + ' × 10%', yen(cut.salesTax.other));
@@ -1988,7 +2018,7 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
       });
       tb.appendChild(tr);
     });
-    $('dlPeriod').textContent = '令和9年4月1日を含む課税期間：' + slash(pr.start) + '〜' + slash(pr.end);
+    $('dlPeriod').textContent = '令和9年4月1日を含む課税期間：' + slash(pr.start) + '〜' + slash(pr.end) + '。特例は飲食料品を売っている事業者だけです。売っていない時は、どれも課税期間が始まる前の日までです。';
   }
   $('dlWho').addEventListener('change', renderDeadline);
   $('dlMonth').addEventListener('change', renderDeadline);

@@ -40,6 +40,10 @@
     maker: { label: "食品の製造・加工", foodKubun: 3, otherKubun: 3 },
   };
 
+  function truthy(v) {
+    return v === true || v === 1 || v === "1" || v === "true" || v === "yes";
+  }
+
   function num(v) {
     const n = Number(v);
     return Number.isFinite(n) && n > 0 ? n : 0;
@@ -55,6 +59,8 @@
    *   otherBuy    10%の仕入れ・経費（酒、消耗品、家賃、光熱費、設備など）
    *   foodKubun / eatInKubun / otherKubun  簡易課税の区分（1〜6）
    *   baseSales   基準期間（2年前）の課税売上高
+   *   invoice     インボイス発行事業者の登録をしている（true なら免税は選べない）
+   *   specifiedOver 特定期間（前年の1〜6月など）の売上と給与がどちらも1,000万円を超えた
    *   foodRate    飲食料品の税率（省略時 1%）
    */
   function compute(p) {
@@ -88,7 +94,9 @@
     const simple = Math.max(0, salesTaxTotal - deduct);
 
     const base = num(p.baseSales);
-    const canExempt = p.baseSales !== undefined && p.baseSales !== "" && base <= LIMIT.exempt;
+    // 免税は、2年前の売上が1,000万円以下で、特定期間も超えておらず、インボイスに登録していない時だけ。
+    const canExempt = p.baseSales !== undefined && p.baseSales !== "" && base <= LIMIT.exempt
+      && !truthy(p.invoice) && !truthy(p.specifiedOver);
     const canSimple = !(p.baseSales !== undefined && p.baseSales !== "" && base > LIMIT.simple);
 
     const options = [
@@ -106,31 +114,58 @@
     };
   }
 
-  /** 今（8%）と引下げ中（1%）を並べる。 */
+  /**
+   * 今（8%）と引下げ中（1%）を並べる。
+   * p.share は、比べる課税期間のうち1%になる月の割合（0〜1、省略時 1）。
+   * 令和9年4月1日を含む課税期間は、4月より前が8%のままなので、1年分の金額を月で按分して混ぜる。
+   * （売上と仕入れが1年を通して同じ割合で出ると仮定した目安）
+   */
   function compare(p) {
     const now = compute(Object.assign({}, p, { foodRate: RATE.foodNow }));
     const cut = compute(Object.assign({}, p, { foodRate: RATE.foodCut }));
+    const share = p.share === undefined ? 1 : Math.min(1, Math.max(0, Number(p.share) || 0));
     const current = p.current && ["general", "simple", "exempt"].includes(p.current) ? p.current : "general";
     const pick = (r, k) => r.options.find((o) => o.key === k);
+    const options = cut.options.map((o) => Object.assign({}, o, {
+      tax: share * o.tax + (1 - share) * pick(now, o.key).tax,
+    }));
+    const allowed = options.filter((o) => o.allowed);
+    const best = allowed.reduce((a, b) => (b.tax < a.tax ? b : a));
     const nowTax = pick(now, current).tax;
-    const stayTax = pick(cut, current).tax;
+    const stayTax = options.find((o) => o.key === current).tax;
     return {
-      now, cut, current,
-      nowTax,                     // 今の方式で、今の税率
-      stayTax,                    // 今の方式のまま、1%の期間
-      bestTax: cut.best.tax,      // 1%の期間に一番少ない方式
-      bestKey: cut.best.key,
+      now, cut, current, share, options, best,
+      nowTax,                     // 今の方式で、今の税率（1年）
+      stayTax,                    // 今の方式のまま、比べる課税期間
+      bestTax: best.tax,          // 比べる課税期間に一番少ない方式
+      bestKey: best.key,
       changeIfStay: stayTax - nowTax,
-      saveBySwitch: stayTax - cut.best.tax,
-      shouldSwitch: cut.best.key !== current && stayTax - cut.best.tax >= 1,
+      saveBySwitch: stayTax - best.tax,
+      shouldSwitch: best.key !== current && stayTax - best.tax >= 1,
+      full: { bestKey: cut.best.key, bestTax: cut.best.tax, stayTax: pick(cut, current).tax }, // 丸1年が1%の時
     };
+  }
+
+  /** 課税期間のうち、1%の期間（令和9年4月〜令和11年3月）に入る月の数。 */
+  function cutMonths(start, end) {
+    let y = Number(start.slice(0, 4)), m = Number(start.slice(5, 7));
+    const ey = Number(end.slice(0, 4)), em = Number(end.slice(5, 7));
+    let n = 0;
+    while (y < ey || (y === ey && m <= em)) {
+      const ym = y * 100 + m;
+      if (ym >= 202704 && ym <= 202903) n++;
+      m++; if (m > 12) { m = 1; y++; }
+    }
+    return n;
   }
 
   function notesFor({ s, general, simple, canExempt, best }) {
     const n = [];
     if (general < 0) n.push("本則課税なら還付（税金が戻る）になります。還付を受けるには本則課税で申告します。");
     if (best.key === "exempt") n.push("免税のままでも納税はありません。ただし取引先が仕入れの税を引けなくなるため、取引先が事業者の場合は値下げを求められることがあります。");
-    if (canExempt && general < 0) n.push("免税事業者でも、課税事業者を選べば還付を受けられます（特例で、令和9年4月1日を含む期間の中に届出を出せます）。");
+    if (canExempt && general < 0) n.push(s.food > 0
+      ? "免税事業者でも、課税事業者を選べば還付を受けられます（飲食料品を売っているので、特例で令和9年4月1日を含む期間の中に届出を出せます）。"
+      : "免税事業者でも、課税事業者を選べば還付を受けられます（届出は、その課税期間が始まる前の日までです）。");
     if (s.eatIn > 0 && s.food > 0) n.push("店内飲食（10%）と持ち帰り（1%）の差が9%に広がります。値付けとレジの設定を見直す時期です。");
     return n;
   }
@@ -156,11 +191,21 @@
   /**
    * 今の方式から一番少ない方式へ移る時に要る届出と期限（目安）。
    * 期限は「令和9年4月1日を含む課税期間」から移る場合。
+   * @param {boolean} sellsFood 飲食料品の販売をしているか。届出の特例は販売している事業者だけ（省略時 true）。
    */
-  function steps(current, best, who, endMonth) {
+  function steps(current, best, who, endMonth, sellsFood) {
     const pr = period(who, endMonth);
+    const food = sellsFood === undefined ? true : !!sellsFood;
+    const before = new Date(Date.parse(pr.start + "T00:00:00Z") - 86400000).toISOString().slice(0, 10);
+    const noFood = "飲食料品の販売が無いので、今回の特例は使えません。変えたい課税期間が始まる前の日までに出します。";
     if (current === best) {
       return { need: false, text: "今の申告のしかたのままで、届出はいりません。", period: pr };
+    }
+    if (best === "general" && current === "simple" && !food) {
+      return { need: true, form: "簡易課税制度選択不適用届出書", deadline: before, special: false, period: pr, text: noFood };
+    }
+    if (best === "general" && current === "exempt" && !food) {
+      return { need: true, form: "課税事業者選択届出書", deadline: before, special: false, period: pr, text: noFood };
     }
     if (best === "general" && current === "simple") {
       return { need: true, form: "簡易課税制度選択不適用届出書", deadline: pr.deadline, special: true, period: pr,
@@ -171,7 +216,6 @@
         text: "特例で、令和9年4月1日を含む課税期間の中に出せば、その期間から課税事業者になれます。原則2年は課税事業者のままです。" };
     }
     if (best === "simple") {
-      const before = new Date(Date.parse(pr.start + "T00:00:00Z") - 86400000).toISOString().slice(0, 10);
       return { need: true, form: "簡易課税制度選択届出書", deadline: before, special: false, period: pr,
         text: "簡易課税には今回の特例がありません。適用したい課税期間が始まる前の日までに出します。原則2年は続けます。" };
     }
@@ -183,5 +227,5 @@
     return new Date(Date.UTC(y, m, 0)).toISOString().slice(0, 10);
   }
 
-  return { RATE, KUBUN, LIMIT, PRESETS, CUT_START, CUT_END, PRICE_DISPLAY, compute, compare, period, steps };
+  return { RATE, KUBUN, LIMIT, PRESETS, CUT_START, CUT_END, PRICE_DISPLAY, compute, compare, period, steps, cutMonths };
 });

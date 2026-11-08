@@ -75,3 +75,40 @@ test("届出: 簡易から本則は特例で課税期間の中、本則から簡
   assert.equal(S.steps("exempt", "general", "corporate", 12).deadline, "2027-12-31");
   assert.equal(S.steps("general", "general", "individual").need, false);
 });
+
+test("インボイス登録や特定期間の超過があると、免税は選べない", () => {
+  const base = { eatIn: 5_000_000, foodSales: 1_000_000, foodBuy: 2_000_000, otherBuy: 1_000_000, baseSales: 6_000_000 };
+  assert.equal(S.compute(base).canExempt, true);
+  assert.equal(S.compute(Object.assign({}, base, { invoice: true })).canExempt, false);
+  assert.equal(S.compute(Object.assign({}, base, { specifiedOver: "1" })).canExempt, false);
+  assert.notEqual(S.compute(Object.assign({}, base, { invoice: true })).best.key, "exempt");
+});
+
+test("令和9年4月1日を含む課税期間の、1%になる月の数", () => {
+  const m = (who, e) => { const pr = S.period(who, e); return S.cutMonths(pr.start, pr.end); };
+  assert.equal(m("individual"), 9);   // 1〜3月は8%
+  assert.equal(m("corporate", 3), 12);
+  assert.equal(m("corporate", 4), 1); // 令和8年5月〜令和9年4月は11か月が8%
+  assert.equal(S.cutMonths("2028-04-01", "2029-03-31"), 12);
+  assert.equal(S.cutMonths("2029-01-01", "2029-12-31"), 3);
+});
+
+test("8%と1%が混ざる期間は、月で按分して比べる", () => {
+  const p = { eatIn: 30_000_000, foodSales: 10_000_000, foodBuy: 12_000_000, otherBuy: 6_000_000, current: "general" };
+  const full = S.compare(p);
+  const mix = S.compare(Object.assign({}, p, { share: 0.75 }));
+  const g = (r, k) => r.options.find((o) => o.key === k).tax;
+  const now = g(full.now, "general"), cut = g(full.cut, "general");
+  assert.equal(Math.round(g(mix, "general")), Math.round(0.75 * cut + 0.25 * now));
+  assert.equal(Math.round(mix.stayTax), Math.round(0.75 * cut + 0.25 * now));
+  assert.equal(full.full.bestKey, full.bestKey);
+});
+
+test("飲食料品を売っていないと、届出の特例は使えない", () => {
+  const a = S.steps("simple", "general", "individual", undefined, false);
+  assert.equal(a.special, false);
+  assert.equal(a.deadline, "2026-12-31");
+  const b = S.steps("exempt", "general", "corporate", 3, false);
+  assert.equal(b.deadline, "2027-03-31");
+  assert.equal(S.steps("simple", "general", "individual", undefined, true).deadline, "2027-12-31");
+});
