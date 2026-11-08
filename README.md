@@ -10,4 +10,13 @@
 - 扱わないもの: 端数処理、簡易課税の75%ルール、インボイスの2割・3割特例、8%のまま残る定期便など
 - 個別の税務相談にならないよう、結果は「目安」とし、最終判断は税理士・税務署へと出す
 
-公開は輸入利益チェッカーと同じ Cloudflare Workers を予定（まだ設定していない）。
+## 公開（Cloudflare Workers）
+
+輸入利益チェッカーと同じ形。正式なURLは https://shohizei-check.com （2026-11-08 Cloudflare で購入）。
+
+- `wrangler.jsonc` 設定。`site/` をそのまま配る。`routes` で独自ドメインと www をつなぐ
+- `src/worker.js` www を正式なURLへ転送し、仮URL（`*.workers.dev`）に noindex を付ける
+- `site/_headers` CSP など全ページ共通の守り。`site/robots.txt`・`site/sitemap.xml`
+- 最初の1回だけ人の作業: Cloudflare の Workers & Pages で「Import a repository」からこのリポジトリを選ぶ
+  （ビルドコマンドは空、デプロイコマンドは `npx wrangler deploy`）。以後は main への push で自動公開
+

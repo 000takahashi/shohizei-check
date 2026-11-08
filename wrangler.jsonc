@@ -1,0 +1,17 @@
+{
+  // Cloudflare Workers の設定。GitHub の main に push すると自動で公開される（Workers Builds）。
+  // 画面は site/ の静的ファイル。src/worker.js は www の転送と、仮URLを検索に載せない処理だけ。
+  "name": "shohizei-check",
+  "main": "src/worker.js",
+  "compatibility_date": "2025-09-01",
+  "assets": {
+    "directory": "./site",
+    "binding": "ASSETS",
+    "run_worker_first": true
+  },
+  "routes": [
+    { "pattern": "shohizei-check.com", "custom_domain": true },
+    { "pattern": "www.shohizei-check.com", "custom_domain": true }
+  ],
+  "observability": { "enabled": true }
+}
