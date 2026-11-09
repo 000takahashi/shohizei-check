@@ -1,0 +1,41 @@
+/* CSV 読み込みの画面（3サイト共通。色や角丸は各サイトの変数を使う） */
+.bk-safe { display: flex; gap: 10px; align-items: flex-start; background: var(--good-soft); color: var(--ink-secondary); border-radius: var(--radius-sm); padding: 10px 14px; font-size: .88rem; line-height: 1.6; margin: 0 0 14px; }
+.bk-safe svg { flex: none; width: 18px; height: 18px; margin-top: 2px; color: var(--good); fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.bk-safe b { color: var(--good); }
+.bk-drop { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center; border: 2px dashed var(--line-strong); border-radius: var(--radius-sm); background: var(--paper-subtle); padding: 26px 16px; cursor: pointer; transition: border-color .15s, background .15s; }
+.bk-drop:hover, .bk-drop.is-over, .bk-drop:focus-within { border-color: var(--accent); background: var(--accent-soft); }
+.bk-drop b { font-size: 1rem; color: var(--accent); }
+.bk-drop span { font-size: .84rem; color: var(--muted); }
+.bk-drop input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.bk-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.bk-btn { font: inherit; font-size: .88rem; font-weight: 600; padding: 8px 14px; min-height: 40px; border-radius: 8px; border: 1px solid var(--line-strong); background: var(--paper); color: var(--ink-secondary); cursor: pointer; }
+.bk-btn:hover { border-color: var(--accent); color: var(--accent); }
+.bk-btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.bk-btn.primary:hover { opacity: .9; color: #fff; }
+.bk-paste { margin-top: 12px; }
+.bk-paste textarea { width: 100%; min-height: 120px; font: inherit; font-family: var(--font-num); font-size: .82rem; padding: 10px; border: 1px solid var(--line-strong); border-radius: 8px; background: var(--paper); color: inherit; resize: vertical; box-sizing: border-box; }
+.bk-msg { margin: 12px 0 0; font-size: .9rem; line-height: 1.6; }
+.bk-msg.err { color: var(--bad); }
+.bk-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px 14px; }
+.bk-grid label, .bk-map-item { display: flex; flex-direction: column; gap: 4px; font-size: .84rem; font-weight: 600; color: var(--ink-secondary); min-width: 0; }
+.bk-grid label.bk-check { flex-direction: row; align-items: center; gap: 8px; font-weight: 500; }
+.bk-grid input[type="number"], .bk-grid input[type="date"], .bk-grid select, .bk-map-item select { font: inherit; font-size: .9rem; font-weight: 400; padding: 7px 9px; min-height: 38px; border: 1px solid var(--line-strong); border-radius: 8px; background: var(--paper); color: inherit; min-width: 0; width: 100%; box-sizing: border-box; }
+.bk-map-item.is-set select { border-color: var(--accent); }
+.bk-hint { font-size: .82rem; color: var(--muted); line-height: 1.55; margin: 10px 0 0; }
+.bk-sum { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 12px; }
+.bk-sum span { font-size: .84rem; padding: 4px 10px; border-radius: 999px; background: var(--soft); color: var(--ink-secondary); }
+.bk-sum span b { font-family: var(--font-num); }
+.bk-v { display: inline-block; font-size: .78rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+.bk-v.ok { background: var(--good-soft); color: var(--good); }
+.bk-v.thin, .bk-v.soon { background: var(--warn-bg); color: var(--warn-fg); }
+.bk-v.loss, .bk-v.error, .bk-v.late { background: var(--bad-soft); color: var(--bad); }
+.bk-v.none { background: var(--soft); color: var(--muted); }
+.bk-table td.r, .bk-table th.r { text-align: right; }
+.bk-table td.num { font-family: var(--font-num); }
+.bk-table td.memo { font-size: .78rem; color: var(--muted); min-width: 160px; }
+.bk-table tr.is-err td { background: var(--bad-soft); }
+.bk-prompt { white-space: pre-wrap; font-family: var(--font-num); font-size: .82rem; line-height: 1.7; background: var(--paper-subtle); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 12px 14px; margin: 0 0 10px; }
+.bk-more { font-size: .84rem; color: var(--muted); margin-top: 8px; }
+.tablewrap table.bk-table { min-width: 980px; }
+.bk-table td { vertical-align: top; }
+.tablewrap table.bk-table.bk-small { min-width: 460px; }
