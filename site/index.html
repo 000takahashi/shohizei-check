@@ -1363,6 +1363,7 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
   .hero-cell .v { font-size: 1.5rem; white-space: nowrap; }
 }
 </style>
+<link rel="stylesheet" href="csvkit.css">
 </head>
 <body>
 <div class="wrap">
@@ -1387,6 +1388,7 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
   <nav class="sidenav" id="sidenav" aria-label="機能の切り替え">
     <p class="nav-label">ツール</p>
       <a class="nav-item" href="#calc" data-view="calc"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h2M12 11h2M8 15h2M12 15h2M8 18h2M12 18h4"/></svg><span>申告方式の試算</span></a>
+      <a class="nav-item" href="#bulk" data-view="bulk"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4zM4 9h16M4 14h16M10 9v11"/></svg><span>帳簿から読み込む（CSV）</span></a>
       <a class="nav-item" href="#deadline" data-view="deadline"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4M8 14h3"/></svg><span>届出と期限</span></a>
     <p class="nav-label">資料</p>
       <a class="nav-item" href="#changes" data-view="changes"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h13l-3-3M20 16H7l3 3"/></svg><span>何が変わるか</span></a>
@@ -1636,6 +1638,68 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
   </div>
   </section>
 
+  <section class="view doc" id="v-bulk" data-view="bulk" hidden>
+    <div class="page-head"><div class="page-head-text"><p class="kicker">帳簿から読み込む</p><h2 class="page-title">帳簿のCSVから売上と仕入れを集める</h2><p class="lead">会計ソフトの取引や仕訳をCSVで読み込むと、<span class="nw">食料品（8%）と10%の</span><span class="nw">売上・仕入れを1年分に集めて、</span>試算に入れます。</p></div></div>
+    <section class="doc-card">
+      <h3>1. 帳簿を読み込む</h3>
+      <p class="bk-safe"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span><b>ファイルはこのブラウザの中だけで読みます。</b>サーバーにもAIにも送りません。読んだ中身は保存もしません（ページを閉じると消えます）。</span></p>
+      <label class="bk-drop" id="bkZone">
+        <input type="file" id="bkFile" accept=".csv,.tsv,.txt,text/csv,text/plain">
+        <b>CSVファイルを選ぶ</b>
+        <span>ここにドラッグしても読み込めます。freee の「取引」、マネーフォワードや弥生の「仕訳帳」の書き出しに対応。Shift_JIS も読めます。</span>
+      </label>
+      <div class="bk-actions">
+        <button type="button" class="bk-btn" id="bkSample">見本で試す</button>
+        <button type="button" class="bk-btn" id="bkSampleDl">見本のCSVをダウンロード</button>
+      </div>
+      <details class="bk-paste">
+        <summary>表を貼り付けて読み込む（AIが出したCSVなど）</summary>
+        <textarea id="bkPaste" placeholder="日付,収支区分,勘定科目,税区分,金額&#10;2026/04/01,収入,売上高,課税売上8%（軽）,216000" aria-label="表を貼り付ける"></textarea>
+        <div class="bk-actions"><button type="button" class="bk-btn primary" id="bkPasteBtn">貼り付けた表を読み込む</button></div>
+      </details>
+      <p class="bk-msg" id="bkMsg" role="status"></p>
+    </section>
+
+    <section class="doc-card">
+      <h3>2. 読み方の前提</h3>
+      <div class="bk-grid">
+        <label>帳簿の金額<select id="bkIncl"><option value="auto">自動で見分ける</option><option value="1">税込み</option><option value="0">税抜き</option></select></label>
+        <label>10%の売上の入れ先<select id="bk10"><option value="eatIn">店内飲食・ケータリング</option><option value="otherSales">その他の売上（お酒・雑貨など）</option></select></label>
+        <label class="bk-check"><input type="checkbox" id="bkScale">1年分に直す（帳簿が1年に足りない時）</label>
+      </div>
+      <p class="bk-hint">税区分の「8%（軽）」を食料品、「10%」をそのほかとして集めます。給料・税金・非課税・輸出などは数えません。税込みの金額は、税額の列があれば金額から税額を引き、無ければ1.08か1.1で割って税抜きにします。</p>
+    </section>
+
+    <section class="doc-card" id="bkMapCard" hidden>
+      <h3>3. 列の当てはめ</h3>
+      <p>見出しの言葉から自動で当てています。違っていたら選び直してください。仕訳帳（借方・貸方）の形なら、借方と貸方の欄を使います。</p>
+      <div class="bk-grid" id="bkMap"></div>
+    </section>
+
+    <section class="doc-card" id="bkResCard" hidden>
+      <h3>4. 集めた結果（税抜き）</h3>
+      <div class="bk-sum" id="bkSum"></div>
+      <div class="tablewrap">
+        <table class="bk-table bk-small">
+          <thead><tr><th>試算の欄</th><th class="r">件数</th><th class="r">帳簿の分</th><th class="r">試算に入れる額</th></tr></thead>
+          <tbody id="bkBody"></tbody>
+        </table>
+      </div>
+      <p class="bk-more" id="bkSkip"></p>
+      <div class="bk-actions">
+        <button type="button" class="bk-btn primary" id="bkApply">この数字で試算する</button>
+      </div>
+      <p class="bk-hint">税区分が帳簿の付け方のとおりに入っていることが前提の目安です。2年前の売上・インボイスの登録・業種は、試算の画面で入れてください。</p>
+    </section>
+
+    <section class="doc-card">
+      <h3>帳簿が無い・形が違う時は：お使いのAIに整えてもらう</h3>
+      <p>レジや家計簿アプリの明細など、列の名前や並びがまちまちな表は、ChatGPT などのAIに下のお願い文と一緒に渡すと、このページで読める形にしてくれます。出てきたCSVを上の「貼り付けて読み込む」に入れてください。</p>
+      <pre class="bk-prompt" id="bkPrompt"></pre>
+      <div class="bk-actions"><button type="button" class="bk-btn" id="bkCopy">お願い文をコピー</button></div>
+      <p class="bk-hint">AIに明細を渡すかどうかは、ご自身で判断してください。このサイトはAIに何も送りません。</p>
+    </section>
+  </section>
   <section class="view doc" id="v-deadline" data-view="deadline" hidden>
     <div class="page-head"><div class="page-head-text"><p class="kicker">届出と期限</p><h2 class="page-title">届出と期限</h2><p class="lead">決算月を選ぶと、令和9年4月1日を含む課税期間と、届出ごとの期限が出ます。</p></div></div>
     <section class="doc-card">
@@ -1772,6 +1836,9 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
 </div>
 
 <script src="calc.js"></script>
+<script src="csvkit.js"></script>
+<script src="csvui.js"></script>
+<script src="bulk.js"></script>
 <script>
 (function () {
   'use strict';
@@ -2117,7 +2184,7 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
   });
 
   // 左のタブ（スマホはメニュー）で画面を切り替える
-  var VIEWS = ['calc', 'deadline', 'changes', 'howto', 'faq', 'about'];
+  var VIEWS = ['calc', 'bulk', 'deadline', 'changes', 'howto', 'faq', 'about'];
   var currentView = 'calc';
   var updMbar = function () {};
   function setMenu(open) { document.body.classList.toggle('nav-open', open); $('btnMenu').setAttribute('aria-expanded', open ? 'true' : 'false'); }
@@ -2141,6 +2208,16 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
   $('btnMenu').addEventListener('click', function () { setMenu(!document.body.classList.contains('nav-open')); });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') setMenu(false); });
   document.addEventListener('click', function (e) { if (document.body.classList.contains('nav-open') && !e.target.closest('#sidenav') && !e.target.closest('#btnMenu')) setMenu(false); });
+  // 帳簿から読み込む（CSV）の画面から使う：集めた金額を試算の欄に入れて開く
+  window.ShohizeiApply = function (vals) {
+    var v = readForm();
+    Object.keys(vals).forEach(function (k) { v[k] = vals[k]; });
+    v.per = 'year';
+    writeForm(v);
+    $('exampleNote').hidden = true;
+    render(); syncKindButtons();
+    showView('calc', true);
+  };
   showView(viewFromHash(), false);
 
   function goTo(el) { el.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }); }
@@ -2156,6 +2233,64 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
     updMbar = function () { $('mbar').hidden = currentView !== 'calc'; };
   }
   updMbar();
+})();
+</script>
+<script>
+// 帳簿から読み込む（CSV）。読んだ表はこのページの中だけで使い、どこにも送らない
+(function () {
+  'use strict';
+  var B = window.ShokuhinBulk, U = window.CsvUI;
+  if (!B || !U) return;
+  var $ = function (id) { return document.getElementById(id); };
+  var yen = function (n) { return (n < 0 ? '−' : '') + Math.round(Math.abs(n)).toLocaleString('ja-JP') + '円'; };
+  var state = { text: '', info: null, map: null, res: null };
+  $('bkPrompt').textContent = B.AI_PROMPT;
+  function msg(t, err) { $('bkMsg').textContent = t; $('bkMsg').className = 'bk-msg' + (err ? ' err' : ''); }
+  function scale(res) { return $('bkScale').checked && res.months > 0 && res.months < 12 ? 12 / res.months : 1; }
+
+  function run() {
+    if (!state.text) return;
+    var inc = $('bkIncl').value;
+    var res = B.run(state.text, { included: inc === 'auto' ? 'auto' : inc === '1' }, state.map);
+    state.res = res;
+    if (!res.rows) { msg('表の中身（2行目から下）が見つかりませんでした。', true); $('bkMapCard').hidden = $('bkResCard').hidden = true; return; }
+    state.map = res.map;
+    msg((state.info.name ? state.info.name + (state.info.encoding ? '（' + state.info.encoding + '）' : '') + 'を' : '') + res.rows + '行読みました。' + (res.truncated ? '多いので最初の' + window.CsvKit.MAX_ROWS + '行だけです。' : ''));
+    $('bkMapCard').hidden = false;
+    U.renderMapping($('bkMap'), B.FIELDS, res.headers, res.map, function (m) { state.map = m; run(); });
+    render(res);
+  }
+
+  function render(res) {
+    var m = scale(res), w = $('bk10').value;
+    var form = B.toForm(res, w, m);
+    var period = res.from ? res.from.replace(/-/g, '/') + '〜' + res.to.replace(/-/g, '/') + '（' + res.months + 'か月分）' : '日付が読めません';
+    $('bkSum').innerHTML = '<span>期間 <b>' + U.esc(period) + '</b></span><span>集めた取引 <b>' + res.used + '件</b></span><span>金額は <b>' + (res.included ? '税込み' : '税抜き') + '</b> として読みました</span>' + (m !== 1 ? '<span>×' + (Math.round(m * 100) / 100) + ' で1年分に直しています</span>' : '');
+    var rows = [
+      ['食料品の販売（8%→1%）', 'saleR', 'foodSales'],
+      [w === 'eatIn' ? '店内飲食・ケータリング（10%）' : 'その他の売上（10%）', 'saleS', w],
+      ['食材・食品の仕入れ（8%→1%）', 'buyR', 'foodBuy'],
+      ['10%の仕入れ・経費', 'buyS', 'otherBuy']
+    ];
+    $('bkBody').innerHTML = rows.map(function (r) {
+      return '<tr><td>' + r[0] + '</td><td class="num r">' + res.counts[r[1]] + '</td><td class="num r">' + yen(res.totals[r[1]]) + '</td><td class="num r"><b>' + yen(form[r[2]]) + '</b></td></tr>';
+    }).join('');
+    var sk = Object.keys(res.skipped);
+    $('bkSkip').textContent = sk.length ? '数えなかった行：' + sk.map(function (k) { return k + ' ' + res.skipped[k] + '件'; }).join('、') + '。' : '';
+    $('bkResCard').hidden = false;
+  }
+
+  function load(text, info) { state.text = text; state.info = info; state.map = null; run(); }
+  U.setupInput({ zone: $('bkZone'), input: $('bkFile'), paste: $('bkPaste'), pasteBtn: $('bkPasteBtn'), onText: load, onError: function (t) { msg(t, true); } });
+  $('bkSample').addEventListener('click', function () { load(B.SAMPLE, { name: '見本', encoding: '' }); });
+  $('bkSampleDl').addEventListener('click', function () { U.download('shohizei-check-mihon.csv', B.SAMPLE); });
+  $('bkCopy').addEventListener('click', function () { U.copy(B.AI_PROMPT, $('bkCopy')); });
+  $('bkApply').addEventListener('click', function () {
+    if (!state.res || !window.ShohizeiApply) return;
+    window.ShohizeiApply(B.toForm(state.res, $('bk10').value, scale(state.res)));
+  });
+  $('bkIncl').addEventListener('change', run);
+  ['bk10', 'bkScale'].forEach(function (id) { $(id).addEventListener('change', function () { if (state.res) render(state.res); }); });
 })();
 </script>
 <!-- seo:jsonld:start -->
