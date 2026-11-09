@@ -4,7 +4,7 @@ https://shohizei-check.com/
 
 > Free calculator for restaurants and food wholesalers/retailers in Japan. Under the planned temporary cut of the consumption tax on food and non-alcoholic drinks from 8% to 1% (April 1, 2027 to March 31, 2029; subject to the bill passing the Diet), it compares the annual tax payable under standard taxation (本則課税), simplified taxation (簡易課税) and tax-exempt status (免税), and shows which notifications to file and by when. Results are estimates, not individual tax advice; confirm with a tax accountant or the tax office.
 
-令和9年4月1日から令和11年3月31日までの食料品の消費税1%（法案成立が前提）で、飲食店・食品の卸・小売の1年分の納税額が、本則課税・簡易課税・免税でいくらになるかを比べ、出す届出と期限の目安を出す無料ツールです。
+令和9年4月1日から令和11年3月31日までの食料品の消費税1%（法案は令和8年11月6日に衆議院で可決、参議院で審議中。成立が前提）で、飲食店・食品の卸・小売の1年分の納税額が、本則課税・簡易課税・免税でいくらになるかを比べ、出す届出と期限の目安を出す無料ツールです。
 
 ## Pages
 
