@@ -1425,7 +1425,7 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
     </div>
   </div>
 
-  <div class="example-banner" id="exampleNote">
+  <div class="example-banner" id="exampleNote" hidden>
     <div class="example-banner-text">
       <span class="example-pill">計算例を表示中</span>
       <span>年商4,000万円ほどの、店内飲食が中心の個人の飲食店の例が入っています。</span>
@@ -1947,13 +1947,13 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
   function row(label, value, cls) { return '<tr' + (cls ? ' class="' + cls + '"' : '') + '><td>' + label + '</td><td class="num">' + value + '</td></tr>'; }
 
   // 入力に誤りがある時は、前の結果を残さない（今の条件の結果と取り違えないように）
-  function clearResults() {
+  function clearResults(msg) {
     ['sBest', 'sSave', 'sNow', 'sStay'].forEach(function (id) { $(id).textContent = '—'; $(id).className = 'v'; });
     ['sBestSub', 'sSaveSub', 'sNowSub', 'sStaySub', 'optNote'].forEach(function (id) { $(id).textContent = ''; });
     $('optBars').textContent = '';
     var t = $('todo'); t.textContent = ''; t.className = 'todo none';
     var h = document.createElement('span'); h.className = 'todo-k'; h.textContent = '出す届出と期限'; t.appendChild(h);
-    var p = document.createElement('span'); p.textContent = '入力を直すと表示します。'; t.appendChild(p);
+    var p = document.createElement('span'); p.textContent = msg || '入力を直すと表示します。'; t.appendChild(p);
     $('notice').hidden = true; $('notice').textContent = '';
     $('lines').textContent = '';
   }
@@ -1965,7 +1965,17 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
     return '前年前半が1,000万円超';
   }
 
+  // 欄は空で始め、薄い灰色で例を見せる（計算例と同じ数字。1か月の時は12で割る）
+  function setPlaceholders() {
+    MONEY.forEach(function (id) {
+      var x = Number(EXAMPLE[id]) || 0;
+      if (state.per === 'month' && FLOWS.indexOf(id) >= 0) x = Math.round(x / 12);
+      $(id).placeholder = '例 ' + x.toLocaleString('ja-JP');
+    });
+  }
+
   function render() {
+    setPlaceholders();
     var v = readForm();
     var errs = [];
     var vals = {};
@@ -1988,6 +1998,12 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
     if (errs.length) {
       setVerdict('', '入力を確かめてください', '金額は0以上の数字で入れてください。', '');
       clearResults();
+      return;
+    }
+    // 空で始める形：売上も仕入れもまだ入っていない時は、判定を出さずに案内する
+    if (FLOWS.every(function (id) { return v[id] === '' || v[id] === undefined; })) {
+      setVerdict('', '金額を入れると、判定が出ます', '売上と仕入れを入れてください。「計算例」を押すと、例の数字で試せます。', '');
+      clearResults('金額を入れると表示します。');
       return;
     }
     var current = v.current;
@@ -2113,7 +2129,7 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
   $('dlMonth').addEventListener('change', renderDeadline);
   renderDeadline();
 
-  // 初期値：URL ＞ 保存 ＞ 計算例
+  // 初期値：URL ＞ 保存 ＞ 空（計算例はボタンで入れる）
   var saved = null;
   try { saved = JSON.parse(localStorage.getItem(STORE_KEY) || 'null'); } catch (e) {}
   var params = new URLSearchParams(location.search);
@@ -2124,8 +2140,9 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
     MONEY.concat(CHECKS).forEach(function (f) { fromUrl[f] = ''; });
     FIELDS.forEach(function (f) { if (params.has(f)) fromUrl[f] = params.get(f); });
   }
-  writeForm(fromUrl || saved || EXAMPLE);
-  if (saved || fromUrl) $('exampleNote').hidden = true;
+  var EMPTY = Object.assign({}, EXAMPLE, { baseSales: '', eatIn: '', foodSales: '', otherSales: '', foodBuy: '', otherBuy: '' });
+  writeForm(fromUrl || saved || EMPTY);
+  $('exampleNote').hidden = true;
   render();
 
   // 操作
@@ -2156,7 +2173,7 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
 
   $('btnResetExample').addEventListener('click', function () { writeForm(EXAMPLE); $('exampleNote').hidden = false; render(); syncKindButtons(); });
   function clearForm() {
-    writeForm(Object.assign({}, EXAMPLE, { baseSales: '', eatIn: '', foodSales: '', otherSales: '', foodBuy: '', otherBuy: '' }));
+    writeForm(EMPTY);
     $('exampleNote').hidden = true;
     render(); syncKindButtons();
     $('eatIn').focus();
