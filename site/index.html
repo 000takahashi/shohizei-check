@@ -1932,13 +1932,19 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
       foodKubun: Number(v.foodKubun), eatInKubun: Number(v.eatInKubun), otherKubun: Number(v.otherKubun),
       invoice: v.invoice === '1', specifiedOver: v.specifiedOver === '1', share: share
     });
+    current = c.current; // 条件に合わない方式を選んだ時は、本則課税を「今」として扱う
     var st = S.steps(current, c.bestKey, state.who, Number(v.endMonth), vals.foodSales > 0);
     $('periodChip').textContent = slash(st.period.start) + '〜' + slash(st.period.end);
 
     // 判定
     var change = c.changeIfStay;
     var changeText = '今の1年分より' + man(Math.abs(change)) + (change >= 0 ? '増えます' : '減ります');
-    if (c.shouldSwitch) {
+    if (!c.currentAllowed) {
+      setVerdict('bad', LABEL[c.currentInput] + 'は、今の条件では選べません',
+        (c.bestKey === 'general' ? '本則課税で申告することになります。' : LABEL[c.bestKey] + 'が一番少なくなります。')
+        + (st.need && st.deadline ? '届出の期限は' + wa(st.deadline) + 'です。' : ''),
+        LABEL[c.currentInput] + 'は選べません');
+    } else if (c.shouldSwitch) {
       setVerdict('warn', LABEL[c.bestKey] + 'に変えると、この期間に約' + man(c.saveBySwitch) + '少なくなります',
         LABEL[current] + 'のままだと、' + changeText + '。' + (st.deadline ? '届出の期限は' + wa(st.deadline) + 'です。' : ''),
         LABEL[c.bestKey] + 'で ' + man(c.saveBySwitch) + '少なく');
@@ -1992,7 +1998,7 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
     var p = document.createElement('span'); p.textContent = st.text; t.appendChild(p);
 
     // 気づいたこと
-    var notes = c.cut.notes;
+    var notes = c.notes;
     $('notice').hidden = !notes.length;
     $('notice').innerHTML = '';
     notes.forEach(function (n) { var el = document.createElement('p'); el.textContent = n; $('notice').appendChild(el); });

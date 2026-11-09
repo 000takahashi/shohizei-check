@@ -112,3 +112,28 @@ test("飲食料品を売っていないと、届出の特例は使えない", ()
   assert.equal(b.deadline, "2027-03-31");
   assert.equal(S.steps("simple", "general", "individual", undefined, true).deadline, "2027-12-31");
 });
+
+test("注意の文は、8%と1%を混ぜた結果から作る", () => {
+  const p = { foodSales: 6_000_000, foodBuy: 2_000_000, otherBuy: 800_000, baseSales: 8_000_000, current: "exempt" };
+  const full = S.compare(p);
+  const mix = S.compare(Object.assign({}, p, { share: 0.75 }));
+  const g = mix.options.find((o) => o.key === "general").tax;
+  assert.ok(g > 0, "混ぜた本則課税は納付");
+  assert.ok(full.cut.general < 0, "丸1年1%なら還付");
+  assert.ok(!mix.notes.some((n) => n.includes("還付")), "混ぜた期間で還付と言わない");
+  assert.ok(full.notes.some((n) => n.includes("還付")));
+});
+
+test("今の方式が条件に合わない時は、本則課税を今として比べる", () => {
+  const c = S.compare({ eatIn: 30_000_000, foodSales: 4_000_000, foodBuy: 10_000_000, otherBuy: 8_000_000,
+    baseSales: 38_000_000, current: "exempt", foodKubun: 3, eatInKubun: 4, otherKubun: 4 });
+  assert.equal(c.currentAllowed, false);
+  assert.equal(c.current, "general");
+  assert.notEqual(c.bestKey, "exempt");
+  assert.ok(c.stayTax > 0);
+  assert.ok(c.notes[0].includes("免税事業者になれません"));
+  const d = S.compare({ eatIn: 60_000_000, foodBuy: 20_000_000, baseSales: 60_000_000, current: "simple" });
+  assert.equal(d.currentAllowed, false);
+  assert.equal(d.current, "general");
+  assert.equal(d.bestKey, "general");
+});

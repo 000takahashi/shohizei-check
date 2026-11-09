@@ -124,8 +124,12 @@
     const now = compute(Object.assign({}, p, { foodRate: RATE.foodNow }));
     const cut = compute(Object.assign({}, p, { foodRate: RATE.foodCut }));
     const share = p.share === undefined ? 1 : Math.min(1, Math.max(0, Number(p.share) || 0));
-    const current = p.current && ["general", "simple", "exempt"].includes(p.current) ? p.current : "general";
+    const input = p.current && ["general", "simple", "exempt"].includes(p.current) ? p.current : "general";
     const pick = (r, k) => r.options.find((o) => o.key === k);
+    // 今の方式が条件に合わない（2年前が1,000万円超なのに免税、5,000万円超なのに簡易など）時は、
+    // 法律上は本則課税になるので、本則課税を「今」として比べる。
+    const currentAllowed = pick(cut, input).allowed;
+    const current = currentAllowed ? input : "general";
     const options = cut.options.map((o) => Object.assign({}, o, {
       tax: share * o.tax + (1 - share) * pick(now, o.key).tax,
     }));
@@ -134,7 +138,7 @@
     const nowTax = pick(now, current).tax;
     const stayTax = options.find((o) => o.key === current).tax;
     return {
-      now, cut, current, share, options, best,
+      now, cut, current, currentInput: input, currentAllowed, share, options, best,
       nowTax,                     // 今の方式で、今の税率（1年）
       stayTax,                    // 今の方式のまま、比べる課税期間
       bestTax: best.tax,          // 比べる課税期間に一番少ない方式
@@ -142,6 +146,10 @@
       changeIfStay: stayTax - nowTax,
       saveBySwitch: stayTax - best.tax,
       shouldSwitch: best.key !== current && stayTax - best.tax >= 1,
+      notes: (currentAllowed ? [] : [input === "exempt"
+        ? "今の条件では免税事業者になれません（2年前や前年前半の売上、インボイスの登録による）。課税事業者として、本則課税を今の方式として比べています。"
+        : "2年前の課税売上高が5,000万円を超えるので、簡易課税は使えません。本則課税を今の方式として比べています。"]).concat(notesFor({ s: { food: num(p.foodSales), eatIn: num(p.eatIn) },
+        general: options.find((o) => o.key === "general").tax, canExempt: cut.canExempt, best })),
       full: { bestKey: cut.best.key, bestTax: cut.best.tax, stayTax: pick(cut, current).tax }, // 丸1年が1%の時
     };
   }
