@@ -5,7 +5,7 @@
 輸入利益チェッカー（yunyu-rieki）の姉妹サイト。
 
 - `site/index.html` 画面（ビルドなし）、`site/calc.js` 計算（画面に依存しない純粋関数）
-- テスト: `node --test tests/calc.test.js`（依存なし。国税庁パンフの計算例2つを答えに使う）
+- テスト: `node --test tests/calc.test.js tests/seo.test.js`（依存なし。国税庁パンフの計算例2つを答えに使う）
 - 出典: 国税庁「飲食料品に係る2年間の消費税率引下げについて」（令和8年9月・法案成立前）
 - 扱わないもの: 端数処理、簡易課税の75%ルール、インボイスの2割・3割特例、8%のまま残る定期便など
 - 個別の税務相談にならないよう、結果は「目安」とし、最終判断は税理士・税務署へと出す
@@ -16,7 +16,8 @@
 
 - `wrangler.jsonc` 設定。`site/` をそのまま配る。`routes` で独自ドメインと www をつなぐ
 - `src/worker.js` www を正式なURLへ転送し、仮URL（`*.workers.dev`）に noindex を付ける
-- `site/_headers` CSP など全ページ共通の守り。`site/robots.txt`・`site/sitemap.xml`
+- `site/_headers` CSP など全ページ共通の守り。`site/robots.txt`・`site/sitemap.xml`・`site/llms.txt`（AI 向けの説明）
+- 検索向けの構造化データ（JSON-LD）は画面の「よくある質問」から `node scripts/seo-sync.js` で作る。Google・Bing への登録手順は `docs/search-registration.md`
 - 最初の1回だけ人の作業: Cloudflare の Workers & Pages で「Import a repository」からこのリポジトリを選ぶ
   （ビルドコマンドは空、デプロイコマンドは `npx wrangler deploy`）。以後は main への push で自動公開
 

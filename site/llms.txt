@@ -1,0 +1,33 @@
+# 消費税1%チェッカー (Japan Food Consumption Tax 1% Checker)
+
+https://shohizei-check.com/
+
+> Free calculator for restaurants and food wholesalers/retailers in Japan. Under the planned temporary cut of the consumption tax on food and non-alcoholic drinks from 8% to 1% (April 1, 2027 to March 31, 2029; subject to the bill passing the Diet), it compares the annual tax payable under standard taxation (本則課税), simplified taxation (簡易課税) and tax-exempt status (免税), and shows which notifications to file and by when. Results are estimates, not individual tax advice; confirm with a tax accountant or the tax office.
+
+令和9年4月1日から令和11年3月31日までの食料品の消費税1%（法案成立が前提）で、飲食店・食品の卸・小売の1年分の納税額が、本則課税・簡易課税・免税でいくらになるかを比べ、出す届出と期限の目安を出す無料ツールです。
+
+## Pages
+
+- [申告方式の試算](https://shohizei-check.com/): 売上と仕入れ（税抜き・1年分）から、方式ごとの納税額を比べる
+- [届出と期限](https://shohizei-check.com/#deadline): 決算月から、令和9年4月1日を含む課税期間と届出の期限を出す
+- [何が変わるか](https://shohizei-check.com/#changes): 取引ごとの今と2年間の税率
+- [計算のしくみ](https://shohizei-check.com/#howto): 計算式と、国税庁パンフレットの計算例との照合
+- [よくある質問](https://shohizei-check.com/#faq)
+
+## Rules used
+
+- Food sales, takeout and delivery: 1% (national 0.78% + local 0.22%). Eating in and catering stay at 10%. Alcohol and other goods stay at 10%.
+- Standard taxation: tax on sales minus tax on purchases; a negative result is a refund.
+- Simplified taxation: a special rule deducts the same amount as the tax on food sales taxed at 1%.
+- Switching from standard to simplified taxation has no special rule (file by the day before the taxable period starts). Switching from simplified to standard, or from exempt to taxable, can be filed within the taxable period that includes April 1, 2027.
+- A period that includes April 1, 2027 is prorated by month between 8% and 1%.
+- Not covered: rounding, the 75% rule of simplified taxation, the 20%/30% special rules for invoice registrants.
+
+## Source
+
+- National Tax Agency pamphlet 「飲食料品に係る2年間の消費税率引下げについて」 (September 2026, before the bill is passed)
+
+## Sister sites
+
+- [輸入利益チェッカー](https://yunyu-rieki.com/): import duty, import consumption tax and profit for goods imported into Japan
+- [免税チェッカー](https://menzei-check.com/): tax-free sales for shops under the refund method from November 2026
