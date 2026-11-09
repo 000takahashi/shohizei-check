@@ -1395,6 +1395,7 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
     <p class="nav-label">このサイト</p>
       <a class="nav-item" href="#about" data-view="about"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>運営者・更新履歴</span></a>
       <a class="nav-item" href="https://yunyu-rieki.com/" target="_blank" rel="noopener"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg><span>輸入利益チェッカー</span></a>
+      <a class="nav-item" href="https://menzei-check.com/" target="_blank" rel="noopener"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg><span>免税チェッカー</span></a>
     <div class="nav-foot">
       <p class="nav-foot-title">もとにしている資料</p>
       <p class="nf-row"><span>国税庁のパンフレット</span><b>令和8年9月</b></p>
@@ -1765,7 +1766,7 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
   </div>
 
   <footer>
-    <p class="foot-links"><a href="#about">運営者情報・更新履歴</a><a href="https://yunyu-rieki.com/" target="_blank" rel="noopener">姉妹サイト：輸入利益チェッカー</a></p>
+    <p class="foot-links"><a href="#about">運営者情報・更新履歴</a><a href="https://yunyu-rieki.com/" target="_blank" rel="noopener">姉妹サイト：輸入利益チェッカー</a><a href="https://menzei-check.com/" target="_blank" rel="noopener">姉妹サイト：免税チェッカー</a></p>
     <p>出典：国税庁<span class="nwl">「飲食料品に係る2年間の消費税率引下げについて」（令和8年9月）</span>。法案は国会での審議前です。計算結果は一般的な目安で、個別の税務相談ではありません。このツールの利用によって生じた損害について責任を負いかねます。</p>
   </footer>
 </div>
@@ -2157,5 +2158,81 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
   updMbar();
 })();
 </script>
+<!-- seo:jsonld:start -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "消費税1%チェッカー",
+  "url": "https://shohizei-check.com/",
+  "description": "令和9年4月からの食料品の消費税1%（案）で、飲食店・食品の卸・小売の税額が本則課税・簡易課税・免税でいくらになるかを比べ、出す届出と期限の目安を出す無料ツールです。",
+  "applicationCategory": "FinanceApplication",
+  "operatingSystem": "Web",
+  "inLanguage": "ja",
+  "isAccessibleForFree": true,
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "JPY"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "いつから1%になりますか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "令和9年4月1日から令和11年3月31日までの2年間です。いまは閣議決定された大綱の段階で、法案が国会で成立することが前提です。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "飲食店のテイクアウトも1%ですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "はい。持ち帰りと出前は飲食料品の販売なので1%です。店内で食べる場合とケータリングは10%のままです。店内かテイクアウトかは、提供する時に客に確かめて決めます。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "なぜ飲食店は納税が増えるのですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "店内飲食の売上の税は10%のままなのに、食材の仕入れの税が8%から1%に減るためです。本則課税では仕入れの税を引いて納めるので、引ける額が減った分だけ納税が増えます。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "簡易課税に変えるには、いつまでに届出が要りますか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "簡易課税制度選択届出書を、使いたい課税期間が始まる前の日までに出します。個人で令和9年分から使うなら、令和8年12月31日までです。今回の特例はありません。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "免税事業者ですが、還付を受けられますか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "課税事業者を選び、本則課税で申告すれば受けられます。特例で、令和9年4月1日を含む課税期間の中に課税事業者選択届出書を出せば、その期間から課税事業者になれます。原則2年間は課税事業者のままです。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "2割特例や3割特例は入っていますか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "入っていません。インボイスの登録で課税事業者になった方の特例は、この試算に含めていません。対象になる方は、税理士か税務署に確かめてください。"
+      }
+    }
+  ]
+}
+</script>
+<!-- seo:jsonld:end -->
 </body>
 </html>

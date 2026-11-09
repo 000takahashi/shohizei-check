@@ -9,3 +9,7 @@
   Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()
   Cross-Origin-Opener-Policy: same-origin
   Strict-Transport-Security: max-age=31536000
+
+# AI 向けの説明（llms.txt）は文字として返す
+/llms.txt
+  Content-Type: text/plain; charset=utf-8
