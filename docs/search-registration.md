@@ -8,12 +8,10 @@
 
 1. https://search.google.com/search-console を開き、Google アカウントでログインする。
 2. 左上のサイト名の一覧から「プロパティを追加」を選び、**ドメイン** に `shohizei-check.com` と入れる。
-3. 画面に出る「TXT レコード」（`google-site-verification=…` で始まる文字）をコピーする。
-4. 別のタブで Cloudflare のダッシュボードを開き、`shohizei-check.com` → **DNS** → **レコードを追加**。
-   - タイプ: TXT／名前: `@`／内容: 3でコピーした文字 → 保存。
-5. Search Console に戻って「確認」を押す（失敗したら10分ほど待ってもう一度）。
-6. 左の **サイトマップ** を開き、`sitemap.xml` と入れて送信する。
-7. 左の **URL検査** で `https://shohizei-check.com/` を入れ、「インデックス登録をリクエスト」を押す。
+3. 所有権の確認。Cloudflare で管理しているドメインなら、Google が「Cloudflare で確認」を出すので、それを押して Cloudflare にログインすれば自動で済みます（2026-11-09 確認）。
+   - 出ない時だけ手で行う：画面の「TXT レコード」（`google-site-verification=…`）をコピーし、Cloudflare の `shohizei-check.com` → **DNS** → **レコードを追加**（タイプ: TXT／名前: `@`／内容: コピーした文字）→ Search Console で「確認」。
+4. 左の **サイトマップ** を開き、`https://shohizei-check.com/sitemap.xml` と**住所を全部**入れて送信する（「ドメイン」で登録した時は `sitemap.xml` だけだと「サイトマップ アドレスが無効です」になる）。
+5. 左の **URL検査** で `https://shohizei-check.com/` を入れ、「インデックス登録をリクエスト」を押す。
 
 ## 2. Bing Webmaster Tools（Bing・Yahoo! の一部・ChatGPT の検索に効きます）
 
