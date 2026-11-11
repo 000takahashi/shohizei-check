@@ -1416,11 +1416,12 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
         <li><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>国税庁の計算例と同じ結果</li>
         <li><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>届出の種類と期限まで表示</li>
         <li><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>登録不要・無料</li>
+        <li><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>入力はこの端末にだけ自動で保存</li>
       </ul>
     </div>
     <div class="top-actions">
       <button type="button" class="action-btn" id="btnResetExample" title="計算例（年商4,000万円の飲食店）に戻す"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg><span class="lbl">計算例</span></button>
-      <button type="button" class="action-btn" id="btnClearForm" title="数値をクリアしてゼロから入力する"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg><span class="lbl">クリア</span></button>
+      <button type="button" class="action-btn" id="btnClearForm" title="入れた数字をすべて消して、空から入力する（この端末に残った入力も消えます）"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg><span class="lbl">すべてクリア</span></button>
       <button type="button" class="action-btn" id="btnShareUrl" title="現在の条件のURLをコピー"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg><span class="lbl">URL共有</span></button>
     </div>
   </div>
@@ -1978,6 +1979,8 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
   function render() {
     setPlaceholders();
     var v = readForm();
+    // 入力は計算より先に残す（空にした時・入力の誤りの時も、次に開いた時に古い数字が戻らないように）
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(v)); } catch (e) {}
     var errs = [];
     var vals = {};
     var mult = state.per === 'month' ? 12 : 1;
@@ -2105,8 +2108,6 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
     html += row('本則課税', now.general < 0 ? '還付 ' + yen(-now.general) : yen(now.general));
     html += row('簡易課税', yen(now.simple)) + '</table>';
     $('lines').innerHTML = html;
-
-    try { localStorage.setItem(STORE_KEY, JSON.stringify(v)); } catch (e) {}
   }
 
   // 届出と期限のページ
@@ -2133,6 +2134,8 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
   // 初期値：URL ＞ 保存 ＞ 空（計算例はボタンで入れる）
   var saved = null;
   try { saved = JSON.parse(localStorage.getItem(STORE_KEY) || 'null'); } catch (e) {}
+  // 前の版は開くたびに計算例を保存していた。計算例のままの保存は読まず、空で始める
+  if (saved && MONEY.every(function (k) { return String(saved[k]) === String(EXAMPLE[k]); })) saved = null;
   var params = new URLSearchParams(location.search);
   var fromUrl = null;
   if (FIELDS.some(function (f) { return params.has(f); })) {
