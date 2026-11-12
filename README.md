@@ -5,10 +5,31 @@
 輸入利益チェッカー（yunyu-rieki）の姉妹サイト。
 
 - `site/index.html` 画面（ビルドなし）、`site/calc.js` 計算（画面に依存しない純粋関数）
-- テスト: `node --test tests/calc.test.js tests/seo.test.js`（依存なし。国税庁パンフの計算例2つを答えに使う）
+- テスト: `node --test tests/calc.test.js tests/seo.test.js tests/csv.test.js tests/paid.test.mjs tests/pass.test.mjs`（依存なし。国税庁パンフの計算例2つを答えに使う）
 - 出典: 国税庁「飲食料品に係る2年間の消費税率引下げについて」（令和8年9月）。法案は令和8年11月6日に衆議院で可決、参議院で審議中（未成立）
 - 扱わないもの: 端数処理、簡易課税の75%ルール、インボイスの2割・3割特例、8%のまま残る定期便など
 - 個別の税務相談にならないよう、結果は「目安」とし、最終判断は税理士・税務署へと出す
+
+## 有料の機能（パス）
+
+今までの試算・届出と期限・CSVの読み込みは無料のまま。有料は次の2画面で、計算はサーバー（`functions/`）でする。入力も結果も保存しない。AIは使わない。
+
+- `#plan` 2年間の通しの見通し（`POST /api/v1/plan`・`functions/_lib/plan.mjs`）。1%が始まる期間から、1%の月が無くなる最初の期間までを並べ、「簡易課税と課税事業者の選択は2期間続ける」「期限が過ぎた届出は出せない」を守った道の中で、合計が一番少ない道・届出と期限・毎月の取り置きを出す
+- `#price` 持ち帰り・店内の値付け（`POST /api/v1/pricing`・`functions/_lib/pricing.mjs`）
+- パスが無い人には、見本の数字での結果（`{ sample: true }`）と、自分の数字での差額だけ（402 の `teaser`）を返す。道・届出・値段の表は返さない（`tests/paid.test.mjs` が固定）
+- 画面は `site/planui.js`・`site/passui.js`。値段・パスの中身・販売者の表示は `site/shopinfo.js` の1か所（画面・支払い・特定商取引法の表記が同じ数字になる）
+- 無料と有料の線、値段を変えるのは運営者だけ
+
+### 売り出す（Stripe）
+
+輸入利益チェッカーと同じ作り（Stripe Checkout・登録なし・データベースなし・Webhookなし）。`GET /api/v1/pass/status`・`POST /api/v1/pass/checkout`・`POST /api/v1/pass/claim`。
+
+売り出しの扉は2つ。両方そろうまで、画面は「準備中」、サーバーは 503 を返す。
+
+1. `site/shopinfo.js` の `OPERATOR.contact`（届いて返信できる連絡先。入れてある）
+2. Cloudflare の Worker の Secret に `STRIPE_SECRET_KEY` と `PASS_SIGNING_SECRET`（運営者が自分で入れる。リポジトリにも会話にも書かない）
+
+手元で有料の画面を試す時は `npx wrangler dev --port 8792 --var PAID_OPEN:1`（本番には入れない）。
 
 ## 帳簿から読み込む（CSV）
 
@@ -24,7 +45,7 @@
 輸入利益チェッカーと同じ形。正式なURLは https://shohizei-check.com （2026-11-08 Cloudflare で購入）。
 
 - `wrangler.jsonc` 設定。`site/` をそのまま配る。`routes` で独自ドメインと www をつなぐ
-- `src/worker.js` www を正式なURLへ転送し、仮URL（`*.workers.dev`）に noindex を付ける
+- `src/worker.js` `/api/v1/*` を `functions/` へ渡し、www を正式なURLへ転送し、仮URL（`*.workers.dev`）に noindex を付ける
 - `site/_headers` CSP など全ページ共通の守り。`site/robots.txt`・`site/sitemap.xml`・`site/llms.txt`（AI 向けの説明）
 - 検索向けの構造化データ（JSON-LD）は画面の「よくある質問」から `node scripts/seo-sync.js` で作る。Google・Bing への登録手順は `docs/search-registration.md`
 - 最初の1回だけ人の作業: Cloudflare の Workers & Pages で「Import a repository」からこのリポジトリを選ぶ

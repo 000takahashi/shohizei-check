@@ -1362,6 +1362,77 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
   .opt-val { min-width: 0; }
   .hero-cell .v { font-size: 1.5rem; white-space: nowrap; }
 }
+/* 有料の画面（通しの見通し・値付け・パス） */
+.nav-paid { margin-left: 6px; font-size: .68rem; font-weight: 700; padding: 1px 6px; border-radius: 999px; background: var(--soft); color: var(--accent); vertical-align: middle; letter-spacing: 0; }
+.plan-cta { display: grid; gap: 2px; margin: 14px 0; padding: 12px 16px; border: 1px dashed var(--accent); border-radius: var(--radius-sm); text-decoration: none; color: inherit; }
+.plan-cta:hover { background: var(--accent-soft); }
+.plan-cta b { color: var(--accent); font-size: .95rem; }
+.plan-cta span { font-size: .84rem; color: var(--ink-secondary); line-height: 1.6; }
+.pl-out { margin-top: 16px; }
+.pl-out h3 { margin: 22px 0 10px; }
+.pl-verdict { display: grid; gap: 4px; padding: 14px 16px; border-radius: var(--radius-sm); border: 1px solid var(--good-border); background: var(--good-soft); }
+.pl-verdict b { font-size: 1.08rem; color: var(--good); line-height: 1.5; }
+.pl-verdict.warn { border-color: var(--warn-border); background: var(--warn-bg); }
+.pl-verdict.warn b { color: var(--warn-fg); }
+.pl-verdict span { font-size: .9rem; color: var(--ink-secondary); }
+.pl-warn { margin: 12px 0 0; padding: 10px 14px; border-left: 4px solid var(--bad); background: var(--bad-soft); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; font-size: .9rem; line-height: 1.7; }
+.pl-sample { display: inline-block; margin: 0 0 12px; padding: 4px 12px; border-radius: 999px; background: var(--soft); font-size: .84rem; font-weight: 600; color: var(--ink-secondary); }
+.pl-steps { margin: 0; padding: 0; list-style: none; counter-reset: st; display: grid; gap: 10px; }
+.pl-steps li { counter-increment: st; position: relative; padding: 12px 16px 12px 52px; border: 1px solid var(--accent); border-radius: var(--radius-sm); background: var(--accent-soft); }
+.pl-steps li::before { content: counter(st); position: absolute; left: 14px; top: 12px; width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: #fff; font-weight: 700; font-size: .88rem; display: grid; place-items: center; }
+.pl-steps b { display: block; font-size: 1rem; }
+.pl-date { font-family: var(--font-num); font-weight: 700; }
+.pl-steps p { margin: 4px 0 0; font-size: .88rem; color: var(--ink-secondary); line-height: 1.7; }
+.pl-notes { margin: 14px 0 0; padding-left: 1.2em; font-size: .88rem; line-height: 1.7; color: var(--ink-secondary); }
+.pl-total td { font-weight: 700; background: var(--paper-subtle); }
+.pl-lock { margin-top: 14px; padding: 16px 18px; border: 1px solid var(--accent); border-radius: var(--radius-sm); background: var(--accent-soft); }
+.pl-lock b { display: block; font-size: 1.05rem; line-height: 1.5; }
+.pl-lock p { margin: 6px 0 0; font-size: .9rem; color: var(--ink-secondary); line-height: 1.7; }
+.pr-table input { width: 100%; min-width: 0; font: inherit; font-size: .9rem; padding: 7px 9px; min-height: 40px; border: 1px solid var(--line-strong); border-radius: 8px; background: var(--paper); color: var(--ink); }
+.pr-table input[type="number"] { font-family: var(--font-num); text-align: right; }
+.tablewrap table.pr-table { min-width: 0; }
+.ps-features { margin: 0 0 14px; padding-left: 1.2em; line-height: 1.8; }
+.ps-price { margin: 0 0 14px; font-size: 1.25rem; font-weight: 700; font-family: var(--font-num); }
+.ps-plans { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 0 0 12px; }
+.ps-plan { display: flex; flex-direction: column; gap: 2px; padding: 12px 14px; border: 2px solid var(--line-strong); border-radius: var(--radius-sm); background: var(--paper); cursor: pointer; position: relative; }
+.ps-plan input { position: absolute; top: 12px; right: 12px; width: 18px; height: 18px; accent-color: var(--accent); }
+.ps-plan b { font-size: 1rem; }
+.ps-plan span { font-family: var(--font-num); font-size: .95rem; color: var(--ink-secondary); }
+.ps-plan:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+.ps-have { padding: 12px 16px; border-radius: var(--radius-sm); background: var(--good-soft); }
+.ps-have p { margin: 0; font-weight: 700; color: var(--good); }
+.ps-terms { display: grid; grid-template-columns: max-content 1fr; gap: 6px 14px; margin: 0; padding: 12px 16px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--paper-subtle); font-size: .9rem; line-height: 1.6; }
+.ps-terms dt { font-weight: 700; color: var(--ink-secondary); }
+.ps-terms dd { margin: 0; }
+.tablewrap table.lg-table { min-width: 0; }
+.lg-table th { width: 9em; vertical-align: top; white-space: normal !important; }
+.lg-table td { line-height: 1.7; }
+@media (max-width: 640px) {
+  .ps-terms { grid-template-columns: 1fr; gap: 2px; } .ps-terms dd { margin-bottom: 8px; }
+  /* 結果の表は、行をカードにして横にはみ出させない */
+  .pl-out .tablewrap { border: 0; background: none; overflow: visible; }
+  .pl-out .tablewrap table { min-width: 0; display: block; }
+  .pl-out .tablewrap thead { display: none; }
+  .pl-out .tablewrap tbody { display: grid; gap: 8px; }
+  .pl-out .tablewrap tr { display: grid; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--paper); padding: 8px 12px; }
+  .pl-out .tablewrap td { display: flex; justify-content: space-between; gap: 12px; padding: 3px 0; border: 0; text-align: right; white-space: normal; }
+  .pl-out .tablewrap td::before { content: attr(data-h); color: var(--muted); font-size: .8rem; font-family: inherit; text-align: left; flex: none; }
+  .pl-out .tablewrap td:empty { display: none; }
+  .pl-out .tablewrap td:first-child { font-weight: 700; }
+  /* 値段を入れる表も、1商品を1枚にする（名前の下に、持ち帰り・店内・消す） */
+  .tablewrap table.pr-table, .pr-table tbody { display: block; }
+  .pr-table thead { display: none; }
+  .pr-table tr { display: grid; grid-template-columns: 1fr 1fr auto; gap: 6px; padding: 10px; border-bottom: 1px solid var(--line); }
+  .pr-table tr:last-child { border-bottom: 0; }
+  .pr-table td { padding: 0; border: 0; }
+  .pr-table td:first-child { grid-column: 1 / -1; }
+  .pr-table td.act { width: auto; align-self: center; }
+}
+@media print {
+  .appbar, .sidenav, footer, .mbar, .page-head .lead, .pl-noprint, .view:not(#v-plan):not(#v-price) { display: none !important; }
+  .shell { display: block; } .doc-card { border: 0; box-shadow: none; padding: 0; max-width: none; }
+  body { background: #fff; }
+}
 </style>
 <link rel="stylesheet" href="csvkit.css">
 </head>
@@ -1389,12 +1460,15 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
     <p class="nav-label">ツール</p>
       <a class="nav-item" href="#calc" data-view="calc"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h2M12 11h2M8 15h2M12 15h2M8 18h2M12 18h4"/></svg><span>申告方式の試算</span></a>
       <a class="nav-item" href="#bulk" data-view="bulk"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4zM4 9h16M4 14h16M10 9v11"/></svg><span>帳簿から読み込む（CSV）</span></a>
+      <a class="nav-item" href="#plan" data-view="plan"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19h16M6 16V9M11 16V5M16 16v-5M20 16v-8"/></svg><span>2年間の通しの見通し<small class="nav-paid">有料</small></span></a>
+      <a class="nav-item" href="#price" data-view="price"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12V5a1 1 0 0 1 1-1h7l8 8-8 8z"/><circle cx="8.5" cy="8.5" r="1.3"/></svg><span>持ち帰りの値付け<small class="nav-paid">有料</small></span></a>
       <a class="nav-item" href="#deadline" data-view="deadline"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4M8 14h3"/></svg><span>届出と期限</span></a>
     <p class="nav-label">資料</p>
       <a class="nav-item" href="#changes" data-view="changes"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h13l-3-3M20 16H7l3 3"/></svg><span>何が変わるか</span></a>
       <a class="nav-item" href="#howto" data-view="howto"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5M9 7h5M9 11h5"/></svg><span>計算のしくみ</span></a>
       <a class="nav-item" href="#faq" data-view="faq"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7M12 17h0"/></svg><span>よくある質問</span></a>
     <p class="nav-label">このサイト</p>
+      <a class="nav-item" href="#pass" data-view="pass"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18M7 15h4"/></svg><span>有料パス</span></a>
       <a class="nav-item" href="#about" data-view="about"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>運営者・更新履歴</span></a>
       <a class="nav-item" href="https://yunyu-rieki.com/" target="_blank" rel="noopener"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg><span>輸入利益チェッカー</span></a>
       <a class="nav-item" href="https://menzei-check.com/" target="_blank" rel="noopener"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg><span>免税チェッカー</span></a>
@@ -1415,7 +1489,7 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
       <ul class="trust">
         <li><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>国税庁の計算例と同じ結果</li>
         <li><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>届出の種類と期限まで表示</li>
-        <li><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>登録不要・無料</li>
+        <li><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>登録不要・この試算は無料</li>
         <li><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>入力はこの端末にだけ自動で保存</li>
       </ul>
     </div>
@@ -1626,6 +1700,8 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
 
       <div class="todo" id="todo"></div>
 
+      <a class="plan-cta" href="#plan" data-view="plan"><b>2年間を通すと、どうなるか</b><span>簡易課税は、選ぶと2年やめられません。1%が終わる年まで並べて、通しで一番少ない道と届出の順番を出します（有料）。</span></a>
+
       <div class="notice" id="notice" hidden></div>
 
       <details class="breakdown" id="breakdown">
@@ -1701,6 +1777,84 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
       <p class="bk-hint">AIに明細を渡すかどうかは、ご自身で判断してください。このサイトはAIに何も送りません。</p>
     </section>
   </section>
+  <section class="view doc" id="v-plan" data-view="plan" hidden>
+    <div class="page-head"><div class="page-head-text"><p class="kicker">2年間の通しの見通し<small class="nav-paid">有料</small></p><h2 class="page-title">1年分ではなく、通しで決める</h2><p class="lead">方式を変えると、2年は続ける決まりがあります。<span class="nw">1%が始まる年から終わったあとの年までを並べて、</span><span class="nw">通しで一番少ない道と、出す届出の順番を出します。</span></p></div></div>
+    <section class="doc-card">
+      <h3 class="pl-noprint">あなたの数字で見る</h3>
+      <p class="pl-noprint">「申告方式の試算」に入れた売上と仕入れを、そのまま使います。</p>
+      <div class="bk-actions pl-noprint">
+        <button type="button" class="bk-btn primary" id="plGo">通しの見通しを出す</button>
+        <button type="button" class="bk-btn" id="plSample">見本で見る</button>
+        <a class="bk-btn" href="#calc" data-view="calc">数字を入れ直す</a>
+      </div>
+      <p class="bk-msg" id="plMsg" role="status"></p>
+      <div id="plLock" hidden></div>
+      <div id="plOut" class="pl-out" hidden></div>
+    </section>
+    <section class="doc-card pl-noprint">
+      <h3>無料の試算との違い</h3>
+      <p>無料の試算は、令和9年4月1日を含む1つの課税期間だけを比べます。ここでは、その次の年、1%が終わる年、終わったあとの年まで並べます。簡易課税を選ぶと2年は続けること、届出の期限が過ぎた道は選べないことを入れて、通しで比べます。</p>
+      <p>計算はサーバーでしますが、入力も結果も保存しません。AIは使いません。</p>
+    </section>
+  </section>
+
+  <section class="view doc" id="v-price" data-view="price" hidden>
+    <div class="page-head"><div class="page-head-text"><p class="kicker">持ち帰りの値付け<small class="nav-paid">有料</small></p><h2 class="page-title">1%になった時の値段を決める</h2><p class="lead">店内（10%）と持ち帰り（1%）の差は、9%に広がります。<span class="nw">今の税込みの値段から、</span><span class="nw">値付けの案を商品ごとに出します。</span></p></div></div>
+    <section class="doc-card">
+      <h3 class="pl-noprint">今の値段を入れる</h3>
+      <div class="tablewrap pl-noprint">
+        <table class="pr-table">
+          <thead><tr><th>商品</th><th>持ち帰りの今の税込み（8%）</th><th>店内の今の税込み（10%）</th><th></th></tr></thead>
+          <tbody id="prRows"></tbody>
+        </table>
+      </div>
+      <p class="bk-hint pl-noprint">店内で出していない商品は、店内の欄を空のままにします。表計算の「名前・持ち帰り・店内」の3列をコピーして、欄に貼り付けるとまとめて入ります（200個まで）。</p>
+      <div class="bk-grid pl-noprint" style="margin-top:12px">
+        <label>店内で食べる人の割合（%）<input type="number" id="prShare" min="0" max="100" step="1" value="50" inputmode="numeric"></label>
+      </div>
+      <div class="bk-actions pl-noprint">
+        <button type="button" class="bk-btn primary" id="prGo">値付けの案を出す</button>
+        <button type="button" class="bk-btn" id="prAdd">行を足す</button>
+        <button type="button" class="bk-btn" id="prSample">見本で見る</button>
+        <button type="button" class="bk-btn" id="prClear">すべて消す</button>
+      </div>
+      <p class="bk-msg" id="prMsg" role="status"></p>
+      <div id="prLock" hidden></div>
+      <div id="prOut" class="pl-out" hidden></div>
+      <p class="bk-hint pl-noprint">入れた値段は、この端末のブラウザの中にだけ残ります。計算はサーバーでしますが、保存しません。</p>
+    </section>
+  </section>
+
+  <section class="view doc" id="v-pass" data-view="pass" hidden>
+    <div class="page-head"><div class="page-head-text"><p class="kicker">有料パス</p><h2 class="page-title">届出を出す前に、通しで確かめる</h2><p class="lead">無料の試算に加えて、<span class="nw">届出と値付けを決めるための機能が使えます。</span><span class="nw">登録は要りません。</span></p></div></div>
+    <section class="doc-card">
+      <h3>パスで使える機能</h3>
+      <ul class="ps-features" id="psFeatures"></ul>
+      <p class="ps-price" id="psPrice"></p>
+      <div class="ps-have" id="psHave" hidden><p id="psHaveText"></p><div class="bk-actions"><a class="bk-btn primary" href="#plan" data-view="plan">2年間の通しの見通しを出す</a><a class="bk-btn" href="#price" data-view="price">持ち帰りの値付けをする</a></div></div>
+      <div id="psBuy" hidden>
+        <div class="ps-plans" id="psPlans" role="radiogroup" aria-label="買うパスを選ぶ"></div>
+        <dl class="ps-terms" id="psTerms"></dl>
+        <div class="bk-actions"><button type="button" class="bk-btn primary" id="psGo">支払いへ進む</button></div>
+        <p class="bk-hint">支払いは Stripe の画面で行います。カードの番号は、当サイトには届きません。<a href="#legal" data-view="legal">特定商取引法に基づく表記</a></p>
+      </div>
+      <p class="bk-hint" id="psSoon" hidden>有料パスは準備中です。売り出しまで、もう少しお待ちください。それぞれの画面の「見本で見る」で、結果の形は確かめられます。</p>
+      <p class="bk-msg" id="psMsg" role="status"></p>
+      <p class="bk-hint">パスはこの端末のブラウザに保存されます。名前やメールアドレスは入っていません。ブラウザのデータを消すと、パスも消えます。</p>
+    </section>
+  </section>
+
+  <section class="view doc" id="v-legal" data-view="legal" hidden>
+    <div class="page-head"><div class="page-head-text"><p class="kicker">有料パス</p><h2 class="page-title">特定商取引法に基づく表記</h2></div></div>
+    <section class="doc-card">
+      <p id="lgSoon">有料パスは準備中です。売り出す時に、ここに表記を出します。</p>
+      <div id="lgBody" hidden>
+        <p id="lgNote"></p>
+        <div class="tablewrap"><table class="lg-table"><tbody id="lgRows"></tbody></table></div>
+      </div>
+    </section>
+  </section>
+
   <section class="view doc" id="v-deadline" data-view="deadline" hidden>
     <div class="page-head"><div class="page-head-text"><p class="kicker">届出と期限</p><h2 class="page-title">届出と期限</h2><p class="lead">決算月を選ぶと、令和9年4月1日を含む課税期間と、届出ごとの期限が出ます。</p></div></div>
     <section class="doc-card">
@@ -1813,7 +1967,9 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
       <h3>運営者</h3>
       <p>運営者：輸入利益チェッカー 編集室<br>連絡先：<a href="mailto:contact@shohizei-check.com">contact@shohizei-check.com</a>（計算の誤りのご指摘や、ご意見はこちらへ）</p>
       <p>国税庁のパンフレット「飲食料品に係る2年間の消費税率引下げについて」（令和8年9月）をもとに作っています。法案の成立や内容の変更があれば、計算を直します。</p>
+      <p>有料の機能（2年間の通しの見通し・持ち帰りの値付け）は、計算をサーバーでします。入れた数字と結果は保存しません。支払いは Stripe の画面で行い、カードの番号は当サイトには届きません。パスは、名前やメールアドレスの入っていない期限つきの印で、お使いの端末のブラウザにだけ保存します。</p>
       <ul class="history">
+        <li>2026年11月12日：有料の機能を足しました。1%が始まる年から終わったあとの年までを通した見通し（届出の順番・毎月の取り置き）と、持ち帰りの値付けです。今までの試算は無料のままです。</li>
         <li>2026年11月12日：入力欄を空で始める形にし、「すべてクリア」を足しました。入力はこの端末にだけ自動で残ります。</li>
         <li>2026年11月9日：法案の状況を「衆議院で可決（11月6日）・参議院で審議中」に直しました。</li>
         <li>2026年11月8日：見た目と使い方を姉妹サイトの輸入利益チェッカーにそろえました。計算例・クリア・URL共有、1か月の平均での入力、届出と期限のページを足しました。</li>
@@ -1833,7 +1989,7 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
   </div>
 
   <footer>
-    <p class="foot-links"><a href="#about">運営者情報・更新履歴</a><a href="https://yunyu-rieki.com/" target="_blank" rel="noopener">姉妹サイト：輸入利益チェッカー</a><a href="https://menzei-check.com/" target="_blank" rel="noopener">姉妹サイト：免税チェッカー</a></p>
+    <p class="foot-links"><a href="#about">運営者情報・更新履歴</a><a href="#pass">有料パス</a><a href="#legal">特定商取引法に基づく表記</a><a href="https://yunyu-rieki.com/" target="_blank" rel="noopener">姉妹サイト：輸入利益チェッカー</a><a href="https://menzei-check.com/" target="_blank" rel="noopener">姉妹サイト：免税チェッカー</a></p>
     <p>出典：国税庁<span class="nwl">「飲食料品に係る2年間の消費税率引下げについて」（令和8年9月）</span>。法案は令和8年11月6日に衆議院で可決され、参議院で審議中です（まだ成立していません）。計算結果は一般的な目安で、個別の税務相談ではありません。このツールの利用によって生じた損害について責任を負いかねます。</p>
   </footer>
 </div>
@@ -1842,6 +1998,7 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
 <script src="csvkit.js"></script>
 <script src="csvui.js"></script>
 <script src="bulk.js"></script>
+<script src="shopinfo.js"></script>
 <script>
 (function () {
   'use strict';
@@ -2206,7 +2363,7 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
   });
 
   // 左のタブ（スマホはメニュー）で画面を切り替える
-  var VIEWS = ['calc', 'bulk', 'deadline', 'changes', 'howto', 'faq', 'about'];
+  var VIEWS = ['calc', 'bulk', 'plan', 'price', 'pass', 'legal', 'deadline', 'changes', 'howto', 'faq', 'about'];
   var currentView = 'calc';
   var updMbar = function () {};
   function setMenu(open) { document.body.classList.toggle('nav-open', open); $('btnMenu').setAttribute('aria-expanded', open ? 'true' : 'false'); }
@@ -2230,6 +2387,22 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
   $('btnMenu').addEventListener('click', function () { setMenu(!document.body.classList.contains('nav-open')); });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') setMenu(false); });
   document.addEventListener('click', function (e) { if (document.body.classList.contains('nav-open') && !e.target.closest('#sidenav') && !e.target.closest('#btnMenu')) setMenu(false); });
+  // 有料の画面（planui.js）から使う：今の入力を、1年分の数字にして渡す。入っていない・誤りがある時は null
+  window.ShohizeiInput = function () {
+    var v = readForm(), mult = state.per === 'month' ? 12 : 1, out = {}, bad = false;
+    MONEY.forEach(function (id) {
+      var raw = v[id];
+      if (raw === '' || raw === undefined) { out[id] = id === 'baseSales' ? '' : 0; return; }
+      var x = Number(raw);
+      if (!isFinite(x) || x < 0) { bad = true; return; }
+      out[id] = FLOWS.indexOf(id) >= 0 ? x * mult : x;
+    });
+    if (bad || FLOWS.every(function (id) { return !(out[id] > 0); })) return null;
+    out.current = v.current; out.who = state.who; out.endMonth = state.who === 'corporate' ? Number(v.endMonth) : 12;
+    ['foodKubun', 'eatInKubun', 'otherKubun'].forEach(function (k) { out[k] = Number(v[k]); });
+    out.invoice = v.invoice === '1'; out.specifiedOver = v.specifiedOver === '1';
+    return out;
+  };
   // 帳簿から読み込む（CSV）の画面から使う：集めた金額を試算の欄に入れて開く
   window.ShohizeiApply = function (vals) {
     var v = readForm();
@@ -2315,6 +2488,8 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
   ['bk10', 'bkScale'].forEach(function (id) { $(id).addEventListener('change', function () { if (state.res) render(state.res); }); });
 })();
 </script>
+<script src="passui.js"></script>
+<script src="planui.js"></script>
 <!-- seo:jsonld:start -->
 <script type="application/ld+json">
 {
