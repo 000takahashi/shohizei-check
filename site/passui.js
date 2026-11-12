@@ -20,6 +20,7 @@
     var until = S.freeText();
     Array.prototype.forEach.call(document.querySelectorAll('.nav-paid'), function (n) { n.textContent = until + 'まで無料'; });
     Array.prototype.forEach.call(document.querySelectorAll('.plan-cta span'), function (n) { n.textContent = n.textContent.replace('（有料）', '（' + until + 'まで無料）'); });
+    if ($('homeFree')) { $('homeFree').textContent = until + 'まで、「2年間の通しの見通し」と「持ち帰りの値付け」も無料でお使いいただけます。ご登録もお支払いも不要です。'; $('homeFree').hidden = false; }
     ['v-plan', 'v-price', 'v-pass'].forEach(function (id) {
       var head = document.querySelector('#' + id + ' .page-head-text');
       if (head) head.appendChild(el('p', until + 'まで、この機能を無料で使えます。登録も支払いも要りません。その次の日からは、有料パスが要ります。', 'free-note'));

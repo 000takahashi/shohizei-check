@@ -1363,8 +1363,14 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
   .hero-cell .v { font-size: 1.5rem; white-space: nowrap; }
 }
 /* 有料の画面（通しの見通し・値付け・パス） */
+.howto { list-style: none; counter-reset: howto; display: grid; gap: 8px; margin: 14px 0 0; padding: 0; }
+.howto li { counter-increment: howto; display: grid; grid-template-columns: 26px 1fr; column-gap: 10px; align-items: start; font-size: .9rem; line-height: 1.6; }
+.howto li::before { content: counter(howto); grid-row: span 2; width: 26px; height: 26px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-weight: 700; font-size: .82rem; display: grid; place-items: center; margin-top: 1px; }
+.howto b { font-size: .95rem; }
+.howto span { grid-column: 2; color: var(--ink-secondary); }
+.howto a { color: var(--accent); font-weight: 700; }
 .free-note { margin: 10px 0 0; padding: 8px 12px; border-radius: var(--radius-sm); background: var(--accent-soft); color: var(--accent); font-weight: 700; font-size: .92rem; line-height: 1.6; }
-.nav-paid { margin-left: 6px; font-size: .68rem; font-weight: 700; padding: 1px 6px; border-radius: 999px; background: var(--soft); color: var(--accent); vertical-align: middle; letter-spacing: 0; }
+.nav-paid { margin-left: 6px; font-size: .68rem; font-weight: 700; padding: 1px 6px; border-radius: 999px; background: var(--soft); color: var(--accent); vertical-align: middle; letter-spacing: 0; white-space: nowrap; }
 .plan-cta { display: grid; gap: 2px; margin: 14px 0; padding: 12px 16px; border: 1px dashed var(--accent); border-radius: var(--radius-sm); text-decoration: none; color: inherit; }
 .plan-cta:hover { background: var(--accent-soft); }
 .plan-cta b { color: var(--accent); font-size: .95rem; }
@@ -1497,6 +1503,12 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
         <li><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>登録不要・この試算は無料</li>
         <li><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>入力はこの端末にだけ自動で保存</li>
       </ul>
+      <ol class="howto" aria-label="使い方">
+        <li><b>数字をご入力ください</b><span>業種をお選びのうえ、1年分の売上と仕入れをご入力ください。おおよその数字で差し支えございません。「計算例」を押していただくと、見本の数字が入ります。</span></li>
+        <li><b>「判定へ」を押してください</b><span>税額が一番少なくなる申告方式と、ご提出いただく届出・期限をお示しいたします。</span></li>
+        <li><b>2年間を通してお確かめください</b><span>結果の下から、<a href="#plan" data-view="plan">2年間の通しの見通し</a>へお進みいただけます。お持ち帰りのあるお店は、<a href="#price" data-view="price">値付け</a>もお決めいただけます。</span></li>
+      </ol>
+      <p class="free-note" id="homeFree" hidden></p>
     </div>
     <div class="top-actions">
       <button type="button" class="action-btn" id="btnResetExample" title="計算例（年商4,000万円の飲食店）に戻す"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg><span class="lbl">計算例</span></button>
