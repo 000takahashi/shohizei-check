@@ -124,7 +124,19 @@
     var act = el('div', null, 'bk-actions pl-noprint');
     var pb = el('button', '印刷する（税理士の先生へのご相談用）', 'bk-btn'); pb.type = 'button';
     pb.addEventListener('click', function () { window.print(); });
-    act.appendChild(pb); box.appendChild(act);
+    act.appendChild(pb);
+    // 表計算ソフト（Excel・Google スプレッドシート）で開けるCSV。この端末で作り、どこにも送らない
+    if (window.PlanCsv) {
+      var cb = el('button', 'CSVで保存（Excel・スプレッドシート用）', 'bk-btn'); cb.type = 'button';
+      cb.addEventListener('click', function () {
+        var d = new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10);
+        var a = el('a'); a.href = URL.createObjectURL(new Blob(['\ufeff' + window.PlanCsv.csv(r, d)], { type: 'text/csv;charset=utf-8' })); a.download = 'shohizei-check-mitoshi.csv';
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+      });
+      act.appendChild(cb);
+    }
+    box.appendChild(act);
   }
 
   function runPlan(sample) {

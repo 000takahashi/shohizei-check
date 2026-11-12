@@ -886,6 +886,7 @@ input:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible
   line-height: 1.55;
 }
 .notice[hidden] { display: none; }
+.sheet-print { padding: 0 18px 12px; margin: 0; }
 .disclaimer { font-size: .78rem; color: var(--muted); padding: 0 18px 16px; margin: 0; line-height: 1.5; }
 
 /* Foldable Sections */
@@ -1440,13 +1441,9 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
   .pr-table td:first-child { grid-column: 1 / -1; }
   .pr-table td.act { width: auto; align-self: center; }
 }
-@media print {
-  .appbar, .sidenav, footer, .mbar, .page-head .lead, .pl-noprint, .view:not(#v-plan):not(#v-price) { display: none !important; }
-  .shell { display: block; } .doc-card { border: 0; box-shadow: none; padding: 0; max-width: none; }
-  body { background: #fff; }
-}
 </style>
 <link rel="stylesheet" href="csvkit.css">
+<link rel="stylesheet" href="print.css">
 </head>
 <body>
 <div class="wrap">
@@ -1720,12 +1717,13 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
 
       <div class="notice" id="notice" hidden></div>
 
-      <details class="breakdown" id="breakdown">
+      <details class="breakdown" id="breakdown" data-print-open>
         <summary><span class="nw">くわしい計算内訳を見る</span><small>売上の税・仕入れの税・控除</small></summary>
         <div class="lines" id="lines"></div>
       </details>
 
       <button type="button" class="jump" id="toInput">↑ 入力欄に戻る</button>
+      <div class="bk-actions sheet-print"><button type="button" class="bk-btn" data-print>印刷する（税理士の先生へのご相談用）</button></div>
       <p class="disclaimer">結果は目安でございます。国と地方を合わせた税率で計算しており、端数処理・75%ルール・インボイスの2割特例や3割特例・8%のまま残る取引は含めておりません。届出と申告につきましては、税理士または<a href="https://www.nta.go.jp/" target="_blank" rel="noopener">税務署</a>にご確認ください。</p>
     </aside>
   </div>
@@ -1879,6 +1877,7 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
       <h3>ご入力の数字で比べる</h3>
       <p>「申告方式の試算」にご入力いただいた売上と仕入れを、そのまま使用いたします。<a href="#calc" data-view="calc">数字を入れ直す</a></p>
       <div id="yrOut" class="pl-out"></div>
+      <div class="bk-actions"><button type="button" class="bk-btn" data-print>印刷する</button></div>
     </section>
     <section class="doc-card">
       <h3>ご利用の時期</h3>
@@ -1908,6 +1907,7 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
         </table>
       </div>
       <p class="hint" id="dlPeriod" style="margin-top:8px"></p>
+      <div class="bk-actions"><button type="button" class="bk-btn" data-print>印刷する</button></div>
     </section>
     <section class="doc-card">
       <h3>特例のポイント</h3>
@@ -2537,6 +2537,8 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
   ['bk10', 'bkScale'].forEach(function (id) { $(id).addEventListener('change', function () { if (state.res) render(state.res); }); });
 })();
 </script>
+<script src="print.js"></script>
+<script src="plancsv.js"></script>
 <script src="icskit.js"></script>
 <script src="yearkit.js"></script>
 <script src="yearui.js"></script>

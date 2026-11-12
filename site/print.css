@@ -1,0 +1,30 @@
+/*
+ * 印刷の見た目（3サイト共通・輸入利益チェッカー／消費税1%チェッカー／免税チェッカーで同じファイル）
+ * いま開いている画面だけを、メニューやボタンを外して紙1枚に収まりやすい形で出す。
+ * 直す時は3つそろえる。
+ */
+.print-head { display: none; }
+@media print {
+  @page { size: A4; margin: 14mm 12mm; }
+  html, body { background: #fff !important; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .appbar, .sidenav, footer, .mbar, .adslot, .example-banner, .top-actions, .action-btn, .trust, .howto-link,
+  .free-note, .plan-cta, .jump, .bk-actions, .bk-paste, .bk-drop, .sh-save, .no-print, .pl-noprint { display: none !important; }
+  .wrap, .shell { display: block !important; max-width: none !important; margin: 0 !important; padding: 0 !important; }
+  .view[hidden] { display: none !important; }
+  .page-head { margin: 0 0 8px !important; padding: 0 !important; }
+  .page-head .lead { display: none !important; }
+  .sheet { position: static !important; max-height: none !important; overflow: visible !important; box-shadow: none !important; }
+  .doc-card, .sheet { border: 1px solid #ccc !important; box-shadow: none !important; break-inside: auto; }
+  .doc-card { max-width: none !important; margin: 0 0 10px !important; }
+  .tablewrap { overflow: visible !important; max-height: none !important; }
+  .tablewrap table, .tablewrap table.bk-table, .tablewrap table.bk-table.bk-small { min-width: 0 !important; width: 100% !important; }
+  .bk-table, .bk-table th, .bk-table td { font-size: 7.5pt !important; padding: 3px 4px !important; }
+  .bk-table td.memo { min-width: 0 !important; }
+  .bk-msg, .sh-log button, .bk-table button { display: none !important; }
+  thead { display: table-header-group; }
+  tr, li, .pl-verdict { break-inside: avoid; }
+  h2, h3 { break-after: avoid; }
+  a { color: inherit !important; text-decoration: none !important; }
+  .print-head { display: flex !important; justify-content: space-between; gap: 12px; font-size: 9pt; color: #444; border-bottom: 1px solid #999; margin: 0 0 10px; padding: 0 0 4px; }
+}
