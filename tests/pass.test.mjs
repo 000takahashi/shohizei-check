@@ -99,3 +99,14 @@ test('状態: 売り出し中かと値段を返す（鍵は返さない）', asy
   assert.deepEqual(out, { onSale: true, plans: Shop.PLANS.map((p) => ({ id: p.id, days: p.days, priceYen: p.yen })) });
   assert.equal((await (await onStatus({ request: new Request('https://shohizei-check.com/api/v1/pass/status'), env: {} })).json()).onSale, false);
 });
+
+test('★値段: 7日間300円と30日間980円（運営者が決めた値）。7日の代金で30日のパスは受け取れない', async () => {
+  assert.deepEqual(Shop.PLANS, [{ id: 'd7', days: 7, yen: 300 }, { id: 'd30', days: 30, yen: 980 }]);
+  const D7 = Shop.PLANS[0];
+  const res = await onClaim({ request: post('/api/v1/pass/claim', { session_id: SID }), env }, { fetch: stripe(paid({}, D7)), now });
+  assert.equal(res.status, 200);
+  const v = await verifyPass(env.PASS_SIGNING_SECRET, (await res.json()).token, now);
+  assert.equal(v.expiresAt, (now / 1000 - 60) * 1000 + 7 * 86400000 + CHECKOUT_TTL_MIN * 60000);
+  const cheat = await onClaim({ request: post('/api/v1/pass/claim', { session_id: SID }), env }, { fetch: stripe(paid({ amount_total: D7.yen })) , now });
+  assert.equal(cheat.status, 402);
+});
