@@ -55,15 +55,15 @@ test('支払い画面: 値段と日数は定数と同じ。カードだけ。戻
 
 test('買う: 鍵が無い・販売者の表示が無い間は 503。そろえば Stripe のアドレスだけを返す', async () => {
   assert.equal((await onCheckout({ request: post('/api/v1/pass/checkout', { plan: D30.id }), env: {} }, { operator })).status, 503);
-  const closed = await onCheckout({ request: post('/api/v1/pass/checkout', { plan: D30.id }), env }, { operator: { contact: '' }, fetch: stripe({ url: 'https://checkout.stripe.com/c/pay/x' }) });
+  const closed = await onCheckout({ request: post('/api/v1/pass/checkout', { plan: D30.id }), env }, { operator: { contact: '' }, now, fetch: stripe({ url: 'https://checkout.stripe.com/c/pay/x' }) });
   assert.equal(closed.status, 503);
   assert.equal((await closed.json()).error, 'seller_info_missing');
-  const ok = await onCheckout({ request: post('/api/v1/pass/checkout', { plan: D30.id }), env }, { operator, fetch: stripe({ url: 'https://checkout.stripe.com/c/pay/x' }) });
+  const ok = await onCheckout({ request: post('/api/v1/pass/checkout', { plan: D30.id }), env }, { operator, now, fetch: stripe({ url: 'https://checkout.stripe.com/c/pay/x' }) });
   assert.equal(ok.status, 200);
   assert.equal((await ok.json()).url, 'https://checkout.stripe.com/c/pay/x');
-  assert.equal((await onCheckout({ request: post('/api/v1/pass/checkout', { plan: D30.id }), env }, { operator, fetch: stripe({ url: 'https://evil.example/' }) })).status, 502);
-  assert.equal((await onCheckout({ request: post('/api/v1/pass/checkout', { plan: 'free' }), env }, { operator, fetch: stripe({ url: 'https://checkout.stripe.com/c/pay/x' }) })).status, 400);
-  assert.equal((await onCheckout({ request: post('/api/v1/pass/checkout', { plan: D30.id }), env }, { operator, fetch: stripe({ error: { message: 'secret detail' } }, 400) })).status, 502);
+  assert.equal((await onCheckout({ request: post('/api/v1/pass/checkout', { plan: D30.id }), env }, { operator, now, fetch: stripe({ url: 'https://evil.example/' }) })).status, 502);
+  assert.equal((await onCheckout({ request: post('/api/v1/pass/checkout', { plan: 'free' }), env }, { operator, now, fetch: stripe({ url: 'https://checkout.stripe.com/c/pay/x' }) })).status, 400);
+  assert.equal((await onCheckout({ request: post('/api/v1/pass/checkout', { plan: D30.id }), env }, { operator, now, fetch: stripe({ error: { message: 'secret detail' } }, 400) })).status, 502);
 });
 
 test('受け取る: 支払い済みなら、期限つきの本物のパスが出る', async () => {
@@ -95,8 +95,8 @@ test('受け取る: 未払い・額が足りない・別の商品・おかしな
 });
 
 test('状態: 売り出し中かと値段を返す（鍵は返さない）', async () => {
-  const out = await (await onStatus({ request: new Request('https://shohizei-check.com/api/v1/pass/status'), env }, { operator })).json();
-  assert.deepEqual(out, { onSale: true, plans: Shop.PLANS.map((p) => ({ id: p.id, days: p.days, priceYen: p.yen })) });
+  const out = await (await onStatus({ request: new Request('https://shohizei-check.com/api/v1/pass/status'), env }, { operator, now })).json();
+  assert.deepEqual(out, { onSale: true, freeUntil: '', plans: Shop.PLANS.map((p) => ({ id: p.id, days: p.days, priceYen: p.yen })) });
   assert.equal((await (await onStatus({ request: new Request('https://shohizei-check.com/api/v1/pass/status'), env: {} })).json()).onSale, false);
 });
 
@@ -149,4 +149,16 @@ test('★切り替え: 7日間のパスが使える間は、差額だけで30日
   assert.equal((await onClaim({ request: post('/api/v1/pass/claim', { session_id: SID2 }), env }, { fetch: stripe(paid({ amount_total: diff })), now })).status, 402);
   // 表記にも書く
   assert.match(Object.fromEntries(Shop.legalRows(operator))['販売価格'], /差額の680円（税込）で30日間に切り替えられます/);
+});
+
+test('★無料開放の間は、パスを売らない（無料の物を売らない）。終われば売る', async () => {
+  const free = Date.parse('2026-11-20T03:00:00Z');
+  const st = await (await onStatus({ request: new Request('https://shohizei-check.com/api/v1/pass/status'), env }, { operator, now: free })).json();
+  assert.equal(st.onSale, false);
+  assert.equal(st.freeUntil, '2026-11-30');
+  const buy = await onCheckout({ request: post('/api/v1/pass/checkout', { plan: D30.id }), env }, { operator, now: free, fetch: stripe({ url: 'https://checkout.stripe.com/c/pay/x' }) });
+  assert.equal(buy.status, 503);
+  assert.equal((await buy.json()).error, 'free_period');
+  const after = Date.parse('2026-11-30T15:00:00Z');
+  assert.equal((await onCheckout({ request: post('/api/v1/pass/checkout', { plan: D30.id }), env }, { operator, now: after, fetch: stripe({ url: 'https://checkout.stripe.com/c/pay/x' }) })).status, 200);
 });

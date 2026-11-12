@@ -124,7 +124,7 @@ test('値付けの入力: 数の上限・名前の掃除・空', () => {
 
 // ---- 窓口 ----
 const SECRET = 'test-secret-for-pass-signing';
-const NOW = Date.parse('2026-11-12T03:00:00Z');
+const NOW = Date.parse('2026-12-01T03:00:00Z'); // 無料開放（11月30日まで）が終わったあと
 const req = (path, body, token) => new Request('https://shohizei-check.com' + path, {
   method: 'POST', headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: 'Bearer ' + token } : {}) }, body: JSON.stringify(body),
 });
@@ -150,7 +150,7 @@ test('本物のパスなら結果が出る。期限切れ・にせ物は 402', a
   assert.equal(res.status, 200);
   const out = await res.json();
   assert.equal(out.result.saving, 3408000);
-  assert.equal(out.result.today, '2026-11-12');
+  assert.equal(out.result.today, '2026-12-01');
   assert.equal((await onPricing({ request: req('/api/v1/pricing', PRICE_SAMPLE, good), env }, { now: NOW })).status, 200);
   const old = await signPass(SECRET, NOW / 1000 - 10, 'abc');
   assert.equal((await onPlan({ request: req('/api/v1/plan', SAMPLE, old), env }, { now: NOW })).status, 402);
@@ -174,4 +174,16 @@ test('窓口の守り: POST だけ・大きすぎる本文・空・JSONでない
   const bad = new Request('https://shohizei-check.com/api/v1/plan', { method: 'POST', body: 'not json' });
   assert.equal((await onPlan({ request: bad, env: {} })).status, 400);
   assert.equal((await onPlan({ request: req('/api/v1/plan', SAMPLE), env: { PAID_OPEN: '1' } }, { now: NOW })).status, 200);
+});
+
+test('★無料開放: 11月30日（日本時間）の終わりまでは、パスなしで結果が出る。12月1日からは 402', async () => {
+  const Shop = createRequire(import.meta.url)('../site/shopinfo.js');
+  const env = { PASS_SIGNING_SECRET: SECRET };
+  assert.equal(Shop.FREE_UNTIL, '2026-11-30'); // 運営者が決めた期間。勝手に延ばさない
+  const last = Date.parse('2026-11-30T14:59:00Z'); // 日本時間 11月30日 23:59
+  const next = Date.parse('2026-11-30T15:00:00Z'); // 日本時間 12月1日 0:00
+  assert.equal((await onPlan({ request: req('/api/v1/plan', SAMPLE), env }, { now: last })).status, 200);
+  assert.equal((await onPricing({ request: req('/api/v1/pricing', PRICE_SAMPLE), env }, { now: last })).status, 200);
+  assert.equal((await onPlan({ request: req('/api/v1/plan', SAMPLE), env }, { now: next })).status, 402);
+  assert.equal((await onPricing({ request: req('/api/v1/pricing', PRICE_SAMPLE), env }, { now: next })).status, 402);
 });

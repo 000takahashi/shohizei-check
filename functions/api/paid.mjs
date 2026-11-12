@@ -4,9 +4,11 @@
 // Authorization: Bearer <パス> が要る。計算はサーバーでして、入力も結果も保存しない。AIは使わない。
 // - { sample: true } は見本の数字で計算して返す（パスなしで中身を見てもらうため）。
 // - パスが無い時は 402 と、結果の一部だけ（teaser）を返す。道・届出・値段の表は返さない。
+// - 無料開放の期間（site/shopinfo.js の FREE_UNTIL まで）は、パスなしで通す。
 // - PAID_OPEN=1 の間は、売り出し前の試し用にパスなしで通す。
 import { json, readJson, todayJst } from '../_lib/http.mjs';
 import { verifyPass, bearer } from '../_lib/pass.mjs';
+import Shop from '../../site/shopinfo.js';
 import { cleanPlan, plan, teaser as planTeaser, SAMPLE as PLAN_SAMPLE } from '../_lib/plan.mjs';
 import { cleanPricing, pricing, teaser as priceTeaser, SAMPLE as PRICE_SAMPLE } from '../_lib/pricing.mjs';
 
@@ -26,7 +28,7 @@ function make(clean, run, tease, SAMPLE, max) {
     const c = clean(body);
     if (c.error) return json({ error: c.error }, 400);
     const result = run(c.input, today);
-    if (env.PAID_OPEN !== '1') {
+    if (env.PAID_OPEN !== '1' && !Shop.freeOpen(deps.now)) {
       const pass = await verifyPass(env.PASS_SIGNING_SECRET, bearer(request), deps.now);
       if (!pass.ok) return json({ error: pass.reason, teaser: tease(result) }, 402);
     }
