@@ -9,7 +9,7 @@
   html, body { background: #fff !important; }
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .appbar, .sidenav, footer, .mbar, .adslot, .example-banner, .top-actions, .action-btn, .trust, .howto-link,
-  .free-note, .plan-cta, .jump, .bk-actions, .bk-paste, .bk-drop, .no-print, .pl-noprint { display: none !important; }
+  .free-note, .plan-cta, .jump, .bk-actions, .bk-paste, .bk-drop, .sh-save, .no-print, .pl-noprint { display: none !important; }
   .wrap, .shell { display: block !important; max-width: none !important; margin: 0 !important; padding: 0 !important; }
   .view[hidden] { display: none !important; }
   .page-head { margin: 0 0 8px !important; padding: 0 !important; }
@@ -18,7 +18,10 @@
   .doc-card, .sheet { border: 1px solid #ccc !important; box-shadow: none !important; break-inside: auto; }
   .doc-card { max-width: none !important; margin: 0 0 10px !important; }
   .tablewrap { overflow: visible !important; max-height: none !important; }
-  table { width: 100%; }
+  .tablewrap table, .tablewrap table.bk-table, .tablewrap table.bk-table.bk-small { min-width: 0 !important; width: 100% !important; }
+  .bk-table, .bk-table th, .bk-table td { font-size: 7.5pt !important; padding: 3px 4px !important; }
+  .bk-table td.memo { min-width: 0 !important; }
+  .bk-msg, .sh-log button, .bk-table button { display: none !important; }
   thead { display: table-header-group; }
   tr, li, .pl-verdict { break-inside: avoid; }
   h2, h3 { break-after: avoid; }
