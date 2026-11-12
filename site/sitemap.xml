@@ -2,4 +2,10 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://shohizei-check.com/</loc><lastmod>2026-11-09</lastmod></url>
   <url><loc>https://shohizei-check.com/llms.txt</loc><lastmod>2026-11-09</lastmod></url>
+  <url><loc>https://shohizei-check.com/guide/</loc><lastmod>2026-11-12</lastmod></url>
+  <url><loc>https://shohizei-check.com/guide/nennai/</loc><lastmod>2026-11-12</lastmod></url>
+  <url><loc>https://shohizei-check.com/guide/changes/</loc><lastmod>2026-11-12</lastmod></url>
+  <url><loc>https://shohizei-check.com/guide/calculation/</loc><lastmod>2026-11-12</lastmod></url>
+  <url><loc>https://shohizei-check.com/guide/faq/</loc><lastmod>2026-11-12</lastmod></url>
+  <url><loc>https://shohizei-check.com/guide/usage/</loc><lastmod>2026-11-12</lastmod></url>
 </urlset>
