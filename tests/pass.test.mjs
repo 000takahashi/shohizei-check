@@ -2,7 +2,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
-import { onStatus, onCheckout, onClaim, checkoutForm, returnOrigin, onSale, CHECKOUT_TTL_MIN } from '../functions/api/pass.mjs';
+import { onStatus, onCheckout, onClaim, onCheck, checkoutForm, returnOrigin, onSale, CHECKOUT_TTL_MIN } from '../functions/api/pass.mjs';
 import { verifyPass } from '../functions/_lib/pass.mjs';
 const Shop = createRequire(import.meta.url)('../site/shopinfo.js');
 
@@ -161,4 +161,41 @@ test('★無料開放の間は、パスを売らない（無料の物を売ら�
   assert.equal((await buy.json()).error, 'free_period');
   const after = Date.parse('2026-11-30T15:00:00Z');
   assert.equal((await onCheckout({ request: post('/api/v1/pass/checkout', { plan: D30.id }), env }, { operator, now: after, fetch: stripe({ url: 'https://checkout.stripe.com/c/pay/x' }) })).status, 200);
+});
+
+test('控えからパスを戻す: 本物で期限の内なら期限を返す。期限切れは 410、にせ物は 401', async () => {
+  const res = await onClaim({ request: post('/api/v1/pass/claim', { session_id: SID }), env }, { fetch: stripe(paid()), now });
+  const { token, expiresAt } = await res.json();
+  const check = (t, n = now, e = env) => onCheck({ request: new Request('https://shohizei-check.com/api/v1/pass/check', { method: 'POST', headers: { Authorization: 'Bearer ' + t } }), env: e }, { now: n });
+  const ok = await check(token);
+  assert.equal(ok.status, 200);
+  assert.deepEqual(await ok.json(), { ok: true, expiresAt });
+  assert.equal((await check(token, expiresAt + 1)).status, 410);
+  assert.equal((await check(token.slice(0, -2) + 'xx')).status, 401);
+  assert.equal((await check('')).status, 401);
+  assert.equal((await check(token, now, {})).status, 503);
+});
+
+test('★支払いのあと: 受け取れるまで支払いの番号を残し、受け取り直せる。受け取りが終わるまで広告を始めない', async () => {
+  const { readFileSync } = await import('node:fs');
+  const ui = readFileSync(new URL('../site/passui.js', import.meta.url), 'utf8');
+  const ads = readFileSync(new URL('../site/adsui.js', import.meta.url), 'utf8');
+  const html = readFileSync(new URL('../site/index.html', import.meta.url), 'utf8');
+  // 番号は端末に残せた時だけアドレス欄から消す。消すのは受け取れた時（finish）か、受け取れないと決まった時だけ
+  assert.match(ui, /if \(setPending\(sid\)\) \{ try \{ history\.replaceState/);
+  assert.match(ui, /finish\(\);\s*msg\('ご購入いただき/);
+  assert.match(ui, /retry\('通信できませんでした/);
+  assert.match(html, /id="psRetryGo"[^>]*>パスを再度受け取る</);
+  // 受け取りの間は広告を止める
+  assert.match(ui, /if \(pendingSid\(\)\) \{ window\.AdsHold = true; claim\(\); \}/);
+  assert.match(ads, /if \(window\.AdsHold\) document\.addEventListener\('ads:release'/);
+  // 控えと戻し方
+  assert.match(html, /id="psKeepCode"/);
+  assert.match(html, /id="psRestoreGo"/);
+  // 期限は日本時間の時刻まで出す
+  assert.match(ui, /時' \+ p2\(d\.getUTCMinutes\(\)\) \+ '分（日本時間）'/);
+  // 受け取り直しても期限は延びない（同じ番号なら同じ期限）
+  const a = await (await onClaim({ request: post('/api/v1/pass/claim', { session_id: SID }), env }, { fetch: stripe(paid()), now })).json();
+  const b = await (await onClaim({ request: post('/api/v1/pass/claim', { session_id: SID }), env }, { fetch: stripe(paid()), now: now + 3600000 })).json();
+  assert.equal(a.expiresAt, b.expiresAt);
 });

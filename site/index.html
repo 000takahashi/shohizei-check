@@ -1395,6 +1395,10 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
 .pl-steps b { display: block; font-size: 1rem; }
 .pl-date { font-family: var(--font-num); font-weight: 700; }
 .pl-steps p { margin: 4px 0 0; font-size: .88rem; color: var(--ink-secondary); line-height: 1.7; }
+.pl-steps .pl-cases { margin: 6px 0 0; padding-left: 1.2em; list-style: disc; }
+.pl-steps .pl-cases li { counter-increment: none; padding: 0; border: 0; background: none; margin: 8px 0 0; }
+.pl-steps .pl-cases li::before { content: none; }
+.pl-steps .pl-cases b { font-size: .92rem; }
 .pl-notes { margin: 14px 0 0; padding-left: 1.2em; font-size: .88rem; line-height: 1.7; color: var(--ink-secondary); }
 .pl-total td { font-weight: 700; background: var(--paper-subtle); }
 .pl-lock { margin-top: 14px; padding: 16px 18px; border: 1px solid var(--accent); border-radius: var(--radius-sm); background: var(--accent-soft); }
@@ -1403,6 +1407,11 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
 .pr-table input { width: 100%; min-width: 0; font: inherit; font-size: .9rem; padding: 7px 9px; min-height: 40px; border: 1px solid var(--line-strong); border-radius: 8px; background: var(--paper); color: var(--ink); }
 .pr-table input[type="number"] { font-family: var(--font-num); text-align: right; }
 .tablewrap table.pr-table { min-width: 0; }
+.ps-code { width: 100%; box-sizing: border-box; font-family: var(--font-num); font-size: .85rem; padding: 8px 10px; border: 1px solid var(--line-strong); border-radius: 8px; background: var(--paper); color: var(--ink); word-break: break-all; resize: vertical; }
+.ps-restore { padding-left: 1.3em; }
+.ps-restore li { margin: 0 0 8px; }
+.ps-restore-label { display: block; margin-top: 10px; font-weight: 700; }
+.ps-restore-label .ps-code { margin-top: 4px; font-weight: 400; }
 .ps-features { margin: 0 0 14px; padding-left: 1.2em; line-height: 1.8; }
 .ps-price { margin: 0 0 14px; font-size: 1.25rem; font-weight: 700; font-family: var(--font-num); }
 .ps-plans { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 0 0 12px; }
@@ -1442,6 +1451,7 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
   .pr-table td { padding: 0; border: 0; }
   .pr-table td:first-child { grid-column: 1 / -1; }
   .pr-table td.act { width: auto; align-self: center; }
+  .pr-table td[data-h]::before { content: attr(data-h); display: block; margin: 0 0 3px; color: var(--muted); font-size: .8rem; font-weight: 700; }
 }
 </style>
 <link rel="stylesheet" href="csvkit.css">
@@ -1861,7 +1871,25 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
       </div>
       <p class="bk-hint" id="psSoon" hidden>有料パスは現在準備中でございます。販売開始まで、今しばらくお待ちくださいませ。各画面の「見本で見る」から、結果の形式をお確かめいただけます。</p>
       <p class="bk-msg" id="psMsg" role="status"></p>
-      <p class="bk-hint">パスはこの端末のブラウザに保存されます。お名前やメールアドレスは含まれておりません。ブラウザのデータを消去されますと、パスも消去されますのでご注意ください。</p>
+      <div class="bk-actions" id="psRetry" hidden><button type="button" class="bk-btn primary" id="psRetryGo">パスを再度受け取る</button></div>
+      <p class="bk-hint">パスはこの端末のブラウザに保存されます。お名前やメールアドレスは含まれておりません。ブラウザのデータを消去されますと、パスも消去されますので、下の「パスの控え」を保存しておいてください。</p>
+    </section>
+    <section class="doc-card" id="psKeep" hidden>
+      <h3>パスの控え</h3>
+      <p>ブラウザのデータを消去された時や、別の端末・ブラウザでお使いになる時は、この控えでパスを戻せます。メモアプリやメールの下書きなどに保存してください。控えをお持ちの方は、どなたでもパスをお使いになれますので、他の方にはお渡しにならないでください。</p>
+      <textarea id="psKeepCode" class="ps-code" rows="3" readonly aria-label="パスの控え"></textarea>
+      <div class="bk-actions"><button type="button" class="bk-btn" id="psKeepCopy">控えをコピーする</button></div>
+    </section>
+    <section class="doc-card">
+      <h3>パスを戻す（ブラウザのデータを消去した時など）</h3>
+      <ol class="ps-restore">
+        <li><b>控えをお持ちの場合</b>：下の欄に貼り付けて「パスを戻す」を押してください。有効期限は変わりません。</li>
+        <li><b>お支払いの直後で、パスの受け取りが終わっていない場合</b>：同じ端末・同じブラウザでこのページを開き直すと、自動で受け取り直します。「パスを再度受け取る」のボタンが出ている時は、そちらを押してください。</li>
+        <li><b>控えが無い場合</b>：<a href="#legal" data-view="legal">特定商取引法に基づく表記</a>のお問い合わせ先へ、お支払いの日時・金額・カードの下4桁（領収メールがあればその内容）をお知らせください。お支払いを確認のうえ、パスを受け取り直すためのリンクをお送りいたします。有効期限は、最初のお支払いの時点から数えた日数のままです。</li>
+      </ol>
+      <label class="ps-restore-label">パスの控え<textarea id="psRestoreCode" class="ps-code" rows="3" placeholder="v1. で始まる控えを貼り付けてください" autocomplete="off" spellcheck="false"></textarea></label>
+      <div class="bk-actions"><button type="button" class="bk-btn" id="psRestoreGo">パスを戻す</button></div>
+      <p class="bk-msg" id="psRestoreMsg" role="status"></p>
     </section>
   </section>
 

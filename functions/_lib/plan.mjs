@@ -84,7 +84,14 @@ function filing(from, to, i, per, sellsFood) {
       ? { form: '課税事業者選択届出書', deadline: per.end, special: true }
       : { form: '課税事業者選択届出書', deadline: before, special: false };
   }
-  if ((from === 'general' || from === 'simple') && to === 'exempt') return { form: '課税事業者選択不適用届出書', deadline: before, special: false };
+  // 免税に戻る届出は、課税事業者になった理由で違う（国税庁 タックスアンサー No.6629）。
+  //   届出で課税事業者を選んでいる → 課税事業者選択不適用届出書。戻りたい期間の初日の前日まで（選んでから2年は出せない）
+  //   売上が1,000万円を超えて課税事業者になった → 基準期間の売上が1,000万円以下になれば届出なしで免税。
+  //     「消費税の納税義務者でなくなった旨の届出書」を速やかに出す（期限ではない）
+  // どちらかは入力からは分からないので、両方を返して画面で分けて案内する。期限は前の方（遅れると戻れない方）で持つ
+  if ((from === 'general' || from === 'simple') && to === 'exempt') {
+    return { form: '課税事業者選択不適用届出書', deadline: before, special: false, byCase: true, alt: { form: '消費税の納税義務者でなくなった旨の届出書', when: '速やかに' } };
+  }
   // 免税⇄簡易は、免税（納税なし）より少なくならないので道に入れない
   return null;
 }
@@ -158,7 +165,7 @@ export function plan(input, today) {
   const notes = [];
   if (!allowed[input.current]) notes.push(`${LABEL[input.current]}は現在の条件では選択できないため、本則課税を現在の方式とみなして計算しております。`);
   if (current === 'simple') notes.push('簡易課税を始めてから2年が経過していない場合、通常の届出では本則課税に戻れません。令和9年4月1日を含む期間の特例でご提出いただく場合は、この決まりは適用されません。');
-  if (best.path.includes('exempt') && current !== 'exempt') notes.push('免税事業者に戻るには、課税事業者を選択してから2年が経過している必要がございます。取引先が事業者の場合は、取引先が仕入れの税を控除できなくなります。');
+  if (best.path.includes('exempt') && current !== 'exempt') notes.push('免税事業者になるには、その期間の基準期間（個人は2年前、法人は2期前）と特定期間（前年の1〜6月など）の課税売上高が1,000万円以下で、インボイスの登録を受けていないことが必要です。取引先が事業者の場合は、取引先が仕入れの税を控除できなくなります。');
   if (best.path.includes('exempt') && current === 'exempt') notes.push('免税のままであれば納税はございません。取引先が事業者の場合は、値下げを求められることがございます。');
   if (best.taxes.some((t) => t < 0)) notes.push('マイナスの期間は還付（納めた税金が戻ること）となります。還付金は申告の後に振り込まれます。');
 
