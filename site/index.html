@@ -1908,7 +1908,7 @@ form.simple .assume { display: flex; align-items: flex-start; justify-content: s
         <div class="ps-plans" id="psPlans" role="radiogroup" aria-label="ご購入になるパスを選ぶ"></div>
         <dl class="ps-terms" id="psTerms"></dl>
         <div class="bk-actions"><button type="button" class="bk-btn primary" id="psGo">お支払いへ進む</button></div>
-        <p class="bk-hint">お支払いは Stripe の画面で行っていただきます。カード番号が当サイトに届くことはありません。<a href="#legal" data-view="legal">特定商取引法に基づく表記</a></p>
+        <p class="bk-hint">お支払いは Stripe の画面で行っていただきます。カード番号が当サイトに届くことはありません。お支払いの画面のアドレスは https://checkout.stripe.com/ で始まります。<a href="#legal" data-view="legal">特定商取引法に基づく表記</a></p>
       </div>
       <p class="bk-hint" id="psSoon" hidden>有料パスは現在準備中です。販売開始まで、今しばらくお待ちくださいませ。各画面の「見本で見る」から、結果の形式をお確かめいただけます。</p>
       <p class="bk-msg" id="psMsg" role="status"></p>
@@ -2101,6 +2101,13 @@ form.simple .assume { display: flex; align-items: flex-start; justify-content: s
       </ul>
     </section>
 
+    <section class="doc-card" id="official">
+      <h3>公式サイトと、なりすましへのご注意</h3>
+      <p>消費税1%チェッカーの公式サイトは <b>https://shohizei-check.com</b> のみでございます。これ以外のアドレスに同じ名前や見た目のサイトがございましても、当サイトとは関係がございません。</p>
+      <p><b>当サイトの画面で、お名前・ご住所・お電話番号・メールアドレス・パスワード・カード番号をお伺いすることはございません。</b>会員登録もございません。有料パスのお支払いは、Stripe 社の画面（アドレスが https://checkout.stripe.com/ で始まる画面）でのみお受けいたします。領収メールのためのメールアドレスとカード番号は、この Stripe 社の画面でのみご入力いただきます。</p>
+      <p>これらをお伺いする画面や、当サイトを名乗るメール・メッセージがございましたら、何もご入力にならずに閉じていただき、<a href="mailto:contact@shohizei-check.com">contact@shohizei-check.com</a> までお知らせくださいますようお願い申し上げます。</p>
+    </section>
+
     <section class="doc-card" id="privacy">
       <h3>プライバシーポリシー</h3>
       <p><b>入れた数字</b>：試算に入れた数字は、次回お開きになる際のために、お使いの端末（ブラウザ）の中にのみ保存します。当サイトのサーバーへは送信しません。帳簿のCSVの読み込みも、ブラウザの中だけで行います。届出の期限のカレンダー用ファイルも、お使いの端末の中で作成します。</p>
@@ -2146,6 +2153,7 @@ form.simple .assume { display: flex; align-items: flex-start; justify-content: s
   </section>
   <footer>
     <p class="foot-links"><a href="#about">運営者情報・プライバシーポリシー</a><a href="#pass">有料パス</a><a href="#legal">特定商取引法に基づく表記</a><a href="https://yunyu-rieki.com/" target="_blank" rel="noopener">姉妹サイト：輸入利益チェッカー</a><a href="https://menzei-check.com/" target="_blank" rel="noopener">姉妹サイト：免税チェッカー</a></p>
+    <p class="foot-official">公式サイトは https://shohizei-check.com のみでございます。当サイトの画面で、お名前・ご住所・お電話番号・メールアドレス・カード番号をお伺いすることはございません。<a href="#about" data-view="about">なりすましへのご注意</a></p>
     <p>出典：国税庁<span class="nwl">「飲食料品に係る2年間の消費税率引下げについて」（令和8年9月）</span>。法案は令和8年11月6日に衆議院で可決され、参議院で審議中です（まだ成立していません）。計算結果は一般的な目安であり、個別の税務相談に代わるものではありません。本ツールのご利用により生じた損害につきましては、責任を負いかねますので、あらかじめご了承ください。</p>
   </footer>
 </div>
