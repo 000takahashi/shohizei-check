@@ -51,6 +51,25 @@
     box.hidden = false;
   }
 
+  // 免税に戻る届出は、課税事業者になった理由で違う（国税庁 タックスアンサー No.6629）。両方を並べて、ご自身で選んでもらう
+  function exemptCases(f, per) {
+    var d = el('div');
+    d.appendChild(el('b', perText(per) + ' の期間から、' + LABEL[f.from] + 'を免税事業者に変更します'));
+    d.appendChild(el('p', '必要な届出は、課税事業者になった理由によって異なります。'));
+    var ul = el('ul', null, 'pl-cases');
+    var a = el('li');
+    a.appendChild(el('b', '「課税事業者選択届出書」を出して課税事業者になっている場合'));
+    a.appendChild(el('p', f.form + 'を、' + wa(f.deadline) + ' までにご提出ください（戻りたい課税期間が始まる前日が期限です）。課税事業者を選んだ期間の初日から2年（一定の場合は3年）を経過する日の属する課税期間が始まるまでは、この届出を出せません。'));
+    ul.appendChild(a);
+    var b = el('li');
+    b.appendChild(el('b', '売上が1,000万円を超えていたために課税事業者になっている場合'));
+    b.appendChild(el('p', 'その期間の基準期間の課税売上高が1,000万円以下になれば、届出をしなくても免税事業者になります（特定期間の売上も1,000万円以下であること）。' + f.alt.form + 'を、' + f.alt.when + 'ご提出ください。'));
+    ul.appendChild(b);
+    d.appendChild(ul);
+    d.appendChild(el('p', 'インボイスの登録を受けている場合は、登録の取消しを求める届出書を、取り消したい課税期間の初日から起算して15日前の日までにご提出いただく必要がございます。どちらに当たるか分からない場合は、税務署にお問い合わせください。', 'bk-hint'));
+    return d;
+  }
+
   // ---------- 2年間の通しの見通し ----------
   function renderPlan(r, sample) {
     var box = $('plOut'); box.textContent = ''; box.hidden = false;
@@ -79,6 +98,7 @@
       var ol = el('ol', null, 'pl-steps');
       r.best.filings.forEach(function (f) {
         var li = el('li');
+        if (f.byCase) { li.appendChild(exemptCases(f, r.periods[f.index])); ol.appendChild(li); return; }
         li.appendChild(el('b', f.form));
         li.appendChild(el('span', wa(f.deadline) + ' まで', 'pl-date'));
         li.appendChild(el('p', perText(r.periods[f.index]) + ' の期間から、' + LABEL[f.from] + 'を' + LABEL[f.to] + 'に変更します。'
@@ -93,6 +113,7 @@
         var cal = el('div', null, 'bk-actions pl-noprint'), cb = el('button', '期限をカレンダーに登録する', 'bk-btn'); cb.type = 'button';
         cb.addEventListener('click', function () {
           var ev = r.best.filings.map(function (f) {
+            if (f.byCase) return { date: f.deadline, title: '【届出の期限】' + f.form + '（届出で課税事業者を選んでいる場合）', note: perText(r.periods[f.index]) + ' の期間から免税事業者に戻る届出です。売上が1,000万円を超えて課税事業者になった方は、この届出は不要で、' + f.alt.form + 'を' + f.alt.when + 'ご提出ください。消費税1%チェッカーによる試算（目安）です。ご提出の前に、税理士または税務署にご確認ください。 https://shohizei-check.com/' };
             return { date: f.deadline, title: '【届出の期限】' + f.form, note: perText(r.periods[f.index]) + ' の期間から、' + LABEL[f.from] + 'を' + LABEL[f.to] + 'に変更する届出です。税務署へご提出ください。' + (f.special ? '参考事項の欄には「飲食料品特例」とご記入ください。' : '') + '消費税1%チェッカーによる試算（目安）です。ご提出の前に、税理士または税務署にご確認ください。 https://shohizei-check.com/' };
           });
           var a = el('a'); a.href = URL.createObjectURL(new Blob([window.IcsKit.build(ev, new Date().toISOString().replace(/[-:]|\.\d+/g, ''))], { type: 'text/calendar' })); a.download = 'shohizei-check-kigen.ics';
@@ -168,6 +189,8 @@
     var tr = el('tr');
     [['name', 'text', '例 日替わり弁当'], ['takeout', 'number', '持ち帰り 864'], ['eatIn', 'number', '店内 880']].forEach(function (c) {
       var td = el('td'), i = el('input');
+      // スマホでは表の見出しが隠れるので、欄ごとに見出しを出す（CSS の td[data-h]::before）
+      td.setAttribute('data-h', { name: '商品名', takeout: '持ち帰り・税込8%', eatIn: '店内・税込10%' }[c[0]]);
       i.type = c[1]; i.placeholder = c[2]; i.setAttribute('data-k', c[0]); i.setAttribute('aria-label', { name: '商品の名前', takeout: '持ち帰りの今の税込み', eatIn: '店内の今の税込み' }[c[0]]);
       if (c[1] === 'number') { i.min = '0'; i.step = '1'; i.inputMode = 'numeric'; } else i.maxLength = 40;
       if (it && it[c[0]]) i.value = it[c[0]];
@@ -188,6 +211,17 @@
   function setRows(items) { $('prRows').textContent = ''; (items && items.length ? items : [null, null, null]).forEach(addRow); }
   function saveDraft() { try { localStorage.setItem(DRAFT_KEY, JSON.stringify({ items: readRows(), share: $('prShare').value })); } catch (e) {} }
 
+  // 「同じにする値段」を何と比べているかを、1つめの商品の数字で書く。
+  // 店内は今の店内の値段と、持ち帰りは「減税分を全額還元した値段（本体を変えない時）」と比べる
+  function sameNote(rows) {
+    var x = rows[0], u = x.same.price, kb = x.keepBase.price, d = function (a, b) { return Math.abs(a - b).toLocaleString('ja-JP') + '円'; };
+    var name = x.name ? '「' + x.name + '」' : '1つめの商品';
+    var eat = u < x.eatIn ? '店内の現在の' + yen(x.eatIn) + 'より' + d(u, x.eatIn) + '安く' : u > x.eatIn ? '店内の現在の' + yen(x.eatIn) + 'より' + d(u, x.eatIn) + '高く' : '店内の現在の' + yen(x.eatIn) + 'と同じで';
+    var take = u > kb ? '減税分を全額還元した持ち帰りの' + yen(kb) + 'より' + d(u, kb) + '高い値段です' : u < kb ? '減税分を全額還元した持ち帰りの' + yen(kb) + 'より' + d(u, kb) + '安い値段です' : '減税分を全額還元した持ち帰りの' + yen(kb) + 'と同じ値段です';
+    var now = u < x.takeout ? '（現在の持ち帰り' + yen(x.takeout) + 'よりは' + d(u, x.takeout) + '安くなります）' : u > x.takeout ? '（現在の持ち帰り' + yen(x.takeout) + 'よりは' + d(u, x.takeout) + '高くなります）' : '（現在の持ち帰りと同じです）';
+    return '例えば' + name + 'の' + yen(u) + 'は、' + eat + '、' + take + now + '。';
+  }
+
   function renderPrice(r, sample) {
     var box = $('prOut'); box.textContent = ''; box.hidden = false; $('prLock').hidden = true;
     if (sample) box.appendChild(el('p', '見本の4つの商品での結果です。', 'pl-sample'));
@@ -202,7 +236,7 @@
       box.appendChild(table(['商品', '今の差', '1%になった時の差', '同じにする値段', 'きりのよい値段'], both.map(function (x) {
         return { cells: [x.name || '（名前なし）', yen(x.gap.now), yen(x.gap.after), yen(x.same.price), yen(x.same.round10)] };
       })));
-      box.appendChild(el('p', '「同じにする値段」は、店内で召し上がるお客様が' + r.eatInShare + '%の場合に、売上の本体の合計が現在と変わらない税込み価格です。店内は少し安く、持ち帰りは少し高くなります。同じ価格にする場合も、店内と持ち帰りで税率が異なる点をレジに設定してください。', 'bk-hint'));
+      box.appendChild(el('p', '「同じにする値段」は、店内で召し上がるお客様が' + r.eatInShare + '%の場合に、売上の本体の合計が現在と変わらない税込み価格です。' + sameNote(both) + '同じ価格にする場合も、店内と持ち帰りで税率が異なる点をレジに設定してください。', 'bk-hint'));
     }
     box.appendChild(el('p', '価格は1円単位で四捨五入しております。最終的な価格は、お店でお決めください。値札の表示方法（税込みの表示）につきましては、税務署や商工会のご案内もあわせてご確認ください。', 'bk-hint'));
     var act = el('div', null, 'bk-actions pl-noprint');

@@ -4,6 +4,7 @@
 //   番号が空の枠は出さない（アドセンスの管理画面で自動広告をオンにした時は、Google が場所を決める）。
 // - 枠は、画面に入った時に初めて広告を入れる（隠れている画面の枠に入れると、幅0で失敗するため）。
 // - ?ads=preview で、広告の場所を点線の枠で確かめられる（広告は読み込まない）。
+// - window.AdsHold が true の間は始めない（パスの受け取り中）。document の 'ads:release' で始める。
 // 設定は <script src="adsui.js" data-client="ca-pub-…" data-pass-key="（パスを入れている localStorage の名前）">。
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) module.exports = factory();
@@ -91,8 +92,14 @@
   if (typeof document !== 'undefined' && document.currentScript) {
     var me = document.currentScript;
     var cfg = { client: me.getAttribute('data-client'), passKey: me.getAttribute('data-pass-key') };
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { start(cfg); });
-    else start(cfg);
+    // 支払いから戻った直後など、パスの受け取りが終わるまでは始めない（ページの側が window.AdsHold = true にして、
+    // 終わったら document に 'ads:release' を出す）。受け取れたパスがあれば、start は何も読み込まない
+    var go = function () {
+      if (window.AdsHold) document.addEventListener('ads:release', function once() { document.removeEventListener('ads:release', once); start(cfg); });
+      else start(cfg);
+    };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', go);
+    else go();
   }
 
   return { passExpiry: passExpiry, passActive: passActive, validClient: validClient, validSlot: validSlot, decide: decide, start: start, hideAll: hideAll };

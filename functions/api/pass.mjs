@@ -2,7 +2,8 @@
 //   GET  /api/v1/pass/status    売り出し中か・値段・日数
 //   POST /api/v1/pass/checkout  Stripe の支払い画面のアドレスを返す
 //        { plan, upgrade: true } といまのパス（Authorization: Bearer）→ 差額だけで長いパスへ切り替える
-//   POST /api/v1/pass/claim     { session_id } → 支払い済みなら、署名つきのパスを返す
+//   POST /api/v1/pass/claim     { session_id } → 支払い済みなら、署名つきのパスを返す（何度でも同じ期限で受け取り直せる）
+//   POST /api/v1/pass/check     Authorization: Bearer <パス> → 本物で期限の内か（控えからパスを戻す時に使う）
 // 登録もデータベースも無い。支払い済みかは Stripe に聞く。パスは期限入りの印で、名前・メール・カードは入れない。
 // 鍵は Worker の秘密の値: STRIPE_SECRET_KEY・PASS_SIGNING_SECRET。どちらかが無い間と、販売者の表示が無い間は売らない（503）。
 import Shop from '../../site/shopinfo.js';
@@ -127,4 +128,14 @@ export async function onClaim(context, deps = {}) {
   const now = deps.now || Date.now();
   if (expMs <= now) return json({ error: 'pass_expired' }, 410);
   return json({ token: await signPass(env.PASS_SIGNING_SECRET, expMs / 1000, `${plan.id}-${await sha16(sid)}`), expiresAt: expMs, days, plan: plan.id });
+}
+
+// 控えから戻すパスが本物で、期限の内かを確かめる。中身（期限）だけ返す
+export async function onCheck(context, deps = {}) {
+  const { request, env } = context;
+  if (request.method !== 'POST') return json({ error: 'Use POST.' }, 405, { Allow: 'POST' });
+  if (!env.PASS_SIGNING_SECRET) return json({ error: 'pass_not_configured' }, 503);
+  const v = await verifyPass(env.PASS_SIGNING_SECRET, bearer(request), deps.now || Date.now());
+  if (!v.ok) return json({ ok: false, reason: v.reason }, v.reason === 'expired' ? 410 : 401);
+  return json({ ok: true, expiresAt: v.expiresAt });
 }

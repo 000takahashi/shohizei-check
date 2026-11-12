@@ -83,6 +83,20 @@ test('免税から課税事業者を選んだら、次の期間は免税に戻�
   assert.ok(r.best.total <= r.stay.total);
 });
 
+test('★免税に戻る届出は一律に決めない: 選択届を出した人と、売上が下がった人で分けて案内する（国税庁 No.6629）', () => {
+  // ご指摘の条件: 本則・個人・基準期間900万円・食品売上900万円・食品仕入100万円・インボイス登録なし
+  const r = run({ eatIn: 0, foodSales: 9000000, otherSales: 0, foodBuy: 1000000, otherBuy: 0, baseSales: 9000000, current: 'general', foodKubun: 2, invoice: false });
+  const f = r.best.filings.find((x) => x.to === 'exempt');
+  assert.ok(f, '免税へ移る道になる');
+  assert.equal(f.byCase, true);
+  assert.equal(f.form, '課税事業者選択不適用届出書');
+  assert.equal(f.deadline, '2026-12-31'); // 選択届を出した人: 戻りたい期間の初日の前日まで
+  assert.deepEqual(f.alt, { form: '消費税の納税義務者でなくなった旨の届出書', when: '速やかに' }); // 売上が下がった人: 期限ではなく速やかに
+  const csv = createRequire(import.meta.url)('../site/plancsv.js').rows(r, TODAY).map((x) => x.join(',')).join('\n');
+  assert.match(csv, /課税事業者選択不適用届出書（届出で課税事業者を選んでいる場合）/);
+  assert.match(csv, /消費税の納税義務者でなくなった旨の届出書（売上が1,000万円を超えて課税事業者になった場合）,速やかに/);
+});
+
 test('今のままが一番少ない時は、届出なし', () => {
   const r = run({ current: 'simple' });
   assert.equal(r.shouldSwitch, false);
