@@ -12,7 +12,7 @@ import Shop from '../../site/shopinfo.js';
 import { cleanPlan, plan, teaser as planTeaser, SAMPLE as PLAN_SAMPLE } from '../_lib/plan.mjs';
 import { cleanPricing, pricing, teaser as priceTeaser, SAMPLE as PRICE_SAMPLE } from '../_lib/pricing.mjs';
 
-const NOTE = '結果は目安です。売上と仕入れが毎年同じと仮定しています。届出と申告は、税理士か税務署に確かめてください。';
+const NOTE = '結果は目安でございます。売上と仕入れが毎年同じと仮定しております。届出と申告につきましては、税理士または税務署にご確認ください。';
 
 function make(clean, run, tease, SAMPLE, max) {
   return async function onRequest(context, deps = {}) {
