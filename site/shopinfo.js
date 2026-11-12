@@ -9,7 +9,8 @@
   // 売っているパス。値段と日数はここだけ。画面・支払い・表記が同じ数字になる。値段を決めるのは運営者だけ
   var PRODUCT = 'shohizei-pass';
   var PLANS = [
-    { id: 'd30', days: 30, yen: 1480 },
+    { id: 'd7', days: 7, yen: 300 },
+    { id: 'd30', days: 30, yen: 980 },
   ];
   function planById(id) { for (var i = 0; i < PLANS.length; i++) if (PLANS[i].id === id) return PLANS[i]; return null; }
   function planText(p) { return p.days + '日間 ' + p.yen.toLocaleString('ja-JP') + '円（税込）'; }
