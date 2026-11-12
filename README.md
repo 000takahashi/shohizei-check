@@ -5,7 +5,7 @@
 輸入利益チェッカー（yunyu-rieki）の姉妹サイト。
 
 - `site/index.html` 画面（ビルドなし）、`site/calc.js` 計算（画面に依存しない純粋関数）
-- テスト: `node --test tests/calc.test.js tests/seo.test.js tests/csv.test.js tests/ics.test.js tests/paid.test.mjs tests/pass.test.mjs`（依存なし。国税庁パンフの計算例2つを答えに使う）
+- テスト: `node --test tests/calc.test.js tests/seo.test.js tests/csv.test.js tests/ics.test.js tests/year.test.js tests/paid.test.mjs tests/pass.test.mjs`（依存なし。国税庁パンフの計算例2つを答えに使う）
 - 出典: 国税庁「飲食料品に係る2年間の消費税率引下げについて」（令和8年9月）。法案は令和8年11月6日に衆議院で可決、参議院で審議中（未成立）
 - 扱わないもの: 端数処理、簡易課税の75%ルール、インボイスの2割・3割特例、8%のまま残る定期便など
 - 個別の税務相談にならないよう、結果は「目安」とし、最終判断は税理士・税務署へと出す
@@ -30,6 +30,11 @@
 2. Cloudflare の Worker の Secret に `STRIPE_SECRET_KEY` と `PASS_SIGNING_SECRET`（運営者が自分で入れる。リポジトリにも会話にも書かない）
 
 手元で有料の画面を試す時は `npx wrangler dev --port 8792 --var PAID_OPEN:1`（本番には入れない）。
+
+## 減税が終わっても使えるようにする物
+
+- `#year` 8%の年の申告方式（無料・`site/yearkit.js`・`site/yearui.js`）。食料品8%の1年分で方式を比べ、次の課税期間の届出の期限を出す。1%が終わったあとも毎年使える
+- 届出の期限をカレンダーに入れる（`site/icskit.js`。ファイルは端末で作り、どこにも送らない）
 
 ## 帳簿から読み込む（CSV）
 

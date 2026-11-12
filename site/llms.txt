@@ -12,6 +12,7 @@ https://shohizei-check.com/
 - [届出と期限](https://shohizei-check.com/#deadline): 決算月から、令和9年4月1日を含む課税期間と届出の期限を出す
 - [何が変わるか](https://shohizei-check.com/#changes): 取引ごとの今と2年間の税率
 - [計算のしくみ](https://shohizei-check.com/#howto): 計算式と、国税庁パンフレットの計算例との照合
+- [8%の年の申告方式](https://shohizei-check.com/#year): 食料品が8%の年（1%の前と、終わったあと）に、本則課税・簡易課税・免税のどれが少ないかを比べる（無料）
 - [よくある質問](https://shohizei-check.com/#faq)
 - [2年間の通しの見通し（有料）](https://shohizei-check.com/#plan): 1%が始まる年から終わったあとの年までを並べ、通しで一番少ない方式の道、届出の順番と期限、毎月の取り置きを出す
 - [持ち帰りの値付け（有料）](https://shohizei-check.com/#price): 今の税込みの値段から、1%になった時の値付けの案を出す

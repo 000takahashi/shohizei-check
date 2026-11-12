@@ -1462,6 +1462,7 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
       <a class="nav-item" href="#bulk" data-view="bulk"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4zM4 9h16M4 14h16M10 9v11"/></svg><span>帳簿から読み込む（CSV）</span></a>
       <a class="nav-item" href="#plan" data-view="plan"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19h16M6 16V9M11 16V5M16 16v-5M20 16v-8"/></svg><span>2年間の通しの見通し<small class="nav-paid">有料</small></span></a>
       <a class="nav-item" href="#price" data-view="price"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12V5a1 1 0 0 1 1-1h7l8 8-8 8z"/><circle cx="8.5" cy="8.5" r="1.3"/></svg><span>持ち帰りの値付け<small class="nav-paid">有料</small></span></a>
+      <a class="nav-item" href="#year" data-view="year"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v4h-4"/></svg><span>8%の年の申告方式</span></a>
       <a class="nav-item" href="#deadline" data-view="deadline"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4M8 14h3"/></svg><span>届出と期限</span></a>
     <p class="nav-label">資料</p>
       <a class="nav-item" href="#changes" data-view="changes"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h13l-3-3M20 16H7l3 3"/></svg><span>何が変わるか</span></a>
@@ -1855,6 +1856,20 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
     </section>
   </section>
 
+  <section class="view doc" id="v-year" data-view="year" hidden>
+    <div class="page-head"><div class="page-head-text"><p class="kicker">8%の年の申告方式</p><h2 class="page-title">1%の前とあとの年を比べる</h2><p class="lead">食料品が8%の年に、<span class="nw">本則課税・簡易課税・免税の</span><span class="nw">どれが少ないかを比べます。</span><span class="nw">1%が終わったあとも、毎年の見直しに使えます。</span></p></div></div>
+    <section class="doc-card">
+      <h3>あなたの数字で比べる</h3>
+      <p>「申告方式の試算」に入れた売上と仕入れを、そのまま使います。<a href="#calc" data-view="calc">数字を入れ直す</a></p>
+      <div id="yrOut" class="pl-out"></div>
+    </section>
+    <section class="doc-card">
+      <h3>いつ使うか</h3>
+      <p>食料品の1%は、令和11年3月31日で終わる予定です。終わったあとは8%に戻るので、1%の間に選んだ方式が、そのまま一番少ないとは限りません。戻る年の前に、ここで比べ直してください。</p>
+      <p>本則課税と簡易課税のどちらが少ないかは、仕入れや設備の買い方で毎年変わります。届出は、変えたい課税期間が始まる前の日までです。</p>
+    </section>
+  </section>
+
   <section class="view doc" id="v-deadline" data-view="deadline" hidden>
     <div class="page-head"><div class="page-head-text"><p class="kicker">届出と期限</p><h2 class="page-title">届出と期限</h2><p class="lead">決算月を選ぶと、令和9年4月1日を含む課税期間と、届出ごとの期限が出ます。</p></div></div>
     <section class="doc-card">
@@ -1969,7 +1984,7 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
       <p>国税庁のパンフレット「飲食料品に係る2年間の消費税率引下げについて」（令和8年9月）をもとに作っています。法案の成立や内容の変更があれば、計算を直します。</p>
       <p>有料の機能（2年間の通しの見通し・持ち帰りの値付け）は、計算をサーバーでします。入れた数字と結果は保存しません。支払いは Stripe の画面で行い、カードの番号は当サイトには届きません。パスは、名前やメールアドレスの入っていない期限つきの印で、お使いの端末のブラウザにだけ保存します。</p>
       <ul class="history">
-        <li>2026年11月12日：有料の機能を足しました。1%が始まる年から終わったあとの年までを通した見通し（届出の順番・毎月の取り置き）と、持ち帰りの値付けです。届出の期限は、カレンダーに入れられます。今までの試算は無料のままです。</li>
+        <li>2026年11月12日：有料の機能を足しました。1%が始まる年から終わったあとの年までを通した見通し（届出の順番・毎月の取り置き）と、持ち帰りの値付けです。届出の期限は、カレンダーに入れられます。今までの試算は無料のままです。食料品が8%の年（1%の前とあと）の申告方式を比べる画面も足しました（無料）。</li>
         <li>2026年11月12日：入力欄を空で始める形にし、「すべてクリア」を足しました。入力はこの端末にだけ自動で残ります。</li>
         <li>2026年11月9日：法案の状況を「衆議院で可決（11月6日）・参議院で審議中」に直しました。</li>
         <li>2026年11月8日：見た目と使い方を姉妹サイトの輸入利益チェッカーにそろえました。計算例・クリア・URL共有、1か月の平均での入力、届出と期限のページを足しました。</li>
@@ -2363,7 +2378,7 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
   });
 
   // 左のタブ（スマホはメニュー）で画面を切り替える
-  var VIEWS = ['calc', 'bulk', 'plan', 'price', 'pass', 'legal', 'deadline', 'changes', 'howto', 'faq', 'about'];
+  var VIEWS = ['calc', 'bulk', 'plan', 'price', 'pass', 'legal', 'year', 'deadline', 'changes', 'howto', 'faq', 'about'];
   var currentView = 'calc';
   var updMbar = function () {};
   function setMenu(open) { document.body.classList.toggle('nav-open', open); $('btnMenu').setAttribute('aria-expanded', open ? 'true' : 'false'); }
@@ -2489,6 +2504,8 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
 })();
 </script>
 <script src="icskit.js"></script>
+<script src="yearkit.js"></script>
+<script src="yearui.js"></script>
 <script src="passui.js"></script>
 <script src="planui.js"></script>
 <!-- seo:jsonld:start -->
