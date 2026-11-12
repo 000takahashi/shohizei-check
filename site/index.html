@@ -1404,6 +1404,9 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
 .ps-terms { display: grid; grid-template-columns: max-content 1fr; gap: 6px 14px; margin: 0; padding: 12px 16px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--paper-subtle); font-size: .9rem; line-height: 1.6; }
 .ps-terms dt { font-weight: 700; color: var(--ink-secondary); }
 .ps-terms dd { margin: 0; }
+.ps-up { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); }
+.ps-up > p { margin: 0 0 10px; }
+.ps-up .bk-actions { margin-top: 12px; }
 .tablewrap table.lg-table { min-width: 0; }
 .lg-table th { width: 9em; vertical-align: top; white-space: normal !important; }
 .lg-table td { line-height: 1.7; }
@@ -1832,7 +1835,9 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
       <h3>パスで使える機能</h3>
       <ul class="ps-features" id="psFeatures"></ul>
       <p class="ps-price" id="psPrice"></p>
-      <div class="ps-have" id="psHave" hidden><p id="psHaveText"></p><div class="bk-actions"><a class="bk-btn primary" href="#plan" data-view="plan">2年間の通しの見通しを出す</a><a class="bk-btn" href="#price" data-view="price">持ち帰りの値付けをする</a></div></div>
+      <div class="ps-have" id="psHave" hidden><p id="psHaveText"></p><div class="bk-actions"><a class="bk-btn primary" href="#plan" data-view="plan">2年間の通しの見通しを出す</a><a class="bk-btn" href="#price" data-view="price">持ち帰りの値付けをする</a></div>
+        <div class="ps-up" id="psUp" hidden><p id="psUpText"></p><dl class="ps-terms" id="psUpTerms"></dl><div class="bk-actions"><button type="button" class="bk-btn" id="psUpGo">30日間に切り替える</button></div></div>
+      </div>
       <div id="psBuy" hidden>
         <div class="ps-plans" id="psPlans" role="radiogroup" aria-label="買うパスを選ぶ"></div>
         <dl class="ps-terms" id="psTerms"></dl>

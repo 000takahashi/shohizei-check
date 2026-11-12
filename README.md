@@ -24,6 +24,8 @@
 
 輸入利益チェッカーと同じ作り（Stripe Checkout・登録なし・データベースなし・Webhookなし）。`GET /api/v1/pass/status`・`POST /api/v1/pass/checkout`・`POST /api/v1/pass/claim`。
 
+7日間のパスが使える間は、差額（30日間の値段から7日間の値段を引いた額）で30日間に切り替えられる。`POST /api/v1/pass/checkout` に `{ plan, upgrade: true }` といまのパス（`Authorization: Bearer`）を送る。期限は、最初のお支払いから30日間。パスの印には、パスの名前（`d7`・`d30`）が入る。決まりは `site/shopinfo.js` の `upgradeFrom`。
+
 売り出しの扉は2つ。両方そろうまで、画面は「準備中」、サーバーは 503 を返す。
 
 1. `site/shopinfo.js` の `OPERATOR.contact`（届いて返信できる連絡先。入れてある）
