@@ -15,6 +15,17 @@
   function dateText(ms) { var d = new Date(ms); return d.getFullYear() + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日'; }
   function msg(text, isErr) { $('psMsg').textContent = text || ''; $('psMsg').className = 'bk-msg' + (isErr ? ' err' : ''); }
 
+  // 無料開放の期間は、「有料」の印を「◯月◯日まで無料」に変え、有料の画面の上に知らせを出す
+  if (S.freeOpen()) {
+    var until = S.freeText();
+    Array.prototype.forEach.call(document.querySelectorAll('.nav-paid'), function (n) { n.textContent = until + 'まで無料'; });
+    Array.prototype.forEach.call(document.querySelectorAll('.plan-cta span'), function (n) { n.textContent = n.textContent.replace('（有料）', '（' + until + 'まで無料）'); });
+    ['v-plan', 'v-price', 'v-pass'].forEach(function (id) {
+      var head = document.querySelector('#' + id + ' .page-head-text');
+      if (head) head.appendChild(el('p', until + 'まで、この機能を無料で使えます。登録も支払いも要りません。その次の日からは、有料パスが要ります。', 'free-note'));
+    });
+  }
+
   S.FEATURES.forEach(function (t) { $('psFeatures').appendChild(el('li', t)); });
   $('psPrice').textContent = S.PLANS.map(S.planText).join(' ／ ');
   // 買うパスを選ぶ（最初は日数の長い方）
@@ -76,6 +87,7 @@
     if (!active && exp > 0) msg('前のパスは期限が切れました。');
     $('psBuy').hidden = !(sale && sale.onSale) || active;
     $('psSoon').hidden = !!(sale && sale.onSale) || active;
+    if (S.freeOpen()) $('psSoon').textContent = S.freeText() + 'までは、パスなしで全部の機能が使えます。パスは、その次の日から買えます。';
   }
 
   // 表記のページ。販売者の表示が入るまでは「準備中」

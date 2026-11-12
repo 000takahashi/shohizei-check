@@ -58,7 +58,8 @@ async function sha16(text) {
 export async function onStatus(context, deps = {}) {
   const { request, env } = context;
   if (request.method !== 'GET') return json({ error: 'Use GET.' }, 405, { Allow: 'GET' });
-  return json({ onSale: onSale(env, deps.operator), plans: Shop.PLANS.map((p) => ({ id: p.id, days: p.days, priceYen: p.yen })) });
+  const free = Shop.freeOpen(deps.now);
+  return json({ onSale: !free && onSale(env, deps.operator), freeUntil: free ? Shop.FREE_UNTIL : '', plans: Shop.PLANS.map((p) => ({ id: p.id, days: p.days, priceYen: p.yen })) });
 }
 
 export async function onCheckout(context, deps = {}) {
@@ -66,6 +67,7 @@ export async function onCheckout(context, deps = {}) {
   if (request.method !== 'POST') return json({ error: 'Use POST.' }, 405, { Allow: 'POST' });
   if (!(env.STRIPE_SECRET_KEY && env.PASS_SIGNING_SECRET)) return json({ error: 'pass_not_configured', message: 'まだ売り出していません。' }, 503);
   if (!Shop.hasOperator(deps.operator)) return json({ error: 'seller_info_missing', message: 'まだ売り出していません。' }, 503); // 表記が先
+  if (Shop.freeOpen(deps.now)) return json({ error: 'free_period', message: '無料開放の期間は、パスを売っていません。' }, 503); // 無料の物を売らない
   const read = await readJson(request, 2000);
   const planId = read.body && typeof read.body.plan === 'string' ? read.body.plan : '';
   if (!Shop.planById(planId)) return json({ error: 'unknown_plan' }, 400);

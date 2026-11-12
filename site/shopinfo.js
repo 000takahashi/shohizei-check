@@ -12,6 +12,15 @@
     { id: 'd7', days: 7, yen: 300 },
     { id: 'd30', days: 30, yen: 980 },
   ];
+  // 無料開放の期間。この日（日本時間）の終わりまで、有料の機能をパスなしで使える。その間はパスを売らない。
+  // 期間を決めるのは運営者だけ。空（''）にすると、無料開放なし
+  var FREE_UNTIL = '2026-11-30';
+  function freeOpen(nowMs) {
+    if (!FREE_UNTIL) return false;
+    var today = new Date((nowMs || Date.now()) + 9 * 3600 * 1000).toISOString().slice(0, 10);
+    return today <= FREE_UNTIL;
+  }
+  function freeText() { var m = /^(\d+)-(\d+)-(\d+)$/.exec(FREE_UNTIL); return m ? Number(m[2]) + '月' + Number(m[3]) + '日' : ''; }
   function planById(id) { for (var i = 0; i < PLANS.length; i++) if (PLANS[i].id === id) return PLANS[i]; return null; }
   // 短いパスから長いパスへの切り替え。払うのは差額だけ。期限は、最初のお支払いから数えた長いパスの日数になる
   function upgradeFrom(fromId) {
@@ -67,5 +76,5 @@
       ? '販売事業者の所在地と電話番号は、ご請求があれば、これらを記したメールを遅滞なくお送りします。ご請求は、下記のメールアドレスへお送りください。'
       : '販売事業者の氏名、所在地、電話番号は、ご請求があれば、これらを記したメールを遅滞なくお送りします。ご請求は、下記のメールアドレスへお送りください。';
   }
-  return { PRODUCT: PRODUCT, PLANS: PLANS, planById: planById, planText: planText, upgradeFrom: upgradeFrom, planOfToken: planOfToken, upgradeText: upgradeText, OPERATOR: OPERATOR, FEATURES: FEATURES, hasOperator: hasOperator, legalRows: legalRows, legalNote: legalNote };
+  return { PRODUCT: PRODUCT, PLANS: PLANS, planById: planById, planText: planText, FREE_UNTIL: FREE_UNTIL, freeOpen: freeOpen, freeText: freeText, upgradeFrom: upgradeFrom, planOfToken: planOfToken, upgradeText: upgradeText, OPERATOR: OPERATOR, FEATURES: FEATURES, hasOperator: hasOperator, legalRows: legalRows, legalNote: legalNote };
 });
