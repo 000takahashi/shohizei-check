@@ -23,7 +23,7 @@
     if ($('homeFree')) { $('homeFree').textContent = until + 'まで、「2年間の通しの見通し」と「持ち帰りの値付け」も無料でお使いいただけます。ご登録もお支払いも不要です。'; $('homeFree').hidden = false; }
     ['v-plan', 'v-price', 'v-pass'].forEach(function (id) {
       var head = document.querySelector('#' + id + ' .page-head-text');
-      if (head) head.appendChild(el('p', until + 'まで、この機能を無料で使えます。登録も支払いも要りません。その次の日からは、有料パスが要ります。', 'free-note'));
+      if (head) head.appendChild(el('p', until + 'まで、この機能を無料でご利用いただけます。ご登録もお支払いも不要です。翌日からは、有料パスが必要となります。', 'free-note'));
     });
   }
 
@@ -45,14 +45,14 @@
   function terms() {
     var P = S.planById(chosen);
     $('psTerms').textContent = '';
-    $('psGo').textContent = P.days + '日間 ' + P.yen.toLocaleString('ja-JP') + '円で買う';
+    $('psGo').textContent = P.days + '日間 ' + P.yen.toLocaleString('ja-JP') + '円で購入する';
   [
-    ['内容', '上の4つの機能が使えます。計算の結果は目安です。法案が成立することが前提です。'],
-    ['価格', P.yen.toLocaleString('ja-JP') + '円（税込）。ほかにかかるのは、通信料だけです。'],
-    ['期間', 'お支払いの時から' + P.days + '日間。自動で更新されません。' + (S.upgradeFrom(P.id) ? 'パスが使える間は、差額の' + S.upgradeFrom(P.id).yen.toLocaleString('ja-JP') + '円で' + S.upgradeFrom(P.id).to.days + '日間に切り替えられます。' : '')],
-    ['支払い', 'クレジットカード・デビットカード。ご購入の時に確定します。'],
-    ['使える時期', 'お支払いが済むと、すぐに使えます。'],
-    ['キャンセル・返金', 'お支払いの後は、キャンセル・返金できません。当方の不具合で使えなかった場合は、全額を返金します。'],
+    ['内容', '上記の4つの機能をご利用いただけます。計算の結果は目安でございます。法案の成立を前提としております。'],
+    ['価格', P.yen.toLocaleString('ja-JP') + '円（税込）。ほかにかかる費用は、通信料のみでございます。'],
+    ['期間', 'お支払いの時点から' + P.days + '日間。自動で更新されません。' + (S.upgradeFrom(P.id) ? 'パスの有効期間中は、差額の' + S.upgradeFrom(P.id).yen.toLocaleString('ja-JP') + '円で' + S.upgradeFrom(P.id).to.days + '日間に切り替えられます。' : '')],
+    ['支払い', 'クレジットカード・デビットカード。ご購入時に確定いたします。'],
+    ['ご利用開始', 'お支払いが完了次第、すぐにご利用いただけます。'],
+    ['キャンセル・返金', 'お支払い後のキャンセル・返金はお受けいたしかねます。当方の不具合によりご利用いただけなかった場合は、全額を返金いたします。'],
   ].forEach(function (r) { $('psTerms').appendChild(el('dt', r[0])); $('psTerms').appendChild(el('dd', r[1])); });
   }
   terms();
@@ -65,15 +65,15 @@
     $('psUp').hidden = !show;
     if (!show) return;
     var yen = u.yen.toLocaleString('ja-JP'), newExp = exp + u.addDays * 86400000;
-    $('psUpText').textContent = '差額の' + yen + '円で、' + u.to.days + '日間のパスに切り替えられます。期限は ' + dateText(newExp) + ' までに延びます。';
+    $('psUpText').textContent = '差額の' + yen + '円で、' + u.to.days + '日間のパスに切り替えられます。有効期限は ' + dateText(newExp) + ' まで延長されます。';
     $('psUpTerms').textContent = '';
     [
-      ['内容', 'いまのパスを、' + u.to.days + '日間のパスに切り替えます。使える機能は同じです。'],
-      ['価格', yen + '円（税込）。' + u.to.days + '日間の値段から、' + u.from.days + '日間の値段を引いた額です。'],
-      ['期間', '最初のお支払いの時から' + u.to.days + '日間（' + dateText(newExp) + ' まで）。自動で更新されません。'],
-      ['支払い', 'クレジットカード・デビットカード。ご購入の時に確定します。'],
-      ['使える時期', 'お支払いが済むと、すぐに期限が延びます。'],
-      ['キャンセル・返金', 'お支払いの後は、キャンセル・返金できません。当方の不具合で使えなかった場合は、全額を返金します。'],
+      ['内容', '現在のパスを、' + u.to.days + '日間のパスに切り替えます。ご利用いただける機能は同じです。'],
+      ['価格', yen + '円（税込）。' + u.to.days + '日間の価格から、' + u.from.days + '日間の価格を差し引いた金額です。'],
+      ['期間', '最初のお支払いの時点から' + u.to.days + '日間（' + dateText(newExp) + ' まで）。自動で更新されません。'],
+      ['支払い', 'クレジットカード・デビットカード。ご購入時に確定いたします。'],
+      ['ご利用開始', 'お支払いが完了次第、すぐに有効期限が延長されます。'],
+      ['キャンセル・返金', 'お支払い後のキャンセル・返金はお受けいたしかねます。当方の不具合によりご利用いただけなかった場合は、全額を返金いたします。'],
     ].forEach(function (r) { $('psUpTerms').appendChild(el('dt', r[0])); $('psUpTerms').appendChild(el('dd', r[1])); });
     $('psUpGo').textContent = '差額' + yen + '円で' + u.to.days + '日間に切り替える';
     $('psUpGo').dataset.plan = u.to.id;
@@ -84,11 +84,11 @@
     var exp = expiryOf(getPass()), active = exp > Date.now();
     upgradeBox(active, exp);
     $('psHave').hidden = !active;
-    if (active) $('psHaveText').textContent = 'パスが使えます。' + dateText(exp) + ' まで有効です。';
-    if (!active && exp > 0) msg('前のパスは期限が切れました。');
+    if (active) $('psHaveText').textContent = 'パスをご利用いただけます。' + dateText(exp) + ' まで有効です。';
+    if (!active && exp > 0) msg('以前のパスは有効期限が切れております。');
     $('psBuy').hidden = !(sale && sale.onSale) || active;
     $('psSoon').hidden = !!(sale && sale.onSale) || active;
-    if (S.freeOpen()) $('psSoon').textContent = S.freeText() + 'までは、パスなしで全部の機能が使えます。パスは、その次の日から買えます。';
+    if (S.freeOpen()) $('psSoon').textContent = S.freeText() + 'までは、パスなしですべての機能をご利用いただけます。パスは、その翌日からご購入いただけます。';
   }
 
   // 表記のページ。販売者の表示が入るまでは「準備中」
@@ -109,23 +109,23 @@
 
   $('psGo').addEventListener('click', function () {
     if (busy) return;
-    busy = true; $('psGo').disabled = true; msg('支払いの画面を開いています…');
+    busy = true; $('psGo').disabled = true; msg('お支払いの画面を開いております…');
     post('/api/v1/pass/checkout', { plan: chosen }).then(function (r) {
       if (r.status === 200 && r.data.url && r.data.url.indexOf('https://checkout.stripe.com/') === 0) { location.href = r.data.url; return; }
-      msg(r.status === 503 ? 'まだ売り出していません。' : '支払いの画面を開けませんでした。少し待ってからもう一度お試しください。', true);
+      msg(r.status === 503 ? '現在、販売を開始しておりません。' : 'お支払いの画面を開けませんでした。恐れ入りますが、しばらくしてからもう一度お試しください。', true);
       busy = false; $('psGo').disabled = false;
-    }).catch(function () { msg('通信できませんでした。電波のよい所でもう一度お試しください。', true); busy = false; $('psGo').disabled = false; });
+    }).catch(function () { msg('通信できませんでした。恐れ入りますが、電波の良い場所でもう一度お試しください。', true); busy = false; $('psGo').disabled = false; });
   });
 
   $('psUpGo').addEventListener('click', function () {
     if (busy) return;
-    busy = true; $('psUpGo').disabled = true; msg('支払いの画面を開いています…');
+    busy = true; $('psUpGo').disabled = true; msg('お支払いの画面を開いております…');
     var again = function () { busy = false; $('psUpGo').disabled = false; };
     post('/api/v1/pass/checkout', { plan: $('psUpGo').dataset.plan, upgrade: true }, getPass()).then(function (r) {
       if (r.status === 200 && r.data.url && r.data.url.indexOf('https://checkout.stripe.com/') === 0) { location.href = r.data.url; return; }
-      msg(r.status === 409 ? 'このパスは切り替えられません。期限が切れている場合は、新しくお求めください。' : r.status === 503 ? 'まだ売り出していません。' : '支払いの画面を開けませんでした。少し待ってからもう一度お試しください。', true);
+      msg(r.status === 409 ? 'このパスは切り替えられません。有効期限が切れている場合は、新たにお求めください。' : r.status === 503 ? '現在、販売を開始しておりません。' : 'お支払いの画面を開けませんでした。恐れ入りますが、しばらくしてからもう一度お試しください。', true);
       again();
-    }).catch(function () { msg('通信できませんでした。電波のよい所でもう一度お試しください。', true); again(); });
+    }).catch(function () { msg('通信できませんでした。恐れ入りますが、電波の良い場所でもう一度お試しください。', true); again(); });
   });
 
   // Stripe から戻ってきた時: 支払い済みかをサーバーに確かめて、パスを受け取る。番号はアドレス欄から消す
@@ -133,17 +133,17 @@
   try { sid = new URLSearchParams(location.search).get('session_id') || ''; } catch (e) {}
   if (sid) {
     try { history.replaceState(null, '', location.pathname + '#pass'); } catch (e) {}
-    msg('お支払いを確かめています…');
+    msg('お支払いを確認しております…');
     post('/api/v1/pass/claim', { session_id: sid }).then(function (r) {
       if (r.status === 200 && r.data.token) {
         var saved = true;
         try { localStorage.setItem(PASS_KEY, r.data.token); } catch (e) { saved = false; }
-        msg(saved ? 'ありがとうございます。パスを受け取りました。' : 'お支払いは済んでいますが、この端末にパスを保存できませんでした。ブラウザの設定（プライベートモードなど）をご確認のうえ、お問い合わせください。', !saved);
+        msg(saved ? 'ご購入いただき、誠にありがとうございます。パスを発行いたしました。' : 'お支払いは完了しておりますが、この端末にパスを保存できませんでした。誠に恐れ入りますが、ブラウザの設定（プライベートモードなど）をご確認のうえ、お問い合わせください。', !saved);
         render(null);
         return;
       }
-      msg(r.status === 402 ? 'お支払いが確かめられませんでした。' : 'パスを受け取れませんでした。お支払いが済んでいる場合は、このページを開き直してください。', true);
-    }).catch(function () { msg('通信できませんでした。お支払いが済んでいる場合は、電波のよい所でこのページを開き直してください。', true); });
+      msg(r.status === 402 ? 'お支払いを確認できませんでした。' : 'パスを発行できませんでした。お支払いがお済みの場合は、お手数ですがこのページを開き直してください。', true);
+    }).catch(function () { msg('通信できませんでした。お支払いがお済みの場合は、お手数ですが電波の良い場所でこのページを開き直してください。', true); });
   }
 
   render(null);

@@ -20,9 +20,9 @@
   function setupInput(opt) {
     function readFile(f) {
       if (!f) return;
-      if (f.size > K.MAX_BYTES) { opt.onError('ファイルが大きすぎます（5MBまで）。'); return; }
+      if (f.size > K.MAX_BYTES) { opt.onError('ファイルが大きすぎます。5MBまでのファイルをお使いください。'); return; }
       if (/\.(xlsx|xls|numbers|pdf)$/i.test(f.name)) {
-        opt.onError('Excel や PDF のままでは読めません。Excel なら「名前を付けて保存」で「CSV」を選んでから読み込んでください。');
+        opt.onError('Excel や PDF の形式のままでは読み込めません。Excel の場合は、「名前を付けて保存」で「CSV」をお選びのうえ、読み込んでください。');
         return;
       }
       var fr = new FileReader();
@@ -30,7 +30,7 @@
         var d = K.decode(fr.result);
         opt.onText(d.text, { name: f.name, encoding: d.encoding });
       };
-      fr.onerror = function () { opt.onError('ファイルを読めませんでした。'); };
+      fr.onerror = function () { opt.onError('ファイルを読み込めませんでした。'); };
       fr.readAsArrayBuffer(f);
     }
     opt.input.addEventListener('change', function () { readFile(opt.input.files[0]); opt.input.value = ''; });
@@ -47,7 +47,7 @@
     if (opt.paste && opt.pasteBtn) {
       opt.pasteBtn.addEventListener('click', function () {
         var t = opt.paste.value;
-        if (!t.trim()) { opt.onError('貼り付ける欄が空です。'); return; }
+        if (!t.trim()) { opt.onError('貼り付ける欄が空欄です。表を貼り付けてください。'); return; }
         opt.onText(t, { name: '貼り付けた表', encoding: '' });
       });
     }

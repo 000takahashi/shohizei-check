@@ -147,8 +147,8 @@
       saveBySwitch: stayTax - best.tax,
       shouldSwitch: best.key !== current && stayTax - best.tax >= 1,
       notes: (currentAllowed ? [] : [input === "exempt"
-        ? "今の条件では免税事業者になれません（2年前や前年前半の売上、インボイスの登録による）。課税事業者として、本則課税を今の方式として比べています。"
-        : "2年前の課税売上高が5,000万円を超えるので、簡易課税は使えません。本則課税を今の方式として比べています。"]).concat(notesFor({ s: { food: num(p.foodSales), eatIn: num(p.eatIn) },
+        ? "現在の条件では免税事業者になれません（2年前や前年前半の売上、インボイスの登録によります）。課税事業者として、本則課税を現在の方式とみなして比較しております。"
+        : "2年前の課税売上高が5,000万円を超えているため、簡易課税はご利用になれません。本則課税を現在の方式とみなして比較しております。"]).concat(notesFor({ s: { food: num(p.foodSales), eatIn: num(p.eatIn) },
         general: options.find((o) => o.key === "general").tax, canExempt: cut.canExempt, best })),
       full: { bestKey: cut.best.key, bestTax: cut.best.tax, stayTax: pick(cut, current).tax }, // 丸1年が1%の時
     };
@@ -169,12 +169,12 @@
 
   function notesFor({ s, general, simple, canExempt, best }) {
     const n = [];
-    if (general < 0) n.push("本則課税なら還付（税金が戻る）になります。還付を受けるには本則課税で申告します。");
-    if (best.key === "exempt") n.push("免税のままでも納税はありません。ただし取引先が仕入れの税を引けなくなるため、取引先が事業者の場合は値下げを求められることがあります。");
+    if (general < 0) n.push("本則課税であれば還付（納めた税金が戻ること）となります。還付を受けるには、本則課税で申告していただく必要がございます。");
+    if (best.key === "exempt") n.push("免税のままでも納税はございません。ただし、取引先が仕入れの税を控除できなくなるため、取引先が事業者の場合は値下げを求められることがございます。");
     if (canExempt && general < 0) n.push(s.food > 0
-      ? "免税事業者でも、課税事業者を選べば還付を受けられます（飲食料品を売っているので、特例で令和9年4月1日を含む期間の中に届出を出せます）。"
-      : "免税事業者でも、課税事業者を選べば還付を受けられます（届出は、その課税期間が始まる前の日までです）。");
-    if (s.eatIn > 0 && s.food > 0) n.push("店内飲食（10%）と持ち帰り（1%）の差が9%に広がります。値付けとレジの設定を見直す時期です。");
+      ? "免税事業者の方も、課税事業者を選択すれば還付を受けられます（飲食料品を販売されているため、特例により令和9年4月1日を含む期間の中に届出をご提出いただけます）。"
+      : "免税事業者の方も、課税事業者を選択すれば還付を受けられます（届出の期限は、その課税期間が始まる前日までです）。");
+    if (s.eatIn > 0 && s.food > 0) n.push("店内飲食（10%）と持ち帰り（1%）の差が9%に広がります。値付けやレジの設定も、この機会に見直されることをおすすめいたします。");
     return n;
   }
 
@@ -205,9 +205,9 @@
     const pr = period(who, endMonth);
     const food = sellsFood === undefined ? true : !!sellsFood;
     const before = new Date(Date.parse(pr.start + "T00:00:00Z") - 86400000).toISOString().slice(0, 10);
-    const noFood = "飲食料品の販売が無いので、今回の特例は使えません。変えたい課税期間が始まる前の日までに出します。";
+    const noFood = "飲食料品の販売がないため、今回の特例はご利用になれません。変更したい課税期間が始まる前日までにご提出ください。";
     if (current === best) {
-      return { need: false, text: "今の申告のしかたのままで、届出はいりません。", period: pr };
+      return { need: false, text: "現在の申告方式のままで、届出は不要です。", period: pr };
     }
     if (best === "general" && current === "simple" && !food) {
       return { need: true, form: "簡易課税制度選択不適用届出書", deadline: before, special: false, period: pr, text: noFood };
@@ -217,18 +217,18 @@
     }
     if (best === "general" && current === "simple") {
       return { need: true, form: "簡易課税制度選択不適用届出書", deadline: pr.deadline, special: true, period: pr,
-        text: "特例で、令和9年4月1日を含む課税期間の中に出せば、その期間から本則課税になります。簡易課税の2年縛りもかかりません。" };
+        text: "特例により、令和9年4月1日を含む課税期間の中にご提出いただければ、その期間から本則課税となります。簡易課税の2年間の継続義務もかかりません。" };
     }
     if (best === "general" && current === "exempt") {
       return { need: true, form: "課税事業者選択届出書", deadline: pr.deadline, special: true, period: pr,
-        text: "特例で、令和9年4月1日を含む課税期間の中に出せば、その期間から課税事業者になれます。原則2年は課税事業者のままです。" };
+        text: "特例により、令和9年4月1日を含む課税期間の中にご提出いただければ、その期間から課税事業者となります。原則として2年間は課税事業者のままとなります。" };
     }
     if (best === "simple") {
       return { need: true, form: "簡易課税制度選択届出書", deadline: before, special: false, period: pr,
-        text: "簡易課税には今回の特例がありません。適用したい課税期間が始まる前の日までに出します。原則2年は続けます。" };
+        text: "簡易課税には今回の特例がございません。適用を受けたい課税期間が始まる前日までにご提出ください。原則として2年間は継続していただく必要がございます。" };
     }
     return { need: true, form: null, deadline: null, special: false, period: pr,
-      text: "免税事業者に戻れるかは、2年前の売上やインボイスの登録で決まります。税理士に確かめてください。" };
+      text: "免税事業者に戻れるかどうかは、2年前の売上やインボイスの登録状況によって決まります。税理士にご確認ください。" };
   }
 
   function lastDay(y, m) {

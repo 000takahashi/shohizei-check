@@ -36,8 +36,8 @@ export function checkoutForm(origin, now = Date.now(), planId = '', up = null) {
   f.set('line_items[0][price_data][currency]', 'jpy');
   f.set('line_items[0][price_data][unit_amount]', String(up ? up.yen : P.yen));
   f.set('line_items[0][price_data][product_data][name]', up ? `消費税1%チェッカー 有料パス（${up.from.days}日間から${P.days}日間への切り替え）` : `消費税1%チェッカー 有料パス（${P.days}日間）`);
-  f.set('line_items[0][price_data][product_data][description]', up ? `いまのパスの期限が、最初のお支払いの時から${P.days}日間に延びます。自動で更新されません。` : `お支払いの時から${P.days}日間、有料の機能が使えます。自動で更新されません。`);
-  f.set('custom_text[submit][message]', `お支払いの後のキャンセル・返金はできません。自動で更新されません。[特定商取引法に基づく表記](${origin}/#legal)`);
+  f.set('line_items[0][price_data][product_data][description]', up ? `現在のパスの有効期限が、最初のお支払いの時点から${P.days}日間に延長されます。自動で更新されません。` : `お支払いの時点から${P.days}日間、有料の機能をご利用いただけます。自動で更新されません。`);
+  f.set('custom_text[submit][message]', `お支払い後のキャンセル・返金はお受けいたしかねます。自動で更新されません。[特定商取引法に基づく表記](${origin}/#legal)`);
   f.set('metadata[product]', Shop.PRODUCT);
   f.set('metadata[plan]', P.id);
   if (up) { f.set('metadata[upgrade_from]', up.from.id); f.set('metadata[upgrade_exp]', String(Math.floor(up.expSec))); }
@@ -65,9 +65,9 @@ export async function onStatus(context, deps = {}) {
 export async function onCheckout(context, deps = {}) {
   const { request, env } = context;
   if (request.method !== 'POST') return json({ error: 'Use POST.' }, 405, { Allow: 'POST' });
-  if (!(env.STRIPE_SECRET_KEY && env.PASS_SIGNING_SECRET)) return json({ error: 'pass_not_configured', message: 'まだ売り出していません。' }, 503);
-  if (!Shop.hasOperator(deps.operator)) return json({ error: 'seller_info_missing', message: 'まだ売り出していません。' }, 503); // 表記が先
-  if (Shop.freeOpen(deps.now)) return json({ error: 'free_period', message: '無料開放の期間は、パスを売っていません。' }, 503); // 無料の物を売らない
+  if (!(env.STRIPE_SECRET_KEY && env.PASS_SIGNING_SECRET)) return json({ error: 'pass_not_configured', message: '現在、販売を開始しておりません。' }, 503);
+  if (!Shop.hasOperator(deps.operator)) return json({ error: 'seller_info_missing', message: '現在、販売を開始しておりません。' }, 503); // 表記が先
+  if (Shop.freeOpen(deps.now)) return json({ error: 'free_period', message: '無料開放の期間中は、パスを販売しておりません。' }, 503); // 無料の物を売らない
   const read = await readJson(request, 2000);
   const planId = read.body && typeof read.body.plan === 'string' ? read.body.plan : '';
   if (!Shop.planById(planId)) return json({ error: 'unknown_plan' }, 400);
@@ -76,7 +76,7 @@ export async function onCheckout(context, deps = {}) {
   if (read.body && read.body.upgrade === true) {
     const v = await verifyPass(env.PASS_SIGNING_SECRET, bearer(request), deps.now || Date.now());
     const u = v.ok ? Shop.upgradeFrom(Shop.planOfToken(`v1.0.${v.id}`)) : null;
-    if (!u || u.to.id !== planId) return json({ error: 'cannot_upgrade', message: '切り替えられるパスがありません。' }, 409);
+    if (!u || u.to.id !== planId) return json({ error: 'cannot_upgrade', message: '切り替えられるパスがございません。' }, 409);
     up = { from: u.from, yen: u.yen, expSec: v.expiresAt / 1000 + u.addDays * 86400 };
   }
   try {

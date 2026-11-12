@@ -156,11 +156,11 @@ export function plan(input, today) {
   });
 
   const notes = [];
-  if (!allowed[input.current]) notes.push(`${LABEL[input.current]}は今の条件では選べないため、本則課税を今の方式として計算しています。`);
-  if (current === 'simple') notes.push('簡易課税を始めてから2年たっていない場合、ふつうの届出では本則課税に戻れません。令和9年4月1日を含む期間の特例で出す時は、この決まりがかかりません。');
-  if (best.path.includes('exempt') && current !== 'exempt') notes.push('免税事業者に戻るには、課税事業者を選んでから2年がたっていることが要ります。取引先が事業者の場合は、取引先が仕入れの税を引けなくなります。');
-  if (best.path.includes('exempt') && current === 'exempt') notes.push('免税のままなら納税はありません。取引先が事業者の場合は、値下げを求められることがあります。');
-  if (best.taxes.some((t) => t < 0)) notes.push('マイナスの期間は還付（税金が戻る）です。還付は申告のあとに振り込まれます。');
+  if (!allowed[input.current]) notes.push(`${LABEL[input.current]}は現在の条件では選択できないため、本則課税を現在の方式とみなして計算しております。`);
+  if (current === 'simple') notes.push('簡易課税を始めてから2年が経過していない場合、通常の届出では本則課税に戻れません。令和9年4月1日を含む期間の特例でご提出いただく場合は、この決まりは適用されません。');
+  if (best.path.includes('exempt') && current !== 'exempt') notes.push('免税事業者に戻るには、課税事業者を選択してから2年が経過している必要がございます。取引先が事業者の場合は、取引先が仕入れの税を控除できなくなります。');
+  if (best.path.includes('exempt') && current === 'exempt') notes.push('免税のままであれば納税はございません。取引先が事業者の場合は、値下げを求められることがございます。');
+  if (best.taxes.some((t) => t < 0)) notes.push('マイナスの期間は還付（納めた税金が戻ること）となります。還付金は申告の後に振り込まれます。');
 
   return {
     today, current, currentInput: input.current, sellsFood,
