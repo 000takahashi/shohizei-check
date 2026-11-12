@@ -5,7 +5,7 @@
 輸入利益チェッカー（yunyu-rieki）の姉妹サイト。
 
 - `site/index.html` 画面（ビルドなし）、`site/calc.js` 計算（画面に依存しない純粋関数）
-- テスト: `node --test tests/calc.test.js tests/seo.test.js tests/csv.test.js tests/ics.test.js tests/year.test.js tests/plancsv.test.js tests/paid.test.mjs tests/pass.test.mjs tests/ads.test.mjs`（依存なし。国税庁パンフの計算例2つを答えに使う）
+- テスト: `node --test tests/calc.test.js tests/seo.test.js tests/guides.test.js tests/csv.test.js tests/ics.test.js tests/year.test.js tests/plancsv.test.js tests/paid.test.mjs tests/pass.test.mjs tests/ads.test.mjs`（依存なし。国税庁パンフの計算例2つを答えに使う）
 - 出典: 国税庁「飲食料品に係る2年間の消費税率引下げについて」（令和8年9月）。法案は令和8年11月6日に衆議院で可決、参議院で審議中（未成立）
 - 扱わないもの: 端数処理、簡易課税の75%ルール、インボイスの2割・3割特例、8%のまま残る定期便など
 - 個別の税務相談にならないよう、結果は「目安」とし、最終判断は税理士・税務署へと出す
@@ -73,3 +73,7 @@
 - 広告の場所は `<aside class="adslot" data-ad-slot="">` の2つ（試算・計算の結果の下と、ページの下）。アドセンスで作った広告ユニットの番号を `data-ad-slot` に入れると出る。空の枠は出さない
 - 場所の確認は `?ads=preview`（点線の枠だけ出る。広告は読み込まない）
 - 自動広告をオンにする場合は、画面の下に張り付く広告と全画面の広告（アンカー・モバイル全画面）はオフにする（入力の邪魔になるため）
+
+## 解説ページ（site/guide/）
+
+検索から直接たどり着けるページ。本文は `site/index.html` の各画面から `node scripts/build-guides.js` で作る（題名と説明は `scripts/guides.config.js`）。画面の説明を直したら流し直してコミットする。`tests/guides.test.js` が古いままを落とす。「年内に決めておくこと」の期限の表は `site/calc.js` から作り、過ぎた期限の判定は `guides.config.js` の `TODAY` で行う。
