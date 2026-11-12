@@ -27,7 +27,7 @@ function nennai(C) {
 <ol class="howto">
 <li><b>申告方式を試算する</b><span>1年分の売上と仕入れをご入力いただくと、本則課税・簡易課税・免税のうち、税額が最も少なくなる方式をお示しいたします。おおよその数字で差し支えございません。<a href="/">申告方式の試算（無料）</a></span></li>
 <li><b>2年間を通してお確かめになる</b><span>簡易課税は、一度お選びになると原則として2年間は継続していただく必要がございます。1%が終わった後の年まで並べてお確かめください。<a href="/#plan">2年間の通しの見通し</a></span></li>
-<li><b>税理士または税務署にご確認のうえ、届出をご提出になる</b><span>試算の結果は目安でございます。届出の前に、税理士または税務署へご確認ください。年末は税務署が閉庁しておりますので、お早めのご準備をおすすめいたします。</span></li>
+<li><b>税理士または税務署にご確認のうえ、届出をご提出になる</b><span>試算の結果は目安でございます。届出の前に、税理士または税務署へご確認ください。この届出の期限は、土曜日・日曜日・祝日や年末の閉庁日に当たる場合も延長されません。郵送の場合は、消印の日付が提出日となります（国税庁 タックスアンサー No.6629）。お早めのご準備をおすすめいたします。</span></li>
 </ol>
 </section>
 <section class="doc-card">
@@ -37,6 +37,7 @@ function nennai(C) {
 <thead><tr><th scope="col">事業のかたち</th><th scope="col">令和9年4月1日を含む課税期間</th><th scope="col">簡易課税へ移る届出の期限（特例なし）</th><th scope="col">特例のある届出の期限</th></tr></thead>
 <tbody>${rows.join("")}</tbody>
 </table></div>
+<p><b>届出の期限は、最新の国税庁のご案内、または税理士の先生にて、必ずご確認ください。</b>この表は、「簡易課税へ移る届出は、適用を受けたい課税期間の初日の前日まで」「特例のある届出は、令和9年4月1日を含む課税期間の中」という決まりから計算した目安でございます。</p>
 <p class="hint">法人は、1年の事業年度を前提としております。決算月によっては、令和9年4月1日を含む課税期間がすでに始まっており、その期間から簡易課税へ移る届出の期限を過ぎております。その場合の取り扱いは、税理士または税務署にご確認ください。</p>
 </section>
 <section class="doc-card">
@@ -52,7 +53,7 @@ function nennai(C) {
 <li>インボイスの登録により課税事業者となった方の2割特例・3割特例は、試算に含めておりません。</li>
 <li>内容は一般的なご説明と目安であり、個別の税務相談に代わるものではございません。</li>
 </ul>
-<p class="src">出典：国税庁「飲食料品に係る2年間の消費税率引下げについて」（令和8年9月）</p>
+<p class="src">出典（令和8年11月12日に確認）：国税庁「<a href="https://www.nta.go.jp/taxes/shiraberu/zeimokubetsu/shohi/keigenzeiritsu/pdf/0026008-127_pamphlet.pdf" target="_blank" rel="noopener">飲食料品に係る2年間の消費税率引下げについて（パンフレット）</a>」「<a href="https://www.nta.go.jp/taxes/shiraberu/zeimokubetsu/shohi/keigenzeiritsu/pdf/0026008-127_qa.pdf" target="_blank" rel="noopener">同 Q&amp;A</a>」（令和8年9月）、「<a href="https://www.nta.go.jp/taxes/shiraberu/taxanswer/shohi/6629.htm" target="_blank" rel="noopener">タックスアンサー No.6629 消費税の各種届出書</a>」</p>
 </section>`;
 }
 
