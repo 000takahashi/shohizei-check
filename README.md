@@ -5,7 +5,7 @@
 輸入利益チェッカー（yunyu-rieki）の姉妹サイト。
 
 - `site/index.html` 画面（ビルドなし）、`site/calc.js` 計算（画面に依存しない純粋関数）
-- テスト: `node --test tests/calc.test.js tests/seo.test.js tests/csv.test.js tests/ics.test.js tests/year.test.js tests/paid.test.mjs tests/pass.test.mjs`（依存なし。国税庁パンフの計算例2つを答えに使う）
+- テスト: `node --test tests/calc.test.js tests/seo.test.js tests/csv.test.js tests/ics.test.js tests/year.test.js tests/plancsv.test.js tests/paid.test.mjs tests/pass.test.mjs`（依存なし。国税庁パンフの計算例2つを答えに使う）
 - 出典: 国税庁「飲食料品に係る2年間の消費税率引下げについて」（令和8年9月）。法案は令和8年11月6日に衆議院で可決、参議院で審議中（未成立）
 - 扱わないもの: 端数処理、簡易課税の75%ルール、インボイスの2割・3割特例、8%のまま残る定期便など
 - 個別の税務相談にならないよう、結果は「目安」とし、最終判断は税理士・税務署へと出す
@@ -59,4 +59,9 @@
 - 検索向けの構造化データ（JSON-LD）は画面の「よくある質問」から `node scripts/seo-sync.js` で作る。Google・Bing への登録手順は `docs/search-registration.md`
 - 最初の1回だけ人の作業: Cloudflare の Workers & Pages で「Import a repository」からこのリポジトリを選ぶ
   （ビルドコマンドは空、デプロイコマンドは `npx wrangler deploy`）。以後は main への push で自動公開
+
+## 印刷とCSVの書き出し
+
+- 印刷は全画面で無料。`site/print.css`・`site/print.js` は輸入利益チェッカー・免税チェッカーと同じファイル（直す時は3つそろえる）。いま開いている画面だけを、メニューとボタンを外して出し、紙の上に「どのサイトで・いつ作ったか・結果は目安」の1行を入れる。ボタンは `data-print` を付けるだけ。`details[data-print-open]` は紙では開いて出す
+- CSVの書き出しは有料の画面だけ（`#plan` の見通し＝`site/plancsv.js`・`tests/plancsv.test.js`、`#price` の値付け）。どれもこの端末で作り、どこにも送らない。BOM 付き UTF-8 なので Excel と Google スプレッドシートでそのまま開ける
 
