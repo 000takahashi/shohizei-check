@@ -7,7 +7,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="description" content="令和9年4月からの食料品の消費税1%（案）で、飲食店・食品の卸・小売の税額が本則課税・簡易課税・免税でいくらになるかを比べ、出す届出と期限の目安をお示しする無料ツールです。">
 <meta property="og:title" content="消費税1%チェッカー｜食料品1%の申告方式と届出の期限">
-<meta property="og:description" content="食料品の消費税が1%になる2年間、本則・簡易・免税のどれが少ないか。届出の期限まで目安をお示しします。">
+<meta property="og:description" content="食料品の消費税が1%になる2年間、本則・簡易・免税のどれが少ないか。届出の期限まで目安を示します。">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://shohizei-check.com/">
 <link rel="canonical" href="https://shohizei-check.com/">
@@ -1453,6 +1453,19 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
   .pr-table td.act { width: auto; align-self: center; }
   .pr-table td[data-h]::before { content: attr(data-h); display: block; margin: 0 0 3px; color: var(--muted); font-size: .8rem; font-weight: 700; }
 }
+/* かんたん（3つ）とくわしく */
+.mode-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 2px 2px 10px; }
+.mode-row .mode-label { font-size: .85rem; font-weight: 600; color: var(--muted); }
+.mode-switch .seg-btn { font-size: .85rem; padding: 6px 12px; min-height: 34px; }
+.seg-pair { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+form.simple .adv { display: none !important; }
+.assume { display: none; }
+form.simple .assume { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin: 4px 0 12px; padding: 12px 14px; border: 1px dashed var(--line); border-radius: var(--radius-sm); background: var(--paper); font-size: .86rem; line-height: 1.6; color: var(--ink-secondary); }
+.assume p { margin: 0; }
+.assume b { display: block; color: var(--ink); font-weight: 600; }
+.assume .mini-btn { flex: none; }
+.sheet.blank .hero-kpi, .sheet.blank .summary, .sheet.blank .cost-bar-wrap, .sheet.blank .plan-cta, .sheet.blank .breakdown, .sheet.blank #toInput, .sheet.blank .todo { display: none !important; }
+@media (max-width: 640px) { form.simple .assume { flex-direction: column; } .page-head .trust { display: none; } }
 </style>
 <link rel="stylesheet" href="csvkit.css">
 <link rel="stylesheet" href="print.css">
@@ -1509,19 +1522,19 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
     <div class="page-head-text">
       <p class="kicker">申告方式の試算</p>
       <h1>食料品1%の申告方式チェック</h1>
-      <p class="lead">令和9年4月から2年間、食料品の消費税が1%に引き下げられる予定です。<span class="nw">本則課税・簡易課税・免税の</span><span class="nw">どれで申告すると税額が少なくなるか、</span><span class="nw">届出の期限まで</span>試算いたします。</p>
+      <p class="lead">令和9年4月から2年間、食料品の消費税が1%に引き下げられる予定です。<span class="nw">本則課税・簡易課税・免税の</span><span class="nw">どれで申告すると税額が少なくなるか、</span><span class="nw">届出の期限まで</span>試算します。</p>
       <ul class="trust">
         <li><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>国税庁の計算例と同じ結果</li>
         <li><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>届出の種類と期限まで表示</li>
         <li><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>登録不要・この試算は無料</li>
-        <li><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>ご入力内容はこの端末にのみ自動で保存</li>
+        <li><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>入力内容はこの端末にのみ自動で保存</li>
       </ul>
       <p class="howto-link"><a href="#guide" data-view="guide">はじめての方へ：使い方のご案内</a></p>
       <p class="free-note" id="homeFree" hidden></p>
     </div>
     <div class="top-actions">
       <button type="button" class="action-btn" id="btnResetExample" title="計算例（年商4,000万円の飲食店）に戻す"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg><span class="lbl">計算例</span></button>
-      <button type="button" class="action-btn" id="btnClearForm" title="ご入力の数字をすべて消去し、空欄から入力し直します（この端末に保存されたご入力内容も消去されます）"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg><span class="lbl">すべてクリア</span></button>
+      <button type="button" class="action-btn" id="btnClearForm" title="入力の数字をすべて消去し、空欄から入力し直します（この端末に保存された入力内容も消去されます）"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg><span class="lbl">すべてクリア</span></button>
       <button type="button" class="action-btn" id="btnShareUrl" title="現在の条件のURLをコピーします"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg><span class="lbl">URL共有</span></button>
     </div>
   </div>
@@ -1529,7 +1542,7 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
   <div class="example-banner" id="exampleNote" hidden>
     <div class="example-banner-text">
       <span class="example-pill">計算例を表示中</span>
-      <span>年商4,000万円ほどの、店内飲食が中心の個人経営の飲食店を例として入力しております。</span>
+      <span>年商4,000万円ほどの、店内飲食が中心の個人経営の飲食店を例として入力しています。</span>
     </div>
     <div class="example-actions">
       <button type="button" class="mini-btn" id="btnClearBanner">数値をクリアして入力</button>
@@ -1537,10 +1550,17 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
   </div>
 
   <div class="grid">
-    <form class="inputs" id="form" autocomplete="off">
+    <form class="inputs simple" id="form" autocomplete="off">
+      <div class="mode-row" id="modeRow">
+        <span class="mode-label">入れる欄</span>
+        <div class="seg-switch mode-switch" role="group" aria-label="入れる欄の多さ">
+          <button type="button" class="seg-btn active" id="modeSimpleBtn" aria-pressed="true">かんたん（3つ）</button>
+          <button type="button" class="seg-btn" id="modeFullBtn" aria-pressed="false">くわしく</button>
+        </div>
+      </div>
       <!-- 1. 事業 -->
       <fieldset>
-        <legend><span class="no" aria-hidden="true">1</span>お店・会社<small>ご事業の内容</small></legend>
+        <legend><span class="no" aria-hidden="true">1</span>どんなお店ですか<small>業種と今の申告</small></legend>
         <div class="stack">
           <div class="field">
             <div class="field-head"><label for="kind">業種</label></div>
@@ -1555,24 +1575,25 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
                 <option value="simple">簡易課税</option>
                 <option value="exempt">免税事業者</option>
               </select>
+              <span class="hint">分からない時は、去年の確定申告書の控えか、税理士さんに確かめてください。</span>
             </div>
-            <div class="field full-mobile">
+            <div class="field full-mobile adv">
               <div class="field-head">
-                <label for="baseSales">2年前の課税売上高</label>
+                <label for="baseSales">2年前の課税売上高（税抜）</label>
               </div>
               <div class="input-wrap">
                 <input type="number" id="baseSales" inputmode="numeric" step="1" min="0">
                 <span class="input-unit">円</span>
               </div>
-              <span class="hint">1,000万円以下の場合は免税、5,000万円以下の場合は簡易課税も比較いたします。</span>
+              <span class="hint">1,000万円以下の場合は免税、5,000万円以下の場合は簡易課税も比較します。</span>
             </div>
           </div>
-          <div class="stack" id="exemptChecks">
+          <div class="stack adv" id="exemptChecks">
             <label class="check"><input type="checkbox" id="invoice"><span><b>インボイス発行事業者の登録をしている</b><br><small class="muted">ご登録中は、免税事業者になることはできません。</small></span></label>
             <label class="check"><input type="checkbox" id="specifiedOver"><span><b>前年の1〜6月の売上と給与が、どちらも1,000万円を超えた</b><br><small class="muted">法人の場合は、前事業年度の開始から6か月間が対象です。いずれも超えた場合は、免税事業者になることはできません。</small></span></label>
           </div>
         </div>
-        <details class="fold" id="foldWho">
+        <details class="fold adv" id="foldWho">
           <summary><span class="ft">個人・法人と決算月</span><span class="fv" id="fvWho"></span></summary>
           <div class="row">
             <div class="field full-mobile">
@@ -1595,13 +1616,19 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
 
       <!-- 2. 売上 -->
       <fieldset>
-        <legend><span class="no" aria-hidden="true">2</span>売上<small>税抜き</small></legend>
+        <legend><span class="no" aria-hidden="true">2</span>売上はいくらですか<small>レジや帳簿の数字で</small></legend>
         <div class="stack">
           <div class="field-head">
             <span class="hint">金額の入れ方</span>
-            <div class="seg-switch" role="group" aria-label="金額の入れ方">
-              <button type="button" class="seg-btn active" id="perYear" data-per="year">1年分</button>
-              <button type="button" class="seg-btn" id="perMonth" data-per="month">1か月の平均</button>
+            <div class="seg-pair">
+              <div class="seg-switch" role="group" aria-label="1年分か1か月か">
+                <button type="button" class="seg-btn active" id="perYear" data-per="year">1年分</button>
+                <button type="button" class="seg-btn" id="perMonth" data-per="month">1か月の平均</button>
+              </div>
+              <div class="seg-switch" role="group" aria-label="税込か税抜か">
+                <button type="button" class="seg-btn active" data-tax="incl">税込</button>
+                <button type="button" class="seg-btn" data-tax="excl">税抜</button>
+              </div>
             </div>
           </div>
           <div class="row">
@@ -1624,7 +1651,7 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
             </div>
           </div>
         </div>
-        <details class="fold" id="foldOther">
+        <details class="fold adv" id="foldOther">
           <summary><span class="ft">その他の売上（お酒・雑貨など）</span><span class="fv" id="fvOther"></span></summary>
           <div class="row">
             <div class="field full-mobile">
@@ -1641,7 +1668,7 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
 
       <!-- 3. 仕入れ -->
       <fieldset>
-        <legend><span class="no" aria-hidden="true">3</span>仕入れ・経費<small>税抜き</small></legend>
+        <legend><span class="no" aria-hidden="true">3</span>仕入れ・経費はいくらですか<small id="buyHow">入れ方は売上と同じ</small></legend>
         <div class="row">
           <div class="field full-mobile">
             <div class="field-head"><label for="foodBuy">食材・食品の仕入れ</label><span class="chip on">8%→1%</span></div>
@@ -1661,7 +1688,7 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
             <span class="hint yearly" data-for="otherBuy"></span>
           </div>
         </div>
-        <details class="fold" id="foldKubun">
+        <details class="fold adv" id="foldKubun">
           <summary><span class="ft">簡易課税の事業区分</span><span class="fv" id="fvKubun"></span></summary>
           <div class="row">
             <div class="field"><label for="foodKubun">食料品の販売</label><select id="foodKubun" data-kubun></select></div>
@@ -1672,6 +1699,10 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
         </details>
       </fieldset>
 
+      <div class="assume" id="assume">
+        <p><b>ほかの欄は、次の値で計算しています。</b><span id="assumeText"></span></p>
+        <button type="button" class="mini-btn" id="assumeEdit">くわしく直す</button>
+      </div>
       <button type="button" class="jump" id="toResult">判定結果と内訳を見る ↓</button>
     </form>
 
@@ -1726,7 +1757,7 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
 
       <div class="todo" id="todo"></div>
 
-      <a class="plan-cta" href="#plan" data-view="plan"><b>2年間を通すと、どうなるか</b><span>簡易課税は、一度選択すると2年間はやめることができません。1%が終わる年まで並べ、通算で最も少なくなる道筋と届出の順番をお示しいたします（有料）。</span></a>
+      <a class="plan-cta" href="#plan" data-view="plan"><b>2年間を通すと、どうなるか</b><span>簡易課税は、一度選択すると2年間はやめることができません。1%が終わる年まで並べ、通算で最も少なくなる道筋と届出の順番を示します（有料）。</span></a>
 
       <div class="notice" id="notice" hidden></div>
 
@@ -1737,7 +1768,7 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
 
       <button type="button" class="jump" id="toInput">↑ 入力欄に戻る</button>
       <div class="bk-actions sheet-print"><button type="button" class="bk-btn" data-print>印刷する（税理士の先生へのご相談用）</button></div>
-      <p class="disclaimer">結果は目安でございます。国と地方を合わせた税率で計算しており、端数処理・75%ルール・インボイスの2割特例や3割特例・8%のまま残る取引は含めておりません。届出と申告につきましては、税理士または<a href="https://www.nta.go.jp/" target="_blank" rel="noopener">税務署</a>にご確認ください。</p>
+      <p class="disclaimer">結果は目安です。国と地方を合わせた税率で計算しており、端数処理・75%ルール・インボイスの2割特例や3割特例・8%のまま残る取引は含めていません。届出と申告につきましては、税理士または<a href="https://www.nta.go.jp/" target="_blank" rel="noopener">税務署</a>に確認してください。</p>
     </aside>
   </div>
 
@@ -1745,14 +1776,14 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
   </section>
 
   <section class="view doc" id="v-bulk" data-view="bulk" hidden>
-    <div class="page-head"><div class="page-head-text"><p class="kicker">帳簿から読み込む</p><h2 class="page-title">帳簿のCSVから売上と仕入れを集める</h2><p class="lead">会計ソフトの取引や仕訳をCSVで読み込んでいただくと、<span class="nw">食料品（8%）と10%の</span><span class="nw">売上・仕入れを1年分に集計し、</span>試算に反映いたします。</p></div></div>
+    <div class="page-head"><div class="page-head-text"><p class="kicker">帳簿から読み込む</p><h2 class="page-title">帳簿のCSVから売上と仕入れを集める</h2><p class="lead">会計ソフトの取引や仕訳をCSVで読み込んでいただくと、<span class="nw">食料品（8%）と10%の</span><span class="nw">売上・仕入れを1年分に集計し、</span>試算に反映します。</p></div></div>
     <section class="doc-card">
       <h3>1. 帳簿を読み込む</h3>
-      <p class="bk-safe"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span><b>ファイルはこのブラウザの中だけで読み込みます。</b>サーバーにもAIにも送信いたしません。読み込んだ内容は保存もいたしません（ページを閉じると消去されます）。</span></p>
+      <p class="bk-safe"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span><b>ファイルはこのブラウザの中だけで読み込みます。</b>サーバーにもAIにも送信しません。読み込んだ内容は保存もしません（ページを閉じると消去されます）。</span></p>
       <label class="bk-drop" id="bkZone">
         <input type="file" id="bkFile" accept=".csv,.tsv,.txt,text/csv,text/plain">
         <b>CSVファイルを選ぶ</b>
-        <span>こちらへドラッグしていただいても読み込めます。freee の「取引」、マネーフォワードや弥生の「仕訳帳」の書き出しに対応しております。Shift_JIS の文字コードも読み込めます。</span>
+        <span>こちらへドラッグしていただいても読み込めます。freee の「取引」、マネーフォワードや弥生の「仕訳帳」の書き出しに対応しています。Shift_JIS の文字コードも読み込めます。</span>
       </label>
       <div class="bk-actions">
         <button type="button" class="bk-btn" id="bkSample">見本で試す</button>
@@ -1773,12 +1804,12 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
         <label>10%の売上の入れ先<select id="bk10"><option value="eatIn">店内飲食・ケータリング</option><option value="otherSales">その他の売上（お酒・雑貨など）</option></select></label>
         <label class="bk-check"><input type="checkbox" id="bkScale">1年分に直す（帳簿が1年に足りない時）</label>
       </div>
-      <p class="bk-hint">税区分の「8%（軽）」を食料品、「10%」をそれ以外として集計いたします。給与・税金・非課税・輸出などは集計に含めません。税込みの金額は、税額の列がある場合は金額から税額を差し引き、ない場合は1.08または1.1で割って税抜きに換算いたします。</p>
+      <p class="bk-hint">税区分の「8%（軽）」を食料品、「10%」をそれ以外として集計します。給与・税金・非課税・輸出などは集計に含めません。税込みの金額は、税額の列がある場合は金額から税額を差し引き、ない場合は1.08または1.1で割って税抜きに換算します。</p>
     </section>
 
     <section class="doc-card" id="bkMapCard" hidden>
       <h3>3. 列の当てはめ</h3>
-      <p>見出しの言葉から自動で当てはめております。誤りがございましたら、お手数ですが選び直してください。仕訳帳（借方・貸方）の形式の場合は、借方と貸方の欄を使用いたします。</p>
+      <p>見出しの言葉から自動で当てはめています。誤りがありましたら、お手数ですが選び直してください。仕訳帳（借方・貸方）の形式の場合は、借方と貸方の欄を使用します。</p>
       <div class="bk-grid" id="bkMap"></div>
     </section>
 
@@ -1795,7 +1826,7 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
       <div class="bk-actions">
         <button type="button" class="bk-btn primary" id="bkApply">この数字で試算する</button>
       </div>
-      <p class="bk-hint">税区分が帳簿に正しく入力されていることを前提とした目安でございます。2年前の売上・インボイスの登録・業種は、試算の画面でご入力ください。</p>
+      <p class="bk-hint">税区分が帳簿に正しく入力されていることを前提とした目安です。2年前の売上・インボイスの登録・業種は、試算の画面で入れてください。</p>
     </section>
 
     <section class="doc-card">
@@ -1803,14 +1834,14 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
       <p>レジや家計簿アプリの明細など、列の名前や並びが異なる表は、ChatGPT などのAIに下記のお願い文と一緒にお渡しいただくと、このページで読み込める形に整えられます。出力されたCSVを、上の「表を貼り付けて読み込む」にお入れください。</p>
       <pre class="bk-prompt" id="bkPrompt"></pre>
       <div class="bk-actions"><button type="button" class="bk-btn" id="bkCopy">お願い文をコピー</button></div>
-      <p class="bk-hint">AIに明細をお渡しになるかどうかは、ご自身のご判断でお願いいたします。当サイトからAIへ送信するものは一切ございません。</p>
+      <p class="bk-hint">AIに明細をお渡しになるかどうかは、ご自身のご判断でお願いします。当サイトからAIへ送信するものは一切ありません。</p>
     </section>
   </section>
   <section class="view doc" id="v-plan" data-view="plan" hidden>
-    <div class="page-head"><div class="page-head-text"><p class="kicker">2年間の通しの見通し<small class="nav-paid">有料</small></p><h2 class="page-title">1年分ではなく、通しで決める</h2><p class="lead">申告方式を変更すると、2年間は継続する決まりがございます。<span class="nw">1%が始まる年から終わった後の年までを並べ、</span><span class="nw">通算で最も少なくなる道筋と、ご提出いただく届出の順番をお示しいたします。</span></p></div></div>
+    <div class="page-head"><div class="page-head-text"><p class="kicker">2年間の通しの見通し<small class="nav-paid">有料</small></p><h2 class="page-title">1年分ではなく、通しで決める</h2><p class="lead">申告方式を変更すると、2年間は継続する決まりがあります。<span class="nw">1%が始まる年から終わった後の年までを並べ、</span><span class="nw">通算で最も少なくなる道筋と、ご提出いただく届出の順番を示します。</span></p></div></div>
     <section class="doc-card">
-      <h3 class="pl-noprint">ご入力の数字で見る</h3>
-      <p class="pl-noprint">「申告方式の試算」にご入力いただいた売上と仕入れを、そのまま使用いたします。</p>
+      <h3 class="pl-noprint">入力の数字で見る</h3>
+      <p class="pl-noprint">「申告方式の試算」に入れた売上と仕入れを、そのまま使用します。</p>
       <div class="bk-actions pl-noprint">
         <button type="button" class="bk-btn primary" id="plGo">通しの見通しを出す</button>
         <button type="button" class="bk-btn" id="plSample">見本で見る</button>
@@ -1822,13 +1853,13 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
     </section>
     <section class="doc-card pl-noprint">
       <h3>無料の試算との違い</h3>
-      <p>無料の試算では、令和9年4月1日を含む1つの課税期間のみを比較いたします。こちらでは、その翌年、1%が終わる年、終わった後の年まで並べてお示しいたします。簡易課税を選択すると2年間は継続すること、届出の期限を過ぎた道筋は選べないことを踏まえ、通算で比較いたします。</p>
-      <p>計算はサーバーで行いますが、ご入力内容も結果も保存いたしません。AIは使用しておりません。</p>
+      <p>無料の試算では、令和9年4月1日を含む1つの課税期間のみを比較します。こちらでは、その翌年、1%が終わる年、終わった後の年まで並べて示します。簡易課税を選択すると2年間は継続すること、届出の期限を過ぎた道筋は選べないことを踏まえ、通算で比較します。</p>
+      <p>計算はサーバーで行いますが、入力内容も結果も保存しません。AIは使用していません。</p>
     </section>
   </section>
 
   <section class="view doc" id="v-price" data-view="price" hidden>
-    <div class="page-head"><div class="page-head-text"><p class="kicker">持ち帰りの値付け<small class="nav-paid">有料</small></p><h2 class="page-title">1%になった時の値段を決める</h2><p class="lead">店内（10%）と持ち帰り（1%）の差は、9%に広がります。<span class="nw">現在の税込み価格をもとに、</span><span class="nw">値付けの案を商品ごとにお示しいたします。</span></p></div></div>
+    <div class="page-head"><div class="page-head-text"><p class="kicker">持ち帰りの値付け<small class="nav-paid">有料</small></p><h2 class="page-title">1%になった時の値段を決める</h2><p class="lead">店内（10%）と持ち帰り（1%）の差は、9%に広がります。<span class="nw">現在の税込み価格をもとに、</span><span class="nw">値付けの案を商品ごとに示します。</span></p></div></div>
     <section class="doc-card">
       <h3 class="pl-noprint">現在の価格を入力する</h3>
       <div class="tablewrap pl-noprint">
@@ -1850,7 +1881,7 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
       <p class="bk-msg" id="prMsg" role="status"></p>
       <div id="prLock" hidden></div>
       <div id="prOut" class="pl-out" hidden></div>
-      <p class="bk-hint pl-noprint">ご入力いただいた価格は、この端末のブラウザの中にのみ保存されます。計算はサーバーで行いますが、保存はいたしません。</p>
+      <p class="bk-hint pl-noprint">入れた価格は、この端末のブラウザの中にのみ保存されます。計算はサーバーで行いますが、保存はしません。</p>
     </section>
   </section>
 
@@ -1867,12 +1898,12 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
         <div class="ps-plans" id="psPlans" role="radiogroup" aria-label="ご購入になるパスを選ぶ"></div>
         <dl class="ps-terms" id="psTerms"></dl>
         <div class="bk-actions"><button type="button" class="bk-btn primary" id="psGo">お支払いへ進む</button></div>
-        <p class="bk-hint">お支払いは Stripe の画面で行っていただきます。カード番号が当サイトに届くことはございません。<a href="#legal" data-view="legal">特定商取引法に基づく表記</a></p>
+        <p class="bk-hint">お支払いは Stripe の画面で行っていただきます。カード番号が当サイトに届くことはありません。<a href="#legal" data-view="legal">特定商取引法に基づく表記</a></p>
       </div>
-      <p class="bk-hint" id="psSoon" hidden>有料パスは現在準備中でございます。販売開始まで、今しばらくお待ちくださいませ。各画面の「見本で見る」から、結果の形式をお確かめいただけます。</p>
+      <p class="bk-hint" id="psSoon" hidden>有料パスは現在準備中です。販売開始まで、今しばらくお待ちくださいませ。各画面の「見本で見る」から、結果の形式をお確かめいただけます。</p>
       <p class="bk-msg" id="psMsg" role="status"></p>
       <div class="bk-actions" id="psRetry" hidden><button type="button" class="bk-btn primary" id="psRetryGo">パスを再度受け取る</button></div>
-      <p class="bk-hint">パスはこの端末のブラウザに保存されます。お名前やメールアドレスは含まれておりません。ブラウザのデータを消去されますと、パスも消去されますので、下の「パスの控え」を保存しておいてください。</p>
+      <p class="bk-hint">パスはこの端末のブラウザに保存されます。お名前やメールアドレスは含まれていません。ブラウザのデータを消去されますと、パスも消去されますので、下の「パスの控え」を保存しておいてください。</p>
     </section>
     <section class="doc-card" id="psKeep" hidden>
       <h3>パスの控え</h3>
@@ -1885,7 +1916,7 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
       <ol class="ps-restore">
         <li><b>控えをお持ちの場合</b>：下の欄に貼り付けて「パスを戻す」を押してください。有効期限は変わりません。</li>
         <li><b>お支払いの直後で、パスの受け取りが終わっていない場合</b>：同じ端末・同じブラウザでこのページを開き直すと、自動で受け取り直します。「パスを再度受け取る」のボタンが出ている時は、そちらを押してください。</li>
-        <li><b>控えが無い場合</b>：<a href="#legal" data-view="legal">特定商取引法に基づく表記</a>のお問い合わせ先へ、お支払いの日時・金額・カードの下4桁（領収メールがあればその内容）をお知らせください。お支払いを確認のうえ、パスを受け取り直すためのリンクをお送りいたします。有効期限は、最初のお支払いの時点から数えた日数のままです。</li>
+        <li><b>控えが無い場合</b>：<a href="#legal" data-view="legal">特定商取引法に基づく表記</a>のお問い合わせ先へ、お支払いの日時・金額・カードの下4桁（領収メールがあればその内容）をお知らせください。お支払いを確認のうえ、パスを受け取り直すためのリンクをお送りします。有効期限は、最初のお支払いの時点から数えた日数のままです。</li>
       </ol>
       <label class="ps-restore-label">パスの控え<textarea id="psRestoreCode" class="ps-code" rows="3" placeholder="v1. で始まる控えを貼り付けてください" autocomplete="off" spellcheck="false"></textarea></label>
       <div class="bk-actions"><button type="button" class="bk-btn" id="psRestoreGo">パスを戻す</button></div>
@@ -1896,7 +1927,7 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
   <section class="view doc" id="v-legal" data-view="legal" hidden>
     <div class="page-head"><div class="page-head-text"><p class="kicker">有料パス</p><h2 class="page-title">特定商取引法に基づく表記</h2></div></div>
     <section class="doc-card">
-      <p id="lgSoon">有料パスは現在準備中でございます。販売開始の際に、こちらへ表記を掲載いたします。</p>
+      <p id="lgSoon">有料パスは現在準備中です。販売開始の際に、こちらへ表記を掲載します。</p>
       <div id="lgBody" hidden>
         <p id="lgNote"></p>
         <div class="tablewrap"><table class="lg-table"><tbody id="lgRows"></tbody></table></div>
@@ -1905,16 +1936,16 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
   </section>
 
   <section class="view doc" id="v-year" data-view="year" hidden>
-    <div class="page-head"><div class="page-head-text"><p class="kicker">8%の年の申告方式</p><h2 class="page-title">1%の前とあとの年を比べる</h2><p class="lead">食料品が8%の年に、<span class="nw">本則課税・簡易課税・免税の</span><span class="nw">どれが少ないかを比較いたします。</span><span class="nw">1%が終わった後も、毎年の見直しにご利用いただけます。</span></p></div></div>
+    <div class="page-head"><div class="page-head-text"><p class="kicker">8%の年の申告方式</p><h2 class="page-title">1%の前とあとの年を比べる</h2><p class="lead">食料品が8%の年に、<span class="nw">本則課税・簡易課税・免税の</span><span class="nw">どれが少ないかを比較します。</span><span class="nw">1%が終わった後も、毎年の見直しにご利用いただけます。</span></p></div></div>
     <section class="doc-card">
-      <h3>ご入力の数字で比べる</h3>
-      <p>「申告方式の試算」にご入力いただいた売上と仕入れを、そのまま使用いたします。<a href="#calc" data-view="calc">数字を入れ直す</a></p>
+      <h3>入力の数字で比べる</h3>
+      <p>「申告方式の試算」に入れた売上と仕入れを、そのまま使用します。<a href="#calc" data-view="calc">数字を入れ直す</a></p>
       <div id="yrOut" class="pl-out"></div>
       <div class="bk-actions"><button type="button" class="bk-btn" data-print>印刷する</button></div>
     </section>
     <section class="doc-card">
       <h3>ご利用の時期</h3>
-      <p>食料品の1%は、令和11年3月31日で終わる予定です。終了後は8%に戻るため、1%の期間に選んだ方式が、引き続き最も少ないとは限りません。8%に戻る年の前に、こちらで比べ直されることをおすすめいたします。</p>
+      <p>食料品の1%は、令和11年3月31日で終わる予定です。終了後は8%に戻るため、1%の期間に選んだ方式が、引き続き最も少ないとは限りません。8%に戻る年の前に、こちらで比べ直されることをおすすめします。</p>
       <p>本則課税と簡易課税のどちらが少ないかは、仕入れや設備投資の状況によって毎年変わります。届出の期限は、変更したい課税期間が始まる前日までです。</p>
     </section>
   </section>
@@ -1945,7 +1976,7 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
     <section class="doc-card">
       <h3>特例のポイント</h3>
       <p>通常、申告方式を変更する届出は、課税期間が始まる前に提出します。今回は特例があり、免税から課税へ、簡易課税から本則課税へ移る届出は、令和9年4月1日を含む課税期間の中に提出すれば、その期間から変更できます。届出書の参考事項の欄には「飲食料品特例」とご記入ください。</p>
-      <p>本則課税から簡易課税へ移る届出には、特例がございません。適用を受けたい課税期間が始まる前日までにご提出ください。</p>
+      <p>本則課税から簡易課税へ移る届出には、特例がありません。適用を受けたい課税期間が始まる前日までにご提出ください。</p>
     </section>
   </section>
 
@@ -1970,7 +2001,7 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
       <h3>業種ごとの影響</h3>
       <p><b>店内飲食が中心の飲食店</b>：売上の税は10%のままで、食材の仕入れの税だけが減ります。引ける税が減るので、本則課税のままだと納税が増えます。簡易課税は売上の税にみなし仕入率をかけて引くので、影響を受けにくくなります。</p>
       <p><b>食品の卸・小売</b>：売上の税が1%になる一方で、家賃・光熱費・設備などの経費は10%のままです。本則課税なら還付が出ることがあります。</p>
-      <p>店内飲食（10%）と持ち帰り（1%）の差は9%に広がります。値付けやレジの設定も、この機会に見直されることをおすすめいたします。</p>
+      <p>店内飲食（10%）と持ち帰り（1%）の差は9%に広がります。値付けやレジの設定も、この機会に見直されることをおすすめします。</p>
     </section>
   </section>
 
@@ -1978,20 +2009,20 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
     <div class="page-head"><div class="page-head-text"><p class="kicker">使い方</p><h2 class="page-title">使い方のご案内</h2><p class="lead">3つの手順でお使いいただけます。<span class="nw">ご登録は不要です。</span></p></div></div>
     <section class="doc-card">
       <ol class="howto">
-        <li><b>数字をご入力ください</b><span>「申告方式の試算」で業種をお選びのうえ、1年分の売上と仕入れを税抜きでご入力ください。おおよその数字で差し支えございません。「計算例」を押していただくと、見本の数字が入ります。会計ソフトをお使いの場合は、「帳簿から読み込む（CSV）」もご利用いただけます。</span></li>
-        <li><b>「判定へ」を押してください</b><span>本則課税・簡易課税・免税のうち、税額が一番少なくなる申告方式をお示しいたします。あわせて、ご提出いただく届出の名前と期限もご確認いただけます。</span></li>
-        <li><b>2年間を通してお確かめください</b><span>簡易課税は、選ぶと2年間は続ける決まりがございます。「2年間の通しの見通し」では、1%が始まる年から終わったあとの年までを並べ、通しで一番少ない道と届出の順番をお示しいたします。お持ち帰りのあるお店は、「持ち帰りの値付け」で1%になった時のお値段もお決めいただけます。</span></li>
+        <li><b>数字を入れてください</b><span>「申告方式の試算」で業種をお選びのうえ、1年分の売上と仕入れを税抜きで入れてください。おおよその数字で差し支えありません。「計算例」を押していただくと、見本の数字が入ります。会計ソフトをお使いの場合は、「帳簿から読み込む（CSV）」もご利用いただけます。</span></li>
+        <li><b>「判定へ」を押してください</b><span>本則課税・簡易課税・免税のうち、税額が一番少なくなる申告方式を示します。あわせて、ご提出いただく届出の名前と期限もご確認いただけます。</span></li>
+        <li><b>2年間を通してお確かめください</b><span>簡易課税は、選ぶと2年間は続ける決まりがあります。「2年間の通しの見通し」では、1%が始まる年から終わったあとの年までを並べ、通しで一番少ない道と届出の順番を示します。お持ち帰りのあるお店は、「持ち帰りの値付け」で1%になった時のお値段もお決めいただけます。</span></li>
       </ol>
       <div class="bk-actions" style="margin-top:18px"><a class="bk-btn primary" href="#calc" data-view="calc">申告方式の試算を始める</a><a class="bk-btn" href="#plan" data-view="plan">2年間の通しの見通し</a><a class="bk-btn" href="#price" data-view="price">持ち帰りの値付け</a></div>
     </section>
     <section class="doc-card">
       <h3>ご利用にあたって</h3>
-      <p>入力された数字は、お使いの端末にだけ保存いたします。計算の結果は目安でございます。届出と申告の前に、税理士または税務署へご確認ください。ご不明な点は、<a href="#faq" data-view="faq">よくある質問</a>もご覧ください。</p>
+      <p>入力された数字は、お使いの端末にだけ保存します。計算の結果は目安です。届出と申告の前に、税理士または税務署へ確認してください。ご不明な点は、<a href="#faq" data-view="faq">よくある質問</a>も見てください。</p>
     </section>
   </section>
 
   <section class="view doc" id="v-howto" data-view="howto" hidden>
-    <div class="page-head"><div class="page-head-text"><p class="kicker">計算のしくみ</p><h2 class="page-title">計算のしくみ</h2><p class="lead">国税庁のパンフレットの計算例と同じ結果になることを確認しております。</p></div></div>
+    <div class="page-head"><div class="page-head-text"><p class="kicker">計算のしくみ</p><h2 class="page-title">計算のしくみ</h2><p class="lead">国税庁のパンフレットの計算例と同じ結果になることを確認しています。</p></div></div>
     <section class="doc-card">
       <h3>本則課税（一般課税）</h3>
       <div class="formula">納税額 = 売上の税 − 仕入れの税       （マイナスなら還付）
@@ -2017,7 +2048,7 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
     <section class="doc-card">
       <details>
         <summary>いつから1%になりますか？</summary>
-        <p>令和9年4月1日から令和11年3月31日までの2年間です。法案は令和8年11月6日に衆議院で可決され、現在は参議院で審議中です。本ツールは法案の成立を前提としております。</p>
+        <p>令和9年4月1日から令和11年3月31日までの2年間です。法案は令和8年11月6日に衆議院で可決され、現在は参議院で審議中です。本ツールは法案の成立を前提としています。</p>
       </details>
       <details>
         <summary>飲食店のテイクアウトも1%ですか？</summary>
@@ -2029,7 +2060,7 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
       </details>
       <details>
         <summary>簡易課税に変えるには、いつまでに届出が要りますか？</summary>
-        <p>簡易課税制度選択届出書を、適用を受けたい課税期間が始まる前日までに提出します。個人で令和9年分から適用を受ける場合は、令和8年12月31日までです。今回の特例の対象ではございません。</p>
+        <p>簡易課税制度選択届出書を、適用を受けたい課税期間が始まる前日までに提出します。個人で令和9年分から適用を受ける場合は、令和8年12月31日までです。今回の特例の対象ではありません。</p>
       </details>
       <details>
         <summary>免税事業者ですが、還付を受けられますか？</summary>
@@ -2037,7 +2068,7 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
       </details>
       <details>
         <summary>2割特例や3割特例は入っていますか？</summary>
-        <p>含まれておりません。インボイスの登録により課税事業者となった方の特例は、この試算には含めておりません。対象となる方は、税理士または税務署にご確認ください。</p>
+        <p>含まれていません。インボイスの登録により課税事業者となった方の特例は、この試算には含めていません。対象となる方は、税理士または税務署に確認してください。</p>
       </details>
     </section>
   </section>
@@ -2047,29 +2078,29 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
     <section class="doc-card">
       <h3>運営者</h3>
       <p>運営者：輸入利益チェッカー 編集室<br>連絡先：<a href="mailto:contact@shohizei-check.com">contact@shohizei-check.com</a>（計算の誤りのご指摘やご意見は、こちらまでお寄せください）</p>
-      <p>国税庁のパンフレット「飲食料品に係る2年間の消費税率引下げについて」（令和8年9月）をもとに作成しております。法案の成立や内容の変更がございましたら、速やかに計算を修正いたします。</p>
-      <p>有料の機能（2年間の通しの見通し・持ち帰りの値付け）は、サーバーで計算いたします。ご入力の数字と結果は保存いたしません。お支払いは Stripe の画面で行っていただき、カード番号が当サイトに届くことはございません。パスは、お名前やメールアドレスを含まない有効期限つきの証票で、お使いの端末のブラウザにのみ保存されます。</p>
+      <p>国税庁のパンフレット「飲食料品に係る2年間の消費税率引下げについて」（令和8年9月）をもとに作成しています。法案の成立や内容の変更がありましたら、速やかに計算を修正します。</p>
+      <p>有料の機能（2年間の通しの見通し・持ち帰りの値付け）は、サーバーで計算します。入力の数字と結果は保存しません。お支払いは Stripe の画面で行っていただき、カード番号が当サイトに届くことはありません。パスは、お名前やメールアドレスを含まない有効期限つきの証票で、お使いの端末のブラウザにのみ保存されます。</p>
       <ul class="history">
-        <li>2026年11月12日：広告（Google アドセンス）の枠を設けました。有料パスをご利用いただいている間は、広告を表示いたしません。あわせて、プライバシーポリシーを掲載いたしました。</li>
-        <li>2026年11月12日：11月30日まで、有料の機能（2年間の通しの見通し・持ち帰りの値付け）を無料で開放いたします。12月1日からは、有料パス（7日間300円・30日間980円）が必要となります。</li>
-        <li>2026年11月12日：有料の機能を追加いたしました。1%が始まる年から終わったあとの年までを通した見通し（届出の順番・毎月の取り置き）と、持ち帰りの値付けです。届出の期限は、カレンダーに登録できます。これまでの試算は引き続き無料です。食料品が8%の年（1%の前とあと）の申告方式を比べる画面も追加いたしました（無料）。</li>
-        <li>2026年11月12日：入力欄を空欄から始める形にし、「すべてクリア」を追加いたしました。ご入力内容はこの端末にのみ自動で保存されます。</li>
-        <li>2026年11月9日：法案の状況を「衆議院で可決（11月6日）・参議院で審議中」に修正いたしました。</li>
-        <li>2026年11月8日：見た目と使い方を姉妹サイトの輸入利益チェッカーに統一いたしました。計算例・クリア・URL共有、1か月の平均での入力、届出と期限のページを追加いたしました。</li>
-        <li>2026年11月7日：最初の版を公開いたしました。</li>
+        <li>2026年11月12日：広告（Google アドセンス）の枠を設けました。有料パスをご利用いただいている間は、広告を表示しません。あわせて、プライバシーポリシーを掲載しました。</li>
+        <li>2026年11月12日：11月30日まで、有料の機能（2年間の通しの見通し・持ち帰りの値付け）を無料で開放します。12月1日からは、有料パス（7日間300円・30日間980円）が必要となります。</li>
+        <li>2026年11月12日：有料の機能を追加しました。1%が始まる年から終わったあとの年までを通した見通し（届出の順番・毎月の取り置き）と、持ち帰りの値付けです。届出の期限は、カレンダーに登録できます。これまでの試算は引き続き無料です。食料品が8%の年（1%の前とあと）の申告方式を比べる画面も追加しました（無料）。</li>
+        <li>2026年11月12日：入力欄を空欄から始める形にし、「すべてクリア」を追加しました。入力内容はこの端末にのみ自動で保存されます。</li>
+        <li>2026年11月9日：法案の状況を「衆議院で可決（11月6日）・参議院で審議中」に修正しました。</li>
+        <li>2026年11月8日：見た目と使い方を姉妹サイトの輸入利益チェッカーに統一しました。計算例・クリア・URL共有、1か月の平均での入力、届出と期限のページを追加しました。</li>
+        <li>2026年11月7日：最初の版を公開しました。</li>
       </ul>
     </section>
 
     <section class="doc-card" id="privacy">
       <h3>プライバシーポリシー</h3>
-      <p><b>ご入力いただいた数字</b>：試算にご入力いただいた数字は、次回お開きになる際のために、お使いの端末（ブラウザ）の中にのみ保存いたします。当サイトのサーバーへは送信いたしません。帳簿のCSVの読み込みも、ブラウザの中だけで行います。届出の期限のカレンダー用ファイルも、お使いの端末の中で作成いたします。</p>
-      <p><b>有料の機能（2年間の通しの見通し・持ち帰りの値付け）</b>：計算のボタンを押していただいた時にのみ、その計算に必要な数字を当サイトのサーバーへ送信して計算いたします。当サイトは、送信された内容と結果を保存いたしません。AIへの送信もいたしません。</p>
-      <p><b>有料パスのお支払い</b>：お支払いは Stripe 社の画面で行っていただきます。カード番号などは Stripe 社が取り扱い、当サイトに届くことはございません。当サイトは、お支払いが完了したかどうかのみを Stripe 社に確認いたします。パス（ご購入の証票）は、お使いの端末の中にのみ保存いたします。お名前やメールアドレスは含まれておりません。</p>
-      <p><b>アクセスの記録</b>：当サイトは Cloudflare で配信しております。不正なアクセスを防ぐため、Cloudflare がIPアドレスなどのアクセスの記録を取り扱います。当サイトが、ご利用者様を特定する目的で使用することはございません。</p>
-      <p><b>広告</b>：当サイトは、第三者配信の広告サービス「Google アドセンス」を利用しております。Google などの広告配信事業者は、Cookie を使用して、ご利用者様が当サイトや他のサイトを過去に訪れた情報をもとに広告を表示することがございます。広告に Cookie を使用しないようにするには、<a href="https://adssettings.google.com/" target="_blank" rel="noopener">Google の広告設定</a>で変更いただけます。また、<a href="https://www.aboutads.info/choices/" target="_blank" rel="noopener">www.aboutads.info</a> で第三者配信事業者の Cookie を無効にしていただけます。詳しくは Google の「<a href="https://policies.google.com/technologies/ads?hl=ja" target="_blank" rel="noopener">広告</a>」のページをご覧ください。有料パスをご利用いただいている間は、広告を表示いたしません（広告の読み込みも行いません）。</p>
-      <p><b>お問い合わせ</b>：メールでお寄せいただいた内容は、ご返信のためにのみ使用いたします。</p>
-      <p><b>免責</b>：計算結果は目安でございます。実際の税額を保証するものではなく、当サイトのご利用により生じた損害につきましては、責任を負いかねますので、あらかじめご了承ください。</p>
-      <p>本方針は、必要に応じて変更することがございます。変更した際は、このページにてお知らせいたします。（2026年11月12日 制定）</p>
+      <p><b>入れた数字</b>：試算に入れた数字は、次回お開きになる際のために、お使いの端末（ブラウザ）の中にのみ保存します。当サイトのサーバーへは送信しません。帳簿のCSVの読み込みも、ブラウザの中だけで行います。届出の期限のカレンダー用ファイルも、お使いの端末の中で作成します。</p>
+      <p><b>有料の機能（2年間の通しの見通し・持ち帰りの値付け）</b>：計算のボタンを押していただいた時にのみ、その計算に必要な数字を当サイトのサーバーへ送信して計算します。当サイトは、送信された内容と結果を保存しません。AIへの送信もしません。</p>
+      <p><b>有料パスのお支払い</b>：お支払いは Stripe 社の画面で行っていただきます。カード番号などは Stripe 社が取り扱い、当サイトに届くことはありません。当サイトは、お支払いが完了したかどうかのみを Stripe 社に確認します。パス（ご購入の証票）は、お使いの端末の中にのみ保存します。お名前やメールアドレスは含まれていません。</p>
+      <p><b>アクセスの記録</b>：当サイトは Cloudflare で配信しています。不正なアクセスを防ぐため、Cloudflare がIPアドレスなどのアクセスの記録を取り扱います。当サイトが、ご利用者様を特定する目的で使用することはありません。</p>
+      <p><b>広告</b>：当サイトは、第三者配信の広告サービス「Google アドセンス」を利用しています。Google などの広告配信事業者は、Cookie を使用して、ご利用者様が当サイトや他のサイトを過去に訪れた情報をもとに広告を表示することがあります。広告に Cookie を使用しないようにするには、<a href="https://adssettings.google.com/" target="_blank" rel="noopener">Google の広告設定</a>で変更いただけます。また、<a href="https://www.aboutads.info/choices/" target="_blank" rel="noopener">www.aboutads.info</a> で第三者配信事業者の Cookie を無効にしていただけます。詳しくは Google の「<a href="https://policies.google.com/technologies/ads?hl=ja" target="_blank" rel="noopener">広告</a>」のページを見てください。有料パスをご利用いただいている間は、広告を表示しません（広告の読み込みも行いません）。</p>
+      <p><b>お問い合わせ</b>：メールでお寄せいただいた内容は、ご返信のためにのみ使用します。</p>
+      <p><b>免責</b>：計算結果は目安です。実際の税額を保証するものではなく、当サイトのご利用により生じた損害につきましては、責任を負いかねますので、あらかじめご了承ください。</p>
+      <p>本方針は、必要に応じて変更することがあります。変更した際は、このページにてお知らせします。（2026年11月12日 制定）</p>
     </section>
   </section>
     <aside class="adslot" id="adBottom" data-ad-slot="" data-ad-name="ページの下" aria-label="広告" hidden><span class="adlabel">広告</span><div class="adbox"></div></aside>
@@ -2086,7 +2117,7 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
 
   <footer>
     <p class="foot-links"><a href="#about">運営者情報・プライバシーポリシー</a><a href="#pass">有料パス</a><a href="#legal">特定商取引法に基づく表記</a><a href="https://yunyu-rieki.com/" target="_blank" rel="noopener">姉妹サイト：輸入利益チェッカー</a><a href="https://menzei-check.com/" target="_blank" rel="noopener">姉妹サイト：免税チェッカー</a></p>
-    <p>出典：国税庁<span class="nwl">「飲食料品に係る2年間の消費税率引下げについて」（令和8年9月）</span>。法案は令和8年11月6日に衆議院で可決され、参議院で審議中です（まだ成立しておりません）。計算結果は一般的な目安であり、個別の税務相談に代わるものではございません。本ツールのご利用により生じた損害につきましては、責任を負いかねますので、あらかじめご了承ください。</p>
+    <p>出典：国税庁<span class="nwl">「飲食料品に係る2年間の消費税率引下げについて」（令和8年9月）</span>。法案は令和8年11月6日に衆議院で可決され、参議院で審議中です（まだ成立していません）。計算結果は一般的な目安であり、個別の税務相談に代わるものではありません。本ツールのご利用により生じた損害につきましては、責任を負いかねますので、あらかじめご了承ください。</p>
   </footer>
 </div>
 
@@ -2106,9 +2137,11 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
   var MONEY = ['baseSales', 'eatIn', 'foodSales', 'otherSales', 'foodBuy', 'otherBuy'];
   var FLOWS = ['eatIn', 'foodSales', 'otherSales', 'foodBuy', 'otherBuy']; // 1か月で入れられる金額
   var CHECKS = ['invoice', 'specifiedOver'];
-  var FIELDS = MONEY.concat(['kind', 'current', 'who', 'endMonth', 'per', 'foodKubun', 'eatInKubun', 'otherKubun']).concat(CHECKS);
+  var FIELDS = MONEY.concat(['kind', 'current', 'who', 'endMonth', 'per', 'tax', 'foodKubun', 'eatInKubun', 'otherKubun']).concat(CHECKS);
+  // 税込で入れた時に割る数（食料品は今の8%で割る）
+  var TAXR = { eatIn: 1.10, foodSales: 1.08, otherSales: 1.10, foodBuy: 1.08, otherBuy: 1.10 };
   var EXAMPLE = {
-    kind: 'restaurant', current: 'general', who: 'individual', endMonth: '3', per: 'year',
+    kind: 'restaurant', current: 'general', who: 'individual', endMonth: '3', per: 'year', tax: 'excl',
     baseSales: 38000000, eatIn: 36000000, foodSales: 4000000, otherSales: 0, foodBuy: 12000000, otherBuy: 9000000,
     foodKubun: '3', eatInKubun: '4', otherKubun: '4'
   };
@@ -2137,7 +2170,13 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
   for (var m = 1; m <= 12; m++) { $('endMonth').add(new Option(m + '月', m)); $('dlMonth').add(new Option(m + '月', m)); }
   $('dlMonth').value = '3';
 
-  var state = { who: 'individual', per: 'year' };
+  var state = { who: 'individual', per: 'year', tax: 'excl' };
+  // 入れた金額を、計算に使う「1年分・税抜」にする
+  function flowVal(id, x) {
+    if (FLOWS.indexOf(id) < 0) return x;
+    var y = x * (state.per === 'month' ? 12 : 1);
+    return state.tax === 'incl' ? Math.round(y / TAXR[id]) : y;
+  }
   function setSeg(kind, val) {
     state[kind] = val;
     document.querySelectorAll('[data-' + kind + ']').forEach(function (b) { b.classList.toggle('active', b.dataset[kind] === val); });
@@ -2154,7 +2193,7 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
   function readForm() {
     var v = {};
     FIELDS.forEach(function (f) { if ($(f)) v[f] = CHECKS.indexOf(f) >= 0 ? ($(f).checked ? '1' : '') : $(f).value; });
-    v.who = state.who; v.per = state.per;
+    v.who = state.who; v.per = state.per; v.tax = state.tax;
     return v;
   }
   function writeForm(v) {
@@ -2166,6 +2205,8 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
     if (!S.PRESETS[$('kind').value]) $('kind').value = 'restaurant';
     setSeg('who', v.who === 'corporate' ? 'corporate' : 'individual');
     setSeg('per', v.per === 'month' ? 'month' : 'year');
+    // 前の版で保存した数字は税抜。tax の無い保存は税抜として読む
+    setSeg('tax', v.tax === 'incl' ? 'incl' : 'excl');
   }
 
   function showErrors(errs) {
@@ -2176,10 +2217,11 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
       var input = $(id), field = input.closest('.field');
       field.classList.add('err');
       input.setAttribute('aria-invalid', 'true');
+      if (field.closest('.adv')) setInputMode(true, false);
       var fold = field.closest('details'); if (fold) fold.open = true;
       var msg = field.querySelector('.errmsg');
       if (!msg) { msg = document.createElement('span'); msg.className = 'errmsg'; msg.id = id + 'Err'; msg.setAttribute('role', 'alert'); field.appendChild(msg); input.setAttribute('aria-describedby', msg.id); }
-      msg.textContent = '0以上の金額を数字でご入力ください';
+      msg.textContent = '0以上の金額を数字で入れてください';
     });
   }
 
@@ -2195,10 +2237,28 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
     $('mValue').textContent = mValue || '';
   }
 
+  function assumeText(vals) {
+    var base = $('baseSales').value;
+    var parts = [base === '' ? '2年前の課税売上高 未入力（免税事業者は比べません）' : '2年前の課税売上高 ' + man(Number(base) || 0)];
+    if ($('invoice').checked) parts.push('インボイス登録あり');
+    parts.push($('fvWho').textContent, 'その他の売上 ' + $('fvOther').textContent, '簡易課税の区分 ' + $('fvKubun').textContent);
+    $('assumeText').textContent = parts.join('・');
+  }
+  // 空の時に見せる例の1行（計算例を今の決まりで計算する）
+  function exampleLine() {
+    try {
+      var e = EXAMPLE, pr = S.period(e.who, Number(e.endMonth));
+      var c = S.compare({ eatIn: e.eatIn, foodSales: e.foodSales, otherSales: e.otherSales, foodBuy: e.foodBuy, otherBuy: e.otherBuy, baseSales: e.baseSales, current: e.current,
+        foodKubun: Number(e.foodKubun), eatInKubun: Number(e.eatInKubun), otherKubun: Number(e.otherKubun), invoice: false, specifiedOver: false, share: S.cutMonths(pr.start, pr.end) / 12 });
+      if (!c.shouldSwitch) return '';
+      return '例：店内飲食が年3,600万円、持ち帰りが年400万円の飲食店（税抜）なら、' + LABEL[c.bestKey] + 'に変えると約' + man(c.saveBySwitch) + '少なくなります。';
+    } catch (err) { return ''; }
+  }
   function foldSummaries(vals) {
     $('fvWho').textContent = state.who === 'corporate' ? '法人・' + $('endMonth').value + '月決算' : '個人（1月〜12月）';
     $('fvOther').textContent = vals.otherSales > 0 ? man(vals.otherSales) + '/年' : 'なし';
     $('fvKubun').textContent = ['foodKubun', 'eatInKubun', 'otherKubun'].map(function (id) { return '第' + $(id).value + '種'; }).join('・');
+    assumeText(vals);
   }
 
   function row(label, value, cls) { return '<tr' + (cls ? ' class="' + cls + '"' : '') + '><td>' + label + '</td><td class="num">' + value + '</td></tr>'; }
@@ -2210,7 +2270,7 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
     $('optBars').textContent = '';
     var t = $('todo'); t.textContent = ''; t.className = 'todo none';
     var h = document.createElement('span'); h.className = 'todo-k'; h.textContent = 'ご提出いただく届出と期限'; t.appendChild(h);
-    var p = document.createElement('span'); p.textContent = msg || 'ご入力内容を修正していただくと表示されます。'; t.appendChild(p);
+    var p = document.createElement('span'); p.textContent = msg || '入力内容を修正していただくと表示されます。'; t.appendChild(p);
     $('notice').hidden = true; $('notice').textContent = '';
     $('lines').textContent = '';
   }
@@ -2227,6 +2287,7 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
     MONEY.forEach(function (id) {
       var x = Number(EXAMPLE[id]) || 0;
       if (state.per === 'month' && FLOWS.indexOf(id) >= 0) x = Math.round(x / 12);
+      if (state.tax === 'incl' && TAXR[id]) x = Math.round(x * TAXR[id]);
       $(id).placeholder = '例 ' + x.toLocaleString('ja-JP');
     });
   }
@@ -2238,31 +2299,32 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
     try { localStorage.setItem(STORE_KEY, JSON.stringify(v)); } catch (e) {}
     var errs = [];
     var vals = {};
-    var mult = state.per === 'month' ? 12 : 1;
     MONEY.forEach(function (id) {
       var raw = v[id];
       if (raw === '' || raw === undefined) { vals[id] = id === 'baseSales' ? '' : 0; return; }
       var x = Number(raw);
       if (!isFinite(x) || x < 0) { errs.push(id); vals[id] = 0; return; }
-      vals[id] = FLOWS.indexOf(id) >= 0 ? x * mult : x;
+      vals[id] = flowVal(id, x);
     });
     showErrors(errs);
     document.querySelectorAll('.hint.yearly').forEach(function (el) {
       var id = el.dataset.for;
-      el.textContent = state.per === 'month' && vals[id] > 0 ? '1年分 ' + man(vals[id]) : '';
+      el.textContent = (state.per === 'month' || state.tax === 'incl') && vals[id] > 0 ? '1年分' + (state.tax === 'incl' ? '・税抜' : '') + ' ' + man(vals[id]) + ' として計算します' : '';
       el.hidden = !el.textContent;
     });
     foldSummaries(vals);
     $('sheetExample').hidden = $('exampleNote').hidden;
     if (errs.length) {
-      setVerdict('', 'ご入力内容をご確認ください', '金額は0以上の数字でご入力ください。', '');
+      setVerdict('', '入力内容を確認してください', '金額は0以上の数字で入れてください。', '');
       clearResults();
       return;
     }
     // 空で始める形：売上も仕入れもまだ入っていない時は、判定を出さずに案内する
-    if (FLOWS.every(function (id) { return v[id] === '' || v[id] === undefined; })) {
-      setVerdict('', '金額をご入力いただくと、判定が表示されます', '売上と仕入れをご入力ください。「計算例」を押していただくと、例の数字でお試しいただけます。', '');
-      clearResults('金額をご入力いただくと表示されます。');
+    var isBlank = FLOWS.every(function (id) { return v[id] === '' || v[id] === undefined; });
+    $('sheet').classList.toggle('blank', isBlank);
+    if (isBlank) {
+      setVerdict('', '売上と仕入れを入れてください', '入れると、ここに「どの申告のやり方が一番安いか」と届出の期限が出ます。' + exampleLine(), '');
+      clearResults('金額を入れると表示されます。');
       return;
     }
     var current = v.current;
@@ -2399,7 +2461,7 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
     MONEY.concat(CHECKS).forEach(function (f) { fromUrl[f] = ''; });
     FIELDS.forEach(function (f) { if (params.has(f)) fromUrl[f] = params.get(f); });
   }
-  var EMPTY = Object.assign({}, EXAMPLE, { baseSales: '', eatIn: '', foodSales: '', otherSales: '', foodBuy: '', otherBuy: '' });
+  var EMPTY = Object.assign({}, EXAMPLE, { tax: 'incl', baseSales: '', eatIn: '', foodSales: '', otherSales: '', foodBuy: '', otherBuy: '' });
   writeForm(fromUrl || saved || EMPTY);
   $('exampleNote').hidden = true;
   render();
@@ -2425,6 +2487,31 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
       setSeg('per', to); render();
     });
   });
+  document.querySelectorAll('[data-tax]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var to = b.dataset.tax;
+      if (to === state.tax) return;
+      // 入れた金額は、税込⇄税抜で換算して残す
+      FLOWS.forEach(function (id) {
+        var x = Number($(id).value);
+        if ($(id).value !== '' && isFinite(x)) $(id).value = Math.round(to === 'incl' ? x * TAXR[id] : x / TAXR[id]);
+      });
+      setSeg('tax', to); render();
+    });
+  });
+  // かんたん（3つ）とくわしくの切り替え（選んだ方をこの端末に覚える）
+  function setInputMode(full, save) {
+    $('form').classList.toggle('simple', !full);
+    $('modeSimpleBtn').classList.toggle('active', !full); $('modeSimpleBtn').setAttribute('aria-pressed', String(!full));
+    $('modeFullBtn').classList.toggle('active', full); $('modeFullBtn').setAttribute('aria-pressed', String(full));
+    if (save) { try { localStorage.setItem('shohizei-check:mode', full ? 'full' : 'simple'); } catch (e) {} }
+  }
+  var savedMode = null;
+  try { savedMode = localStorage.getItem('shohizei-check:mode'); } catch (e) {}
+  setInputMode(savedMode === 'full', false);
+  $('modeSimpleBtn').addEventListener('click', function () { setInputMode(false, true); });
+  $('modeFullBtn').addEventListener('click', function () { setInputMode(true, true); });
+  $('assumeEdit').addEventListener('click', function () { setInputMode(true, true); $('form').scrollIntoView({ block: 'start' }); });
   $('form').addEventListener('input', function () { $('exampleNote').hidden = true; render(); syncKindButtons(); });
   $('form').addEventListener('change', function () { render(); syncKindButtons(); });
   $('form').addEventListener('submit', function (e) { e.preventDefault(); });
@@ -2486,13 +2573,13 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
   document.addEventListener('click', function (e) { if (document.body.classList.contains('nav-open') && !e.target.closest('#sidenav') && !e.target.closest('#btnMenu')) setMenu(false); });
   // 有料の画面（planui.js）から使う：今の入力を、1年分の数字にして渡す。入っていない・誤りがある時は null
   window.ShohizeiInput = function () {
-    var v = readForm(), mult = state.per === 'month' ? 12 : 1, out = {}, bad = false;
+    var v = readForm(), out = {}, bad = false;
     MONEY.forEach(function (id) {
       var raw = v[id];
       if (raw === '' || raw === undefined) { out[id] = id === 'baseSales' ? '' : 0; return; }
       var x = Number(raw);
       if (!isFinite(x) || x < 0) { bad = true; return; }
-      out[id] = FLOWS.indexOf(id) >= 0 ? x * mult : x;
+      out[id] = flowVal(id, x);
     });
     if (bad || FLOWS.every(function (id) { return !(out[id] > 0); })) return null;
     out.current = v.current; out.who = state.who; out.endMonth = state.who === 'corporate' ? Number(v.endMonth) : 12;
@@ -2545,9 +2632,9 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
     var inc = $('bkIncl').value;
     var res = B.run(state.text, { included: inc === 'auto' ? 'auto' : inc === '1' }, state.map);
     state.res = res;
-    if (!res.rows) { msg('表の中身（2行目以降）が見つかりませんでした。ファイルをご確認ください。', true); $('bkMapCard').hidden = $('bkResCard').hidden = true; return; }
+    if (!res.rows) { msg('表の中身（2行目以降）が見つかりませんでした。ファイルを確認してください。', true); $('bkMapCard').hidden = $('bkResCard').hidden = true; return; }
     state.map = res.map;
-    msg((state.info.name ? state.info.name + (state.info.encoding ? '（' + state.info.encoding + '）' : '') + 'を' : '') + res.rows + '行読み込みました。' + (res.truncated ? '行数が多いため、最初の' + window.CsvKit.MAX_ROWS + '行のみ読み込んでおります。' : ''));
+    msg((state.info.name ? state.info.name + (state.info.encoding ? '（' + state.info.encoding + '）' : '') + 'を' : '') + res.rows + '行読み込みました。' + (res.truncated ? '行数が多いため、最初の' + window.CsvKit.MAX_ROWS + '行のみ読み込んでいます。' : ''));
     $('bkMapCard').hidden = false;
     U.renderMapping($('bkMap'), B.FIELDS, res.headers, res.map, function (m) { state.map = m; run(); });
     render(res);
@@ -2557,7 +2644,7 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
     var m = scale(res), w = $('bk10').value;
     var form = B.toForm(res, w, m);
     var period = res.from ? res.from.replace(/-/g, '/') + '〜' + res.to.replace(/-/g, '/') + '（' + res.months + 'か月分）' : '日付が読めません';
-    $('bkSum').innerHTML = '<span>期間 <b>' + U.esc(period) + '</b></span><span>集めた取引 <b>' + res.used + '件</b></span><span>金額は <b>' + (res.included ? '税込み' : '税抜き') + '</b> として読み込みました</span>' + (m !== 1 ? '<span>×' + (Math.round(m * 100) / 100) + ' で1年分に換算しております</span>' : '');
+    $('bkSum').innerHTML = '<span>期間 <b>' + U.esc(period) + '</b></span><span>集めた取引 <b>' + res.used + '件</b></span><span>金額は <b>' + (res.included ? '税込み' : '税抜き') + '</b> として読み込みました</span>' + (m !== 1 ? '<span>×' + (Math.round(m * 100) / 100) + ' で1年分に換算しています</span>' : '');
     var rows = [
       ['食料品の販売（8%→1%）', 'saleR', 'foodSales'],
       [w === 'eatIn' ? '店内飲食・ケータリング（10%）' : 'その他の売上（10%）', 'saleS', w],
@@ -2621,7 +2708,7 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
       "name": "いつから1%になりますか？",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "令和9年4月1日から令和11年3月31日までの2年間です。法案は令和8年11月6日に衆議院で可決され、現在は参議院で審議中です。本ツールは法案の成立を前提としております。"
+        "text": "令和9年4月1日から令和11年3月31日までの2年間です。法案は令和8年11月6日に衆議院で可決され、現在は参議院で審議中です。本ツールは法案の成立を前提としています。"
       }
     },
     {
@@ -2645,7 +2732,7 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
       "name": "簡易課税に変えるには、いつまでに届出が要りますか？",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "簡易課税制度選択届出書を、適用を受けたい課税期間が始まる前日までに提出します。個人で令和9年分から適用を受ける場合は、令和8年12月31日までです。今回の特例の対象ではございません。"
+        "text": "簡易課税制度選択届出書を、適用を受けたい課税期間が始まる前日までに提出します。個人で令和9年分から適用を受ける場合は、令和8年12月31日までです。今回の特例の対象ではありません。"
       }
     },
     {
@@ -2661,7 +2748,7 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
       "name": "2割特例や3割特例は入っていますか？",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "含まれておりません。インボイスの登録により課税事業者となった方の特例は、この試算には含めておりません。対象となる方は、税理士または税務署にご確認ください。"
+        "text": "含まれていません。インボイスの登録により課税事業者となった方の特例は、この試算には含めていません。対象となる方は、税理士または税務署に確認してください。"
       }
     }
   ]
