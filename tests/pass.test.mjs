@@ -33,7 +33,7 @@ test('表記: 連絡先が入ると行が出る。本名が空なら「請求が
   assert.match(rows['販売事業者'], /請求があれば/);
   assert.equal(rows['屋号'], 'テスト屋');
   assert.equal(rows['メールアドレス'], 'shop@example.com');
-  assert.equal(rows['販売価格'], '有料パス ' + Shop.PLANS.map(Shop.planText).join('、'));
+  assert.ok(rows['販売価格'].startsWith('有料パス ' + Shop.PLANS.map(Shop.planText).join('、'))); // 後ろに、切り替えの値段が続く
   assert.match(rows['提供時期'], /自動で更新されません/);
   assert.match(Shop.legalNote(operator), /氏名、所在地、電話番号/);
   assert.equal(Object.fromEntries(Shop.legalRows({ ...operator, name: '山田 太郎' }))['販売事業者'], '山田 太郎');
@@ -109,4 +109,44 @@ test('★値段: 7日間300円と30日間980円（運営者が決めた値）。
   assert.equal(v.expiresAt, (now / 1000 - 60) * 1000 + 7 * 86400000 + CHECKOUT_TTL_MIN * 60000);
   const cheat = await onClaim({ request: post('/api/v1/pass/claim', { session_id: SID }), env }, { fetch: stripe(paid({ amount_total: D7.yen })) , now });
   assert.equal(cheat.status, 402);
+});
+
+test('★切り替え: 7日間のパスが使える間は、差額だけで30日間へ。期限は最初のお支払いから30日', async () => {
+  const [D7, D30b] = Shop.PLANS;
+  const diff = D30b.yen - D7.yen;
+  assert.equal(diff, 680);
+  // まず7日間のパスを受け取る
+  const first = await (await onClaim({ request: post('/api/v1/pass/claim', { session_id: SID }), env }, { fetch: stripe(paid({}, D7)), now })).json();
+  assert.equal(Shop.planOfToken(first.token), 'd7');
+  const up = (token, body = { plan: 'd30', upgrade: true }, at = now) => {
+    const req = new Request('https://shohizei-check.com/api/v1/pass/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: 'Bearer ' + token } : {}) }, body: JSON.stringify(body) });
+    let sent = null;
+    return onCheckout({ request: req, env }, { operator, now: at, fetch: async (url, init) => { sent = init.body; return new Response(JSON.stringify({ url: 'https://checkout.stripe.com/c/pay/x' })); } }).then((res) => ({ res, sent }));
+  };
+  const ok = await up(first.token);
+  assert.equal(ok.res.status, 200);
+  assert.equal(ok.sent.get('line_items[0][price_data][unit_amount]'), String(diff));
+  assert.equal(ok.sent.get('metadata[upgrade_from]'), 'd7');
+  const newExpSec = first.expiresAt / 1000 + 23 * 86400;
+  assert.equal(ok.sent.get('metadata[upgrade_exp]'), String(newExpSec));
+  // パスが無い・にせ物・期限切れ・もう30日間のパス、では切り替えられない
+  assert.equal((await up('')).res.status, 409);
+  assert.equal((await up(first.token.slice(0, -3) + 'abc')).res.status, 409);
+  assert.equal((await up(first.token, undefined, now + 8 * 86400000)).res.status, 409);
+  const long = await (await onClaim({ request: post('/api/v1/pass/claim', { session_id: SID }), env }, { fetch: stripe(paid()), now })).json();
+  assert.equal((await up(long.token)).res.status, 409);
+  // 受け取る: 差額を払っていれば、30日間のパス。期限は最初のお支払いから数える
+  const upMeta = { product: Shop.PRODUCT, plan: 'd30', upgrade_from: 'd7', upgrade_exp: String(newExpSec) };
+  const SID2 = 'cs_test_' + 'b'.repeat(30);
+  const got = await onClaim({ request: post('/api/v1/pass/claim', { session_id: SID2 }), env }, { fetch: stripe(paid({ amount_total: diff, metadata: upMeta })), now: now + 3 * 86400000 });
+  assert.equal(got.status, 200);
+  const out = await got.json();
+  assert.equal(out.expiresAt, newExpSec * 1000);
+  assert.equal(Shop.planOfToken(out.token), 'd30');
+  assert.equal((await verifyPass(env.PASS_SIGNING_SECRET, out.token, now + 20 * 86400000)).ok, true);
+  // 差額より少ない額・切り替えの印なしで差額だけ、は通さない
+  assert.equal((await onClaim({ request: post('/api/v1/pass/claim', { session_id: SID2 }), env }, { fetch: stripe(paid({ amount_total: diff - 1, metadata: upMeta })), now })).status, 402);
+  assert.equal((await onClaim({ request: post('/api/v1/pass/claim', { session_id: SID2 }), env }, { fetch: stripe(paid({ amount_total: diff })), now })).status, 402);
+  // 表記にも書く
+  assert.match(Object.fromEntries(Shop.legalRows(operator))['販売価格'], /差額の680円（税込）で30日間に切り替えられます/);
 });

@@ -1,5 +1,5 @@
 // 有料のパス（買った印）を作る・確かめる。
-// 形: v1.<期限の秒>.<でたらめなID>.<署名>。名前・メール・カードは入れない。
+// 形: v1.<期限の秒>.<パスの名前>-<でたらめなID>.<署名>。名前・メール・カードは入れない。
 // 署名は HMAC-SHA256（鍵は Worker の秘密の値 PASS_SIGNING_SECRET）。鍵が無ければ、どの印も通さない。
 const enc = new TextEncoder();
 
@@ -28,15 +28,15 @@ export async function signPass(secret, expiresAtSec, id) {
   return `${body}.${await hmac(secret, body)}`;
 }
 
-// 通れば { ok: true, expiresAt }、だめなら { ok: false, reason }
+// 通れば { ok: true, expiresAt, id }、だめなら { ok: false, reason }
 export async function verifyPass(secret, token, nowMs = Date.now()) {
   if (!secret) return { ok: false, reason: 'not_on_sale' };
-  const m = /^(v1\.(\d{1,12})\.[A-Za-z0-9_-]{1,40})\.([A-Za-z0-9_-]{20,80})$/.exec(String(token || '').slice(0, 200));
+  const m = /^(v1\.(\d{1,12})\.([A-Za-z0-9_-]{1,40}))\.([A-Za-z0-9_-]{20,80})$/.exec(String(token || '').slice(0, 200));
   if (!m) return { ok: false, reason: 'no_pass' };
-  if (!sameText(await hmac(secret, m[1]), m[3])) return { ok: false, reason: 'bad_pass' };
+  if (!sameText(await hmac(secret, m[1]), m[4])) return { ok: false, reason: 'bad_pass' };
   const expiresAt = Number(m[2]) * 1000;
   if (expiresAt <= nowMs) return { ok: false, reason: 'expired' };
-  return { ok: true, expiresAt };
+  return { ok: true, expiresAt, id: m[3] };
 }
 
 // Authorization: Bearer <印> から印を取り出す

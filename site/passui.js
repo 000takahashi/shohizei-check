@@ -37,7 +37,7 @@
   [
     ['内容', '上の4つの機能が使えます。計算の結果は目安です。法案が成立することが前提です。'],
     ['価格', P.yen.toLocaleString('ja-JP') + '円（税込）。ほかにかかるのは、通信料だけです。'],
-    ['期間', 'お支払いの時から' + P.days + '日間。自動で更新されません。'],
+    ['期間', 'お支払いの時から' + P.days + '日間。自動で更新されません。' + (S.upgradeFrom(P.id) ? 'パスが使える間は、差額の' + S.upgradeFrom(P.id).yen.toLocaleString('ja-JP') + '円で' + S.upgradeFrom(P.id).to.days + '日間に切り替えられます。' : '')],
     ['支払い', 'クレジットカード・デビットカード。ご購入の時に確定します。'],
     ['使える時期', 'お支払いが済むと、すぐに使えます。'],
     ['キャンセル・返金', 'お支払いの後は、キャンセル・返金できません。当方の不具合で使えなかった場合は、全額を返金します。'],
@@ -45,8 +45,32 @@
   }
   terms();
 
+  var lastSale = null;
+  // 短いパスを持っている人に、差額だけで長いパスへ切り替える案内を出す
+  function upgradeBox(active, exp) {
+    var u = active ? S.upgradeFrom(S.planOfToken(getPass())) : null;
+    var show = !!(u && lastSale && lastSale.onSale);
+    $('psUp').hidden = !show;
+    if (!show) return;
+    var yen = u.yen.toLocaleString('ja-JP'), newExp = exp + u.addDays * 86400000;
+    $('psUpText').textContent = '差額の' + yen + '円で、' + u.to.days + '日間のパスに切り替えられます。期限は ' + dateText(newExp) + ' までに延びます。';
+    $('psUpTerms').textContent = '';
+    [
+      ['内容', 'いまのパスを、' + u.to.days + '日間のパスに切り替えます。使える機能は同じです。'],
+      ['価格', yen + '円（税込）。' + u.to.days + '日間の値段から、' + u.from.days + '日間の値段を引いた額です。'],
+      ['期間', '最初のお支払いの時から' + u.to.days + '日間（' + dateText(newExp) + ' まで）。自動で更新されません。'],
+      ['支払い', 'クレジットカード・デビットカード。ご購入の時に確定します。'],
+      ['使える時期', 'お支払いが済むと、すぐに期限が延びます。'],
+      ['キャンセル・返金', 'お支払いの後は、キャンセル・返金できません。当方の不具合で使えなかった場合は、全額を返金します。'],
+    ].forEach(function (r) { $('psUpTerms').appendChild(el('dt', r[0])); $('psUpTerms').appendChild(el('dd', r[1])); });
+    $('psUpGo').textContent = '差額' + yen + '円で' + u.to.days + '日間に切り替える';
+    $('psUpGo').dataset.plan = u.to.id;
+  }
+
   function render(sale) {
+    if (sale) lastSale = sale; else sale = lastSale;
     var exp = expiryOf(getPass()), active = exp > Date.now();
+    upgradeBox(active, exp);
     $('psHave').hidden = !active;
     if (active) $('psHaveText').textContent = 'パスが使えます。' + dateText(exp) + ' まで有効です。';
     if (!active && exp > 0) msg('前のパスは期限が切れました。');
@@ -63,8 +87,10 @@
     rows.forEach(function (r) { var tr = document.createElement('tr'); tr.appendChild(el('th', r[0])); tr.appendChild(el('td', r[1])); $('lgRows').appendChild(tr); });
   }
 
-  function post(path, body) {
-    return fetch(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}) })
+  function post(path, body, pass) {
+    var headers = { 'Content-Type': 'application/json' };
+    if (pass) headers.Authorization = 'Bearer ' + pass;
+    return fetch(path, { method: 'POST', headers: headers, body: JSON.stringify(body || {}) })
       .then(function (res) { return res.json().then(function (data) { return { status: res.status, data: data }; }); });
   }
 
@@ -76,6 +102,17 @@
       msg(r.status === 503 ? 'まだ売り出していません。' : '支払いの画面を開けませんでした。少し待ってからもう一度お試しください。', true);
       busy = false; $('psGo').disabled = false;
     }).catch(function () { msg('通信できませんでした。電波のよい所でもう一度お試しください。', true); busy = false; $('psGo').disabled = false; });
+  });
+
+  $('psUpGo').addEventListener('click', function () {
+    if (busy) return;
+    busy = true; $('psUpGo').disabled = true; msg('支払いの画面を開いています…');
+    var again = function () { busy = false; $('psUpGo').disabled = false; };
+    post('/api/v1/pass/checkout', { plan: $('psUpGo').dataset.plan, upgrade: true }, getPass()).then(function (r) {
+      if (r.status === 200 && r.data.url && r.data.url.indexOf('https://checkout.stripe.com/') === 0) { location.href = r.data.url; return; }
+      msg(r.status === 409 ? 'このパスは切り替えられません。期限が切れている場合は、新しくお求めください。' : r.status === 503 ? 'まだ売り出していません。' : '支払いの画面を開けませんでした。少し待ってからもう一度お試しください。', true);
+      again();
+    }).catch(function () { msg('通信できませんでした。電波のよい所でもう一度お試しください。', true); again(); });
   });
 
   // Stripe から戻ってきた時: 支払い済みかをサーバーに確かめて、パスを受け取る。番号はアドレス欄から消す

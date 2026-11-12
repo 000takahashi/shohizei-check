@@ -13,6 +13,19 @@
     { id: 'd30', days: 30, yen: 980 },
   ];
   function planById(id) { for (var i = 0; i < PLANS.length; i++) if (PLANS[i].id === id) return PLANS[i]; return null; }
+  // 短いパスから長いパスへの切り替え。払うのは差額だけ。期限は、最初のお支払いから数えた長いパスの日数になる
+  function upgradeFrom(fromId) {
+    var from = planById(fromId), to = PLANS[PLANS.length - 1];
+    if (!from || from.id === to.id || to.days <= from.days || to.yen <= from.yen) return null;
+    return { from: from, to: to, yen: to.yen - from.yen, addDays: to.days - from.days };
+  }
+  // パスの印の中の、パスの名前（v1.<期限>.<名前>-<ID>.<署名>）
+  function planOfToken(token) { var m = /^v1\.\d{1,12}\.(d\d{1,3})-/.exec(token || ''); return m && planById(m[1]) ? m[1] : ''; }
+  function upgradeText() {
+    var out = [];
+    PLANS.forEach(function (p) { var u = upgradeFrom(p.id); if (u) out.push(u.from.days + '日間のパスが使える間は、差額の' + u.yen.toLocaleString('ja-JP') + '円（税込）で' + u.to.days + '日間に切り替えられます。期限は、最初のお支払いの時から' + u.to.days + '日間です。'); });
+    return out.join('');
+  }
   function planText(p) { return p.days + '日間 ' + p.yen.toLocaleString('ja-JP') + '円（税込）'; }
   // name: 本名（空なら「請求があれば遅滞なく開示」と表示）。tradeName: 屋号。contact: 返信できるメールアドレス。
   // 運営者・連絡先は、このサイトの「運営者情報」に前から出している物と同じ。
@@ -38,7 +51,7 @@
       ['所在地', ON_REQUEST],
       ['電話番号', ON_REQUEST],
       ['メールアドレス', String(op.contact).trim()],
-      ['販売価格', '有料パス ' + PLANS.map(planText).join('、')],
+      ['販売価格', '有料パス ' + PLANS.map(planText).join('、') + (upgradeText() ? '。' + upgradeText() : '')],
       ['商品代金以外の必要料金', 'インターネットの通信料は、お客様のご負担です。'],
       ['内容', FEATURES.join(' ') + ' 計算の結果は目安で、実際の税額は申告で決まります。法案が成立することが前提です。'],
       ['支払方法', 'クレジットカード・デビットカード（Stripe の支払い画面で）'],
@@ -54,5 +67,5 @@
       ? '販売事業者の所在地と電話番号は、ご請求があれば、これらを記したメールを遅滞なくお送りします。ご請求は、下記のメールアドレスへお送りください。'
       : '販売事業者の氏名、所在地、電話番号は、ご請求があれば、これらを記したメールを遅滞なくお送りします。ご請求は、下記のメールアドレスへお送りください。';
   }
-  return { PRODUCT: PRODUCT, PLANS: PLANS, planById: planById, planText: planText, OPERATOR: OPERATOR, FEATURES: FEATURES, hasOperator: hasOperator, legalRows: legalRows, legalNote: legalNote };
+  return { PRODUCT: PRODUCT, PLANS: PLANS, planById: planById, planText: planText, upgradeFrom: upgradeFrom, planOfToken: planOfToken, upgradeText: upgradeText, OPERATOR: OPERATOR, FEATURES: FEATURES, hasOperator: hasOperator, legalRows: legalRows, legalNote: legalNote };
 });
