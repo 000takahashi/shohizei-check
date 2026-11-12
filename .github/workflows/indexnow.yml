@@ -1,0 +1,21 @@
+# main に公開した後、検索エンジン（Bing・Yandex・Naver など）へ「ページが変わりました」と知らせる。
+# 無料・登録なし。Google はこの仕組みに入っていないので、Google は Search Console のサイトマップで読む。
+name: indexnow
+on:
+  push:
+    branches: [main]
+    paths: ['site/**']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      # Cloudflare の公開が終わるのを待ってから送る（中の処理でも鍵のファイルが読めるまで待つ）
+      - run: sleep 90
+      - run: node scripts/indexnow.mjs shohizei-check.com
