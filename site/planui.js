@@ -88,6 +88,19 @@
         ol.appendChild(li);
       });
       box.appendChild(ol);
+      // 期限をカレンダーに入れる（ファイルはこの端末で作る。どこにも送らない）
+      if (window.IcsKit) {
+        var cal = el('div', null, 'bk-actions pl-noprint'), cb = el('button', '期限をカレンダーに入れる', 'bk-btn'); cb.type = 'button';
+        cb.addEventListener('click', function () {
+          var ev = r.best.filings.map(function (f) {
+            return { date: f.deadline, title: '【届出の期限】' + f.form, note: perText(r.periods[f.index]) + ' の期間から、' + LABEL[f.from] + 'を' + LABEL[f.to] + 'に変える届出です。税務署に出します。' + (f.special ? '参考事項の欄に「飲食料品特例」と書きます。' : '') + '消費税1%チェッカーの試算（目安）です。出す前に、税理士か税務署に確かめてください。 https://shohizei-check.com/' };
+          });
+          var a = el('a'); a.href = URL.createObjectURL(new Blob([window.IcsKit.build(ev, new Date().toISOString().replace(/[-:]|\.\d+/g, ''))], { type: 'text/calendar' })); a.download = 'shohizei-check-kigen.ics';
+          document.body.appendChild(a); a.click(); a.remove();
+        });
+        cal.appendChild(cb); box.appendChild(cal);
+        box.appendChild(el('p', '14日前と3日前に、カレンダーが知らせます。iPhone・Google カレンダー・Outlook で開けます。', 'bk-hint pl-noprint'));
+      }
     }
 
     // 年ごとの見込み
