@@ -47,7 +47,7 @@
     $('psTerms').textContent = '';
     $('psGo').textContent = P.days + '日間 ' + P.yen.toLocaleString('ja-JP') + '円で購入する';
   [
-    ['内容', '上記の4つの機能をご利用いただけます。計算の結果は目安でございます。法案の成立を前提としております。'],
+    ['内容', '上記の内容でご利用いただけます。計算の結果は目安でございます。法案の成立を前提としております。'],
     ['価格', P.yen.toLocaleString('ja-JP') + '円（税込）。ほかにかかる費用は、通信料のみでございます。'],
     ['期間', 'お支払いの時点から' + P.days + '日間。自動で更新されません。' + (S.upgradeFrom(P.id) ? 'パスの有効期間中は、差額の' + S.upgradeFrom(P.id).yen.toLocaleString('ja-JP') + '円で' + S.upgradeFrom(P.id).to.days + '日間に切り替えられます。' : '')],
     ['支払い', 'クレジットカード・デビットカード。ご購入時に確定いたします。'],
@@ -139,6 +139,7 @@
         var saved = true;
         try { localStorage.setItem(PASS_KEY, r.data.token); } catch (e) { saved = false; }
         msg(saved ? 'ご購入いただき、誠にありがとうございます。パスを発行いたしました。' : 'お支払いは完了しておりますが、この端末にパスを保存できませんでした。誠に恐れ入りますが、ブラウザの設定（プライベートモードなど）をご確認のうえ、お問い合わせください。', !saved);
+        if (saved && window.AdsUI) window.AdsUI.hideAll();
         render(null);
         return;
       }

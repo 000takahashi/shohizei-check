@@ -1072,6 +1072,8 @@ a:hover { text-decoration: underline; }
 footer { margin-top: 40px; font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 16px; line-height: 1.6; }
 .adslot { margin: 32px 0 0; text-align: center; }
 .adslot[hidden] { display: none; }
+/* 計算の画面では結果の下に1つ出すので、ページの下の枠は重ねて出さない */
+.views:has(> #v-calc:not([hidden])) > #adBottom { display: none; }
 .adslot .adlabel { display: block; font-size: .75rem; color: var(--muted); letter-spacing: .08em; margin-bottom: 4px; text-align: left; }
 .adslot .adbox { min-height: 100px; border-radius: 8px; }
 .adslot.preview .adbox { border: 1px dashed var(--line); background: var(--soft); display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: .85rem; }
@@ -1444,6 +1446,7 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
 </style>
 <link rel="stylesheet" href="csvkit.css">
 <link rel="stylesheet" href="print.css">
+<meta name="google-adsense-account" content="ca-pub-3013755960099768">
 </head>
 <body>
 <div class="wrap">
@@ -1480,7 +1483,7 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
       <a class="nav-item" href="#faq" data-view="faq"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7M12 17h0"/></svg><span>よくある質問</span></a>
     <p class="nav-label">このサイト</p>
       <a class="nav-item" href="#pass" data-view="pass"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18M7 15h4"/></svg><span>有料パス</span></a>
-      <a class="nav-item" href="#about" data-view="about"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>運営者・更新履歴</span></a>
+      <a class="nav-item" href="#about" data-view="about"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>運営者・プライバシー</span></a>
       <a class="nav-item" href="https://yunyu-rieki.com/" target="_blank" rel="noopener"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg><span>輸入利益チェッカー</span></a>
       <a class="nav-item" href="https://menzei-check.com/" target="_blank" rel="noopener"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg><span>免税チェッカー</span></a>
     <div class="nav-foot">
@@ -1727,6 +1730,8 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
       <p class="disclaimer">結果は目安でございます。国と地方を合わせた税率で計算しており、端数処理・75%ルール・インボイスの2割特例や3割特例・8%のまま残る取引は含めておりません。届出と申告につきましては、税理士または<a href="https://www.nta.go.jp/" target="_blank" rel="noopener">税務署</a>にご確認ください。</p>
     </aside>
   </div>
+
+  <aside class="adslot" id="adTop" data-ad-slot="" data-ad-name="試算結果の下" aria-label="広告" hidden><span class="adlabel">広告</span><div class="adbox"></div></aside>
   </section>
 
   <section class="view doc" id="v-bulk" data-view="bulk" hidden>
@@ -2010,13 +2015,14 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
   </section>
 
   <section class="view doc" id="v-about" data-view="about" hidden>
-    <div class="page-head"><div class="page-head-text"><p class="kicker">運営者・更新履歴</p><h2 class="page-title">運営者情報・更新履歴</h2></div></div>
+    <div class="page-head"><div class="page-head-text"><p class="kicker">運営者・プライバシー・更新履歴</p><h2 class="page-title">運営者情報・プライバシーポリシー</h2></div></div>
     <section class="doc-card">
       <h3>運営者</h3>
       <p>運営者：輸入利益チェッカー 編集室<br>連絡先：<a href="mailto:contact@shohizei-check.com">contact@shohizei-check.com</a>（計算の誤りのご指摘やご意見は、こちらまでお寄せください）</p>
       <p>国税庁のパンフレット「飲食料品に係る2年間の消費税率引下げについて」（令和8年9月）をもとに作成しております。法案の成立や内容の変更がございましたら、速やかに計算を修正いたします。</p>
       <p>有料の機能（2年間の通しの見通し・持ち帰りの値付け）は、サーバーで計算いたします。ご入力の数字と結果は保存いたしません。お支払いは Stripe の画面で行っていただき、カード番号が当サイトに届くことはございません。パスは、お名前やメールアドレスを含まない有効期限つきの証票で、お使いの端末のブラウザにのみ保存されます。</p>
       <ul class="history">
+        <li>2026年11月12日：広告（Google アドセンス）の枠を設けました。有料パスをご利用いただいている間は、広告を表示いたしません。あわせて、プライバシーポリシーを掲載いたしました。</li>
         <li>2026年11月12日：11月30日まで、有料の機能（2年間の通しの見通し・持ち帰りの値付け）を無料で開放いたします。12月1日からは、有料パス（7日間300円・30日間980円）が必要となります。</li>
         <li>2026年11月12日：有料の機能を追加いたしました。1%が始まる年から終わったあとの年までを通した見通し（届出の順番・毎月の取り置き）と、持ち帰りの値付けです。届出の期限は、カレンダーに登録できます。これまでの試算は引き続き無料です。食料品が8%の年（1%の前とあと）の申告方式を比べる画面も追加いたしました（無料）。</li>
         <li>2026年11月12日：入力欄を空欄から始める形にし、「すべてクリア」を追加いたしました。ご入力内容はこの端末にのみ自動で保存されます。</li>
@@ -2025,7 +2031,20 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
         <li>2026年11月7日：最初の版を公開いたしました。</li>
       </ul>
     </section>
+
+    <section class="doc-card" id="privacy">
+      <h3>プライバシーポリシー</h3>
+      <p><b>ご入力いただいた数字</b>：試算にご入力いただいた数字は、次回お開きになる際のために、お使いの端末（ブラウザ）の中にのみ保存いたします。当サイトのサーバーへは送信いたしません。帳簿のCSVの読み込みも、ブラウザの中だけで行います。届出の期限のカレンダー用ファイルも、お使いの端末の中で作成いたします。</p>
+      <p><b>有料の機能（2年間の通しの見通し・持ち帰りの値付け）</b>：計算のボタンを押していただいた時にのみ、その計算に必要な数字を当サイトのサーバーへ送信して計算いたします。当サイトは、送信された内容と結果を保存いたしません。AIへの送信もいたしません。</p>
+      <p><b>有料パスのお支払い</b>：お支払いは Stripe 社の画面で行っていただきます。カード番号などは Stripe 社が取り扱い、当サイトに届くことはございません。当サイトは、お支払いが完了したかどうかのみを Stripe 社に確認いたします。パス（ご購入の証票）は、お使いの端末の中にのみ保存いたします。お名前やメールアドレスは含まれておりません。</p>
+      <p><b>アクセスの記録</b>：当サイトは Cloudflare で配信しております。不正なアクセスを防ぐため、Cloudflare がIPアドレスなどのアクセスの記録を取り扱います。当サイトが、ご利用者様を特定する目的で使用することはございません。</p>
+      <p><b>広告</b>：当サイトは、第三者配信の広告サービス「Google アドセンス」を利用しております。Google などの広告配信事業者は、Cookie を使用して、ご利用者様が当サイトや他のサイトを過去に訪れた情報をもとに広告を表示することがございます。広告に Cookie を使用しないようにするには、<a href="https://adssettings.google.com/" target="_blank" rel="noopener">Google の広告設定</a>で変更いただけます。また、<a href="https://www.aboutads.info/choices/" target="_blank" rel="noopener">www.aboutads.info</a> で第三者配信事業者の Cookie を無効にしていただけます。詳しくは Google の「<a href="https://policies.google.com/technologies/ads?hl=ja" target="_blank" rel="noopener">広告</a>」のページをご覧ください。有料パスをご利用いただいている間は、広告を表示いたしません（広告の読み込みも行いません）。</p>
+      <p><b>お問い合わせ</b>：メールでお寄せいただいた内容は、ご返信のためにのみ使用いたします。</p>
+      <p><b>免責</b>：計算結果は目安でございます。実際の税額を保証するものではなく、当サイトのご利用により生じた損害につきましては、責任を負いかねますので、あらかじめご了承ください。</p>
+      <p>本方針は、必要に応じて変更することがございます。変更した際は、このページにてお知らせいたします。（2026年11月12日 制定）</p>
+    </section>
   </section>
+    <aside class="adslot" id="adBottom" data-ad-slot="" data-ad-name="ページの下" aria-label="広告" hidden><span class="adlabel">広告</span><div class="adbox"></div></aside>
   </main>
 </div>
 
@@ -2038,7 +2057,7 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
   </div>
 
   <footer>
-    <p class="foot-links"><a href="#about">運営者情報・更新履歴</a><a href="#pass">有料パス</a><a href="#legal">特定商取引法に基づく表記</a><a href="https://yunyu-rieki.com/" target="_blank" rel="noopener">姉妹サイト：輸入利益チェッカー</a><a href="https://menzei-check.com/" target="_blank" rel="noopener">姉妹サイト：免税チェッカー</a></p>
+    <p class="foot-links"><a href="#about">運営者情報・プライバシーポリシー</a><a href="#pass">有料パス</a><a href="#legal">特定商取引法に基づく表記</a><a href="https://yunyu-rieki.com/" target="_blank" rel="noopener">姉妹サイト：輸入利益チェッカー</a><a href="https://menzei-check.com/" target="_blank" rel="noopener">姉妹サイト：免税チェッカー</a></p>
     <p>出典：国税庁<span class="nwl">「飲食料品に係る2年間の消費税率引下げについて」（令和8年9月）</span>。法案は令和8年11月6日に衆議院で可決され、参議院で審議中です（まだ成立しておりません）。計算結果は一般的な目安であり、個別の税務相談に代わるものではございません。本ツールのご利用により生じた損害につきましては、責任を負いかねますので、あらかじめご了承ください。</p>
   </footer>
 </div>
@@ -2048,6 +2067,7 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
 <script src="csvui.js"></script>
 <script src="bulk.js"></script>
 <script src="shopinfo.js"></script>
+<script src="adsui.js" data-client="ca-pub-3013755960099768" data-pass-key="shohizei_pass" defer></script>
 <script>
 (function () {
   'use strict';
