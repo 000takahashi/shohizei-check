@@ -6,7 +6,8 @@ import { plan, cleanPlan, periods, teaser, SAMPLE } from '../functions/_lib/plan
 import { pricing, cleanPricing, SAMPLE as PRICE_SAMPLE, PRICE_LIMIT } from '../functions/_lib/pricing.mjs';
 import { onPlan, onPricing } from '../functions/api/paid.mjs';
 import { signPass } from '../functions/_lib/pass.mjs';
-const S = createRequire(import.meta.url)('../site/calc.js');
+const require = createRequire(import.meta.url);
+const S = require('../site/calc.js');
 
 const TODAY = '2026-11-12';
 const run = (over = {}, today = TODAY) => plan(cleanPlan({ ...SAMPLE, ...over }).input, today);
@@ -95,6 +96,36 @@ test('★免税に戻る届出は一律に決めない: 選択届を出した人
   const csv = createRequire(import.meta.url)('../site/plancsv.js').rows(r, TODAY).map((x) => x.join(',')).join('\n');
   assert.match(csv, /課税事業者選択不適用届出書（届出で課税事業者を選んでいる場合）/);
   assert.match(csv, /消費税の納税義務者でなくなった旨の届出書（売上が1,000万円を超えて課税事業者になった場合）,速やかに/);
+});
+
+test('★免税に戻る道: 売上が下がった人は届出の期限で外さない。選択届を出した人は期限を守った道を別に返す', () => {
+  const over = { eatIn: 0, foodSales: 9000000, otherSales: 0, foodBuy: 1000000, otherBuy: 0, baseSales: 9000000, current: 'general', foodKubun: 2, invoice: false };
+  const before = run(over, '2026-11-14'), after = run(over, '2027-01-02');
+  // 計算する日が年をまたいでも、売上が下がった人の道（1つ目の期間から免税）は変わらない
+  assert.equal(before.best.path[0], 'exempt');
+  assert.equal(after.best.path[0], 'exempt');
+  assert.equal(after.best.total, before.best.total);
+  const f = after.best.filings.find((x) => x.byCase);
+  assert.equal(f.late, true); // 選択届を出した人には、期限切れと分かる
+  assert.equal(before.best.filings.find((x) => x.byCase).late, false);
+  // 選択届を出した人の道: 1つ目の期間は本則のまま（前回の結果と同じ22万円）
+  assert.ok(after.ifElected);
+  assert.equal(after.ifElected.path[0], 'general');
+  assert.ok(after.ifElected.total > after.best.total);
+  assert.equal(before.ifElected, null); // 期限の内なら道は同じ
+  const csv = createRequire(import.meta.url)('../site/plancsv.js').rows(after, '2027-01-02').map((x) => x.join(',')).join('\n');
+  assert.match(csv, /期限切れ・この期間からは戻れません/);
+});
+
+test('特定期間は給与等の支払額でも判定できると書く（国税庁 No.6501）', () => {
+  const r = run({ eatIn: 0, foodSales: 9000000, otherSales: 0, foodBuy: 1000000, otherBuy: 0, baseSales: 9000000, current: 'general', foodKubun: 2 });
+  assert.ok(r.notes.some((t) => t.includes('給与等の支払額')));
+  const { readFileSync } = require('node:fs');
+  for (const f of ['planui.js', 'yearui.js', 'calc.js']) {
+    const src = readFileSync(new URL('../site/' + f, import.meta.url), 'utf8');
+    assert.ok(src.includes('給与等の支払額'), f);
+    assert.ok(!src.includes('特定期間の売上も1,000万円以下'), f);
+  }
 });
 
 test('今のままが一番少ない時は、届出なし', () => {

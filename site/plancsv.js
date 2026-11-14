@@ -28,7 +28,7 @@
     if (!r.best.filings.length) out.push(['届出は不要です']);
     r.best.filings.forEach(function (f) {
       if (f.byCase) { // 免税に戻る届出は、課税事業者になった理由で違う
-        out.push([f.form + '（届出で課税事業者を選んでいる場合）', f.deadline, per(r.periods[f.index]), LABEL[f.from], LABEL[f.to], '']);
+        out.push([f.form + '（届出で課税事業者を選んでいる場合）', f.late ? f.deadline + '（期限切れ・この期間からは戻れません）' : f.deadline, per(r.periods[f.index]), LABEL[f.from], LABEL[f.to], '']);
         out.push([f.alt.form + '（売上が1,000万円を超えて課税事業者になった場合）', f.alt.when, per(r.periods[f.index]), LABEL[f.from], LABEL[f.to], '']);
         return;
       }

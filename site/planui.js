@@ -52,18 +52,26 @@
   }
 
   // 免税に戻る届出は、課税事業者になった理由で違う（国税庁 タックスアンサー No.6629）。両方を並べて、ご自身で選んでもらう
-  function exemptCases(f, per) {
+  function exemptCases(f, per, r) {
     var d = el('div');
     d.appendChild(el('b', perText(per) + ' の期間から、' + LABEL[f.from] + 'を免税事業者に変更します'));
     d.appendChild(el('p', '必要な届出は、課税事業者になった理由によって異なります。'));
     var ul = el('ul', null, 'pl-cases');
     var a = el('li');
     a.appendChild(el('b', '「課税事業者選択届出書」を出して課税事業者になっている場合'));
-    a.appendChild(el('p', f.form + 'を、' + wa(f.deadline) + ' までにご提出ください（戻りたい課税期間が始まる前日が期限です）。課税事業者を選んだ期間の初日から2年（一定の場合は3年）を経過する日の属する課税期間が始まるまでは、この届出を出せません。'));
+    if (f.late) {
+      // 期限を過ぎていて、この期間からは戻れない。その人の場合の道を出す
+      var e = r.ifElected;
+      a.appendChild(el('p', f.form + 'の期限（' + wa(f.deadline) + '）を過ぎているため、この期間からは免税事業者に戻れません。'
+        + (e ? 'この場合の最も少ない道は「' + e.path.map(function (m) { return LABEL[m]; }).join(' → ') + '」で、通算 ' + taxText(e.total) + '（今のままより約' + man(e.saving) + '少ない）です。' + (e.filings.length ? 'ご提出いただく届出は、' + e.filings.map(function (g) { return g.form + '（' + wa(g.deadline) + ' まで）'; }).join('、') + 'です。' : '届出は不要です。') : '')));
+    } else {
+      a.appendChild(el('p', f.form + 'を、' + wa(f.deadline) + ' までにご提出ください（戻りたい課税期間が始まる前日が期限です）。課税事業者を選んだ期間の初日から2年（一定の場合は3年）を経過する日の属する課税期間が始まるまでは、この届出を出せません。'
+        + (r.ifElected ? '選んでから2年を経過していない場合の最も少ない道は「' + r.ifElected.path.map(function (m) { return LABEL[m]; }).join(' → ') + '」（通算 ' + taxText(r.ifElected.total) + '）です。' : '')));
+    }
     ul.appendChild(a);
     var b = el('li');
     b.appendChild(el('b', '売上が1,000万円を超えていたために課税事業者になっている場合'));
-    b.appendChild(el('p', 'その期間の基準期間の課税売上高が1,000万円以下になれば、届出をしなくても免税事業者になります（特定期間の売上も1,000万円以下であること）。' + f.alt.form + 'を、' + f.alt.when + 'ご提出ください。'));
+    b.appendChild(el('p', 'その期間の基準期間の課税売上高が1,000万円以下になり、特定期間の判定でも免税の要件を満たせば（売上に代えて給与等の支払額で判定することもできます）、届出をしなくても免税事業者になります。上の見通しはこの場合の結果です。' + f.alt.form + 'を、' + f.alt.when + 'ご提出ください。'));
     ul.appendChild(b);
     d.appendChild(ul);
     d.appendChild(el('p', 'インボイスの登録を受けている場合は、登録の取消しを求める届出書を、取り消したい課税期間の初日から起算して15日前の日までにご提出いただく必要がございます。どちらに当たるか分からない場合は、税務署にお問い合わせください。', 'bk-hint'));
@@ -98,7 +106,7 @@
       var ol = el('ol', null, 'pl-steps');
       r.best.filings.forEach(function (f) {
         var li = el('li');
-        if (f.byCase) { li.appendChild(exemptCases(f, r.periods[f.index])); ol.appendChild(li); return; }
+        if (f.byCase) { li.appendChild(exemptCases(f, r.periods[f.index], r)); ol.appendChild(li); return; }
         li.appendChild(el('b', f.form));
         li.appendChild(el('span', wa(f.deadline) + ' まで', 'pl-date'));
         li.appendChild(el('p', perText(r.periods[f.index]) + ' の期間から、' + LABEL[f.from] + 'を' + LABEL[f.to] + 'に変更します。'
@@ -109,13 +117,14 @@
       });
       box.appendChild(ol);
       // 期限をカレンダーに入れる（ファイルはこの端末で作る。どこにも送らない）
-      if (window.IcsKit) {
+      if (window.IcsKit && r.best.filings.some(function (f) { return !(f.byCase && f.late); })) {
         var cal = el('div', null, 'bk-actions pl-noprint'), cb = el('button', '期限をカレンダーに登録する', 'bk-btn'); cb.type = 'button';
         cb.addEventListener('click', function () {
           var ev = r.best.filings.map(function (f) {
+            if (f.byCase && f.late) return null; // 期限を過ぎた届出は、カレンダーに入れない
             if (f.byCase) return { date: f.deadline, title: '【届出の期限】' + f.form + '（届出で課税事業者を選んでいる場合）', note: perText(r.periods[f.index]) + ' の期間から免税事業者に戻る届出です。売上が1,000万円を超えて課税事業者になった方は、この届出は不要で、' + f.alt.form + 'を' + f.alt.when + 'ご提出ください。消費税1%チェッカーによる試算（目安）です。ご提出の前に、税理士または税務署にご確認ください。 https://shohizei-check.com/' };
             return { date: f.deadline, title: '【届出の期限】' + f.form, note: perText(r.periods[f.index]) + ' の期間から、' + LABEL[f.from] + 'を' + LABEL[f.to] + 'に変更する届出です。税務署へご提出ください。' + (f.special ? '参考事項の欄には「飲食料品特例」とご記入ください。' : '') + '消費税1%チェッカーによる試算（目安）です。ご提出の前に、税理士または税務署にご確認ください。 https://shohizei-check.com/' };
-          });
+          }).filter(Boolean);
           var a = el('a'); a.href = URL.createObjectURL(new Blob([window.IcsKit.build(ev, new Date().toISOString().replace(/[-:]|\.\d+/g, ''))], { type: 'text/calendar' })); a.download = 'shohizei-check-kigen.ics';
           document.body.appendChild(a); a.click(); a.remove();
         });
