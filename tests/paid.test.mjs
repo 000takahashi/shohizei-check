@@ -128,6 +128,25 @@ test('特定期間は給与等の支払額でも判定できると書く（国�
   }
 });
 
+test('★売上が1,000万円以下で課税事業者のままの道: 選択届が要ると書く（届出なしなら免税になるため）', () => {
+  // 売上900万円・本則のままが一番少ない人（食品の卸で還付）
+  const r = run({ eatIn: 0, foodSales: 9000000, otherSales: 0, foodBuy: 8500000, otherBuy: 3000000, baseSales: 9000000, current: 'general', foodKubun: 2, invoice: false });
+  assert.ok(r.best.path.some((m) => m !== 'exempt'));
+  assert.equal(r.needElect, true);
+  assert.ok(r.notes.some((t) => t.includes('課税事業者選択届出書のご提出が必要')));
+  // 売上が1,000万円を超える人・インボイス登録の人には出さない
+  assert.equal(run({}).needElect, false);
+  assert.equal(run({ eatIn: 0, foodSales: 9000000, foodBuy: 8500000, otherBuy: 3000000, baseSales: 9000000, foodKubun: 2, invoice: true }).needElect, false);
+  // 無料の試算の届出の案内も同じ
+  const st = S.steps('general', 'general', 'individual', 12, true, true);
+  assert.equal(st.need, false);
+  assert.equal(st.electToStay, true);
+  assert.equal(st.deadline, '2027-12-31'); // 飲食料品の特例: この期間の中に
+  assert.equal(S.steps('general', 'general', 'individual', 12, false, true).deadline, '2026-12-31');
+  assert.equal(S.steps('general', 'general', 'individual', 12, true, false).electToStay, undefined);
+  assert.equal(S.steps('exempt', 'exempt', 'individual', 12, true, true).electToStay, undefined);
+});
+
 test('今のままが一番少ない時は、届出なし', () => {
   const r = run({ current: 'simple' });
   assert.equal(r.shouldSwitch, false);

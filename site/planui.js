@@ -91,7 +91,7 @@
       v.appendChild(el('span', '現在の' + LABEL[r.current] + 'のままですと合計 ' + taxText(r.stay.total) + '、見直した場合は合計 ' + taxText(r.best.total) + ' です（' + perText({ start: first.start, end: last.end }) + '）。'));
     } else {
       v.appendChild(el('b', '現在の' + LABEL[r.current] + 'のままが、' + n + '年分の通算でも最も少なくなります'));
-      v.appendChild(el('span', '合計 ' + taxText(r.best.total) + ' です（' + perText({ start: first.start, end: last.end }) + '）。届出は不要です。'));
+      v.appendChild(el('span', '合計 ' + taxText(r.best.total) + ' です（' + perText({ start: first.start, end: last.end }) + '）。' + (r.needElect ? '課税事業者選択届出書をすでに提出している場合は、届出は不要です（下の注意をご覧ください）。' : '届出は不要です。')));
     }
     box.appendChild(v);
 
@@ -101,7 +101,7 @@
 
     // 出す届出と期限
     box.appendChild(el('h3', 'ご提出いただく届出と期限'));
-    if (!r.best.filings.length) box.appendChild(el('p', '届出は不要です。'));
+    if (!r.best.filings.length) box.appendChild(el('p', r.needElect ? '課税事業者選択届出書をすでに提出している場合は、届出は不要です。提出していない場合は、売上が1,000万円以下のため免税事業者になります。課税事業者のまま申告するには、課税事業者選択届出書のご提出が必要です。' : '届出は不要です。'));
     else {
       var ol = el('ol', null, 'pl-steps');
       r.best.filings.forEach(function (f) {

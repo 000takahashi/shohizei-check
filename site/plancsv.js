@@ -25,7 +25,7 @@
     out.push(['合計', '', '', yen(r.best.total), yen(r.stay.total), '']);
     out.push([]);
     out.push(['ご提出いただく届出', '期限', '適用する課税期間', '変更前', '変更後', '特例']);
-    if (!r.best.filings.length) out.push(['届出は不要です']);
+    if (!r.best.filings.length) out.push([r.needElect ? '課税事業者選択届出書をすでに提出している場合は不要（提出していない場合、課税事業者のまま申告するには課税事業者選択届出書が必要）' : '届出は不要です']);
     r.best.filings.forEach(function (f) {
       if (f.byCase) { // 免税に戻る届出は、課税事業者になった理由で違う
         out.push([f.form + '（届出で課税事業者を選んでいる場合）', f.late ? f.deadline + '（期限切れ・この期間からは戻れません）' : f.deadline, per(r.periods[f.index]), LABEL[f.from], LABEL[f.to], '']);

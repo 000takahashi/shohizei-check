@@ -178,6 +178,9 @@ export function plan(input, today) {
   if (current === 'simple') notes.push('簡易課税を始めてから2年が経過していない場合、通常の届出では本則課税に戻れません。令和9年4月1日を含む期間の特例でご提出いただく場合は、この決まりは適用されません。');
   if (best.path.includes('exempt') && current !== 'exempt') notes.push('免税事業者になるには、その期間の基準期間（個人は2年前、法人は2期前）の課税売上高が1,000万円以下で、特定期間（前年の1〜6月など）の判定でも免税の要件を満たし（売上に代えて給与等の支払額で判定することもできます）、インボイスの登録を受けていないことが必要です。取引先が事業者の場合は、取引先が仕入れの税を控除できなくなります。');
   if (best.path.includes('exempt') && current === 'exempt') notes.push('免税のままであれば納税はございません。取引先が事業者の場合は、値下げを求められることがございます。');
+  // 売上が1,000万円以下の人は、届出をしないと免税になる。課税事業者のままでいる道には選択届が要る（国税庁 No.6501・No.6629）
+  const needElect = current !== 'exempt' && allowed.exempt && best.path.some((m) => m !== 'exempt');
+  if (needElect) notes.push('基準期間の課税売上高が1,000万円以下のため、特定期間の判定でも要件を満たし、インボイスの登録を受けていなければ、届出をしなくても免税事業者になります。この見通しのとおり本則課税・簡易課税で申告するには、課税事業者選択届出書のご提出が必要です（すでに提出している場合は不要です）。');
   if (best.taxes.some((t) => t < 0)) notes.push('マイナスの期間は還付（納めた税金が戻ること）となります。還付金は申告の後に振り込まれます。');
 
   return {
@@ -190,6 +193,7 @@ export function plan(input, today) {
       monthly: best.taxes.map((t) => (t > 0 ? Math.ceil(t / 12 / 100) * 100 : 0)), // 毎月の取り置き（100円単位に切り上げ）
     },
     ifElected,
+    needElect,
     saving: Math.round(stay.total - best.total),
     shouldSwitch: stay.total - best.total >= 1 && best.filings.length > 0,
     firstYear: firstOnly ? { method: firstBest, total: firstOnly.total, differs: firstBest !== best.path[0], loss: Math.round(firstOnly.total - best.total) } : null,
