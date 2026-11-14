@@ -2376,7 +2376,7 @@ form.simple .assume { display: flex; align-items: flex-start; justify-content: s
       invoice: v.invoice === '1', specifiedOver: v.specifiedOver === '1', share: share
     });
     current = c.current; // 条件に合わない方式を選んだ時は、本則課税を「今」として扱う
-    var st = S.steps(current, c.bestKey, state.who, Number(v.endMonth), vals.foodSales > 0);
+    var st = S.steps(current, c.bestKey, state.who, Number(v.endMonth), vals.foodSales > 0, c.cut.canExempt);
     $('periodChip').textContent = slash(st.period.start) + '〜' + slash(st.period.end);
 
     // 判定

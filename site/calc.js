@@ -201,12 +201,18 @@
    * 期限は「令和9年4月1日を含む課税期間」から移る場合。
    * @param {boolean} sellsFood 飲食料品の販売をしているか。届出の特例は販売している事業者だけ（省略時 true）。
    */
-  function steps(current, best, who, endMonth, sellsFood) {
+  function steps(current, best, who, endMonth, sellsFood, canExempt) {
     const pr = period(who, endMonth);
     const food = sellsFood === undefined ? true : !!sellsFood;
     const before = new Date(Date.parse(pr.start + "T00:00:00Z") - 86400000).toISOString().slice(0, 10);
     const noFood = "飲食料品の販売がないため、今回の特例はご利用になれません。変更したい課税期間が始まる前日までにご提出ください。";
     if (current === best) {
+      // 売上が1,000万円以下の人は、届出をしないと免税になる。課税事業者のままでいるには選択届が要る（国税庁 No.6501）
+      if (canExempt && current !== "exempt") {
+        const special = food;
+        return { need: false, electToStay: true, form: "課税事業者選択届出書（まだ提出していない場合）", deadline: special ? pr.deadline : before, special, period: pr,
+          text: "課税事業者選択届出書をすでに提出している場合は、届出は不要です。提出していない場合は、基準期間の売上が1,000万円以下のため、この期間は免税事業者になります（特定期間の判定でも要件を満たし、インボイスの登録がない場合）。課税事業者のまま申告するには、課税事業者選択届出書を" + (special ? "、特例によりこの課税期間の中に" : "、この課税期間が始まる前日までに") + "ご提出ください。" + (special ? "参考事項の欄には「飲食料品特例」とご記入ください。" : "") };
+      }
       return { need: false, text: "現在の申告方式のままで、届出は不要です。", period: pr };
     }
     if (best === "general" && current === "simple" && !food) {

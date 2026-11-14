@@ -46,7 +46,11 @@
     t.appendChild(tb); wrap.appendChild(t); box.appendChild(wrap);
 
     box.appendChild(el('h3', '申告方式を変更する場合の届出'));
-    if (!r.shouldSwitch) box.appendChild(el('p', '現在の方式のままであれば、届出は不要です。'));
+    // 売上が1,000万円以下の人は、届出をしないと免税になる。課税事業者のままでいるには選択届が要る
+    var exemptOk = r.options.some(function (o) { return o.key === 'exempt' && o.allowed; });
+    var needElect = exemptOk && r.current !== 'exempt' && !(r.shouldSwitch && r.bestKey === 'exempt');
+    if (!r.shouldSwitch) box.appendChild(el('p', needElect ? '課税事業者選択届出書をすでに提出している場合は、現在の方式のままであれば届出は不要です。' : '現在の方式のままであれば、届出は不要です。'));
+    if (needElect) box.appendChild(el('p', '基準期間の課税売上高が1,000万円以下のため、特定期間の判定でも要件を満たし、インボイスの登録を受けていなければ、届出をしなくても免税事業者になります。課税事業者として申告するには、課税事業者選択届出書を、その課税期間が始まる前日までにご提出ください（すでに提出している場合は不要です）。', 'pl-warn'));
     else if (r.bestKey === 'exempt') {
       // 免税に戻る届出は、課税事業者になった理由で違う（国税庁 タックスアンサー No.6629）
       box.appendChild(el('p', '免税事業者に戻る場合の届出は、課税事業者になった理由によって異なります。'));
