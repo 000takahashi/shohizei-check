@@ -17,6 +17,18 @@ https://shohizei-check.com/
 - [2年間の通しの見通し（有料）](https://shohizei-check.com/#plan): 1%が始まる年から終わったあとの年までを並べ、通しで一番少ない方式の道、届出の順番と期限、毎月の取り置きを出す
 - [持ち帰りの値付け（有料）](https://shohizei-check.com/#price): 今の税込みの値段から、1%になった時の値付けの案を出す
 
+## For AI agents (MCP and API)
+
+Free tools, no key. Same calculation as the free part of the site. Nothing is stored. Results are estimates; confirm with a tax accountant or the tax office.
+
+- MCP server: `https://shohizei-check.com/mcp` (Streamable HTTP, JSON responses, no auth). Tools: `compare_tax_methods`, `get_filing_period`, `compare_normal_year`.
+- `GET|POST /api/v1/compare`: compare standard / simplified / tax-exempt for the taxable period that includes April 1, 2027 (prorated by month), with the notification to file and its deadline. Inputs: `eatIn`, `foodSales`, `otherSales`, `foodBuy`, `otherBuy` (annual yen excluding tax, or including tax with `amountsIncludeTax: true`), `baseSales`, `current` (`general`|`simple`|`exempt`), `preset` (`restaurant`|`takeout`|`wholesale`|`retail`|`maker`), `foodKubun`/`eatInKubun`/`otherKubun` (1-6), `invoice`, `specifiedOver`, `who` (`individual`|`corporate`), `endMonth` (1-12). `GET` with no parameters returns the input schema.
+- `GET|POST /api/v1/period`: the taxable period that includes April 1, 2027 and the filing deadlines (`who`, `endMonth`).
+- `GET|POST /api/v1/normal-year`: the same comparison for a year with food at 8%, and the next period's deadline to change.
+- Example: `https://shohizei-check.com/api/v1/compare?preset=restaurant&eatIn=30000000&foodSales=8000000&foodBuy=9000000&otherBuy=6000000&baseSales=38000000`
+- Paid (`Authorization: Bearer <pass>`, pass bought on the site): `POST /api/v1/plan` (multi-year plan across all periods of the cut) and `POST /api/v1/pricing` (takeout and eat-in pricing). Without a pass they return 402 with a partial result. `{"sample": true}` returns a sample result without a pass.
+- Unknown fields or out-of-range values return an error instead of a guessed result. `/api/v1/*` field names and meanings will not change; breaking changes go to `/api/v2`.
+
 ## Rules used
 
 - Food sales, takeout and delivery: 1% (national 0.78% + local 0.22%). Eating in and catering stay at 10%. Alcohol and other goods stay at 10%.
