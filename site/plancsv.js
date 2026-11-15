@@ -24,16 +24,18 @@
     });
     out.push(['合計', '', '', yen(r.best.total), yen(r.stay.total), '']);
     out.push([]);
-    out.push(['ご提出いただく届出', '期限', '適用する課税期間', '変更前', '変更後', '特例']);
-    if (!r.best.filings.length) out.push([r.needElect ? '課税事業者選択届出書をすでに提出している場合は不要（提出していない場合、課税事業者のまま申告するには課税事業者選択届出書が必要）' : '届出は不要です']);
-    r.best.filings.forEach(function (f) {
-      if (f.byCase) { // 免税に戻る届出は、課税事業者になった理由で違う
-        out.push([f.form + '（届出で課税事業者を選んでいる場合）', f.late ? f.deadline + '（期限切れ・この期間からは戻れません）' : f.deadline, per(r.periods[f.index]), LABEL[f.from], LABEL[f.to], '']);
-        out.push([f.alt.form + '（売上が1,000万円を超えて課税事業者になった場合）', f.alt.when, per(r.periods[f.index]), LABEL[f.from], LABEL[f.to], '']);
-        return;
-      }
-      out.push([f.form, f.deadline, per(r.periods[f.index]), LABEL[f.from], LABEL[f.to], f.special ? '飲食料品特例（参考事項の欄に記入）' : '']);
-    });
+    out.push([r.twoStarts ? 'ご提出いただく届出（課税事業者選択届出書をまだ出していない場合）' : 'ご提出いただく届出', '期限', '適用する課税期間', '変更前', '変更後', '特例']);
+    var row = function (f) {
+      return [f.form, f.info ? f.when : f.deadline, per(r.periods[f.index]), f.elect ? '免税事業者（課税事業者を選択）' : LABEL[f.from], LABEL[f.to], f.special ? '飲食料品特例（参考事項の欄に記入）' : ''];
+    };
+    if (!r.best.filings.length) out.push(['届出は不要です']);
+    r.best.filings.forEach(function (f) { out.push(row(f)); });
+    if (r.ifElected) {
+      out.push([]);
+      out.push(['すでに課税事業者選択届出書を出していて、2年を過ぎている場合', r.ifElected.same ? '最も少ない道は同じ' : '道 ' + r.ifElected.path.map(function (m) { return LABEL[m]; }).join(' → ') + '・合計 ' + yen(r.ifElected.total)]);
+      if (!r.ifElected.filings.length) out.push(['届出は不要です']);
+      r.ifElected.filings.forEach(function (f) { out.push(row(f)); });
+    }
     out.push([]);
     out.push(['前提：売上と仕入れは毎年同じとし、1%の月と8%の月を月数で按分しております。結果は目安でございます。届出と申告につきましては、税理士または税務署にご確認ください。']);
     return out;

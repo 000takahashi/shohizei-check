@@ -84,39 +84,6 @@ test('免税から課税事業者を選んだら、次の期間は免税に戻�
   assert.ok(r.best.total <= r.stay.total);
 });
 
-test('★免税に戻る届出は一律に決めない: 選択届を出した人と、売上が下がった人で分けて案内する（国税庁 No.6629）', () => {
-  // ご指摘の条件: 本則・個人・基準期間900万円・食品売上900万円・食品仕入100万円・インボイス登録なし
-  const r = run({ eatIn: 0, foodSales: 9000000, otherSales: 0, foodBuy: 1000000, otherBuy: 0, baseSales: 9000000, current: 'general', foodKubun: 2, invoice: false });
-  const f = r.best.filings.find((x) => x.to === 'exempt');
-  assert.ok(f, '免税へ移る道になる');
-  assert.equal(f.byCase, true);
-  assert.equal(f.form, '課税事業者選択不適用届出書');
-  assert.equal(f.deadline, '2026-12-31'); // 選択届を出した人: 戻りたい期間の初日の前日まで
-  assert.deepEqual(f.alt, { form: '消費税の納税義務者でなくなった旨の届出書', when: '速やかに' }); // 売上が下がった人: 期限ではなく速やかに
-  const csv = createRequire(import.meta.url)('../site/plancsv.js').rows(r, TODAY).map((x) => x.join(',')).join('\n');
-  assert.match(csv, /課税事業者選択不適用届出書（届出で課税事業者を選んでいる場合）/);
-  assert.match(csv, /消費税の納税義務者でなくなった旨の届出書（売上が1,000万円を超えて課税事業者になった場合）,速やかに/);
-});
-
-test('★免税に戻る道: 売上が下がった人は届出の期限で外さない。選択届を出した人は期限を守った道を別に返す', () => {
-  const over = { eatIn: 0, foodSales: 9000000, otherSales: 0, foodBuy: 1000000, otherBuy: 0, baseSales: 9000000, current: 'general', foodKubun: 2, invoice: false };
-  const before = run(over, '2026-11-14'), after = run(over, '2027-01-02');
-  // 計算する日が年をまたいでも、売上が下がった人の道（1つ目の期間から免税）は変わらない
-  assert.equal(before.best.path[0], 'exempt');
-  assert.equal(after.best.path[0], 'exempt');
-  assert.equal(after.best.total, before.best.total);
-  const f = after.best.filings.find((x) => x.byCase);
-  assert.equal(f.late, true); // 選択届を出した人には、期限切れと分かる
-  assert.equal(before.best.filings.find((x) => x.byCase).late, false);
-  // 選択届を出した人の道: 1つ目の期間は本則のまま（前回の結果と同じ22万円）
-  assert.ok(after.ifElected);
-  assert.equal(after.ifElected.path[0], 'general');
-  assert.ok(after.ifElected.total > after.best.total);
-  assert.equal(before.ifElected, null); // 期限の内なら道は同じ
-  const csv = createRequire(import.meta.url)('../site/plancsv.js').rows(after, '2027-01-02').map((x) => x.join(',')).join('\n');
-  assert.match(csv, /期限切れ・この期間からは戻れません/);
-});
-
 test('特定期間は給与等の支払額でも判定できると書く（国税庁 No.6501）', () => {
   const r = run({ eatIn: 0, foodSales: 9000000, otherSales: 0, foodBuy: 1000000, otherBuy: 0, baseSales: 9000000, current: 'general', foodKubun: 2 });
   assert.ok(r.notes.some((t) => t.includes('給与等の支払額')));
@@ -128,23 +95,55 @@ test('特定期間は給与等の支払額でも判定できると書く（国�
   }
 });
 
-test('★売上が1,000万円以下で課税事業者のままの道: 選択届が要ると書く（届出なしなら免税になるため）', () => {
-  // 売上900万円・本則のままが一番少ない人（食品の卸で還付）
-  const r = run({ eatIn: 0, foodSales: 9000000, otherSales: 0, foodBuy: 8500000, otherBuy: 3000000, baseSales: 9000000, current: 'general', foodKubun: 2, invoice: false });
-  assert.ok(r.best.path.some((m) => m !== 'exempt'));
-  assert.equal(r.needElect, true);
-  assert.ok(r.notes.some((t) => t.includes('課税事業者選択届出書のご提出が必要')));
-  // 売上が1,000万円を超える人・インボイス登録の人には出さない
-  assert.equal(run({}).needElect, false);
-  assert.equal(run({ eatIn: 0, foodSales: 9000000, foodBuy: 8500000, otherBuy: 3000000, baseSales: 9000000, foodKubun: 2, invoice: true }).needElect, false);
-  // 無料の試算の届出の案内も同じ
-  const st = S.steps('general', 'general', 'individual', 12, true, true);
-  assert.equal(st.need, false);
-  assert.equal(st.electToStay, true);
-  assert.equal(st.deadline, '2027-12-31'); // 飲食料品の特例: この期間の中に
-  assert.equal(S.steps('general', 'general', 'individual', 12, false, true).deadline, '2026-12-31');
-  assert.equal(S.steps('general', 'general', 'individual', 12, true, false).electToStay, undefined);
-  assert.equal(S.steps('exempt', 'exempt', 'individual', 12, true, true).electToStay, undefined);
+// 売上900万円・本則・インボイス登録なしの個人（国税庁 No.6501・No.6629）
+const LOW = { eatIn: 0, baseSales: 9000000, current: 'general', invoice: false, foodKubun: 2 };
+const forms = (fs) => fs.map((f) => [f.form, f.deadline || f.when]);
+
+test('★売上が下がった人: 出発点は免税。1つ目の期間が免税なら「納税義務者でなくなった旨の届出書」を速やかに。日をまたいでも同じ', () => {
+  const o = { ...LOW, foodSales: 9000000, otherSales: 0, foodBuy: 1000000, otherBuy: 0 };
+  const a = run(o, '2026-11-14'), b = run(o, '2027-01-02');
+  assert.equal(a.twoStarts, true);
+  assert.equal(a.best.path.join(), 'exempt,exempt,exempt,exempt');
+  assert.equal(b.best.total, a.best.total);
+  assert.deepEqual(forms(a.best.filings), [['消費税の納税義務者でなくなった旨の届出書', '速やかに']]);
+  // 選択済みの人: 期限の内は同じ道（届出は不適用届）、期限を過ぎたら1つ目の期間は本則
+  assert.equal(a.ifElected.same, true);
+  assert.deepEqual(forms(a.ifElected.filings), [['課税事業者選択不適用届出書', '2026-12-31']]);
+  assert.equal(b.ifElected.same, false);
+  assert.equal(b.ifElected.path[0], 'general');
+});
+
+test('★新たに課税事業者を選ぶ人は、2年間は課税のまま（本則→免税→本則のような道は出さない）', () => {
+  // レビューの例1: 食品売上200万円・その他売上700万円・食材仕入1,000万円・10%経費600万円
+  const r = run({ ...LOW, foodSales: 2000000, otherSales: 7000000, foodBuy: 10000000, otherBuy: 6000000 }, '2026-11-15');
+  const p = r.best.path;
+  for (let i = 0; i < p.length; i++) if (p[i] !== 'exempt' && (i === 0 || p[i - 1] === 'exempt')) assert.notEqual(p[i + 1], 'exempt', p.join());
+  assert.equal(r.best.filings[0].form, '課税事業者選択届出書');
+  assert.equal(r.best.filings[0].elect, true);
+  // 選択済みで2年を過ぎた人は、本則→免税→本則もありうる（別の道として返す）
+  assert.equal(r.ifElected.same, false);
+  assert.equal(r.ifElected.path.join(), 'general,exempt,general,general');
+});
+
+test('★最初の課税事業者選択届出書と期限を、届出の一覧・CSV・カレンダーに載せる', () => {
+  // レビューの例2: 食品売上900万円・食材500万円・10%経費200万円 → 2027・2028年は本則で還付
+  const r = run({ ...LOW, foodSales: 9000000, otherSales: 0, foodBuy: 5000000, otherBuy: 2000000 }, '2026-11-15');
+  assert.deepEqual(r.best.path.slice(0, 2), ['general', 'general']);
+  assert.deepEqual(forms(r.best.filings), [['課税事業者選択届出書', '2027-12-31'], ['課税事業者選択不適用届出書', '2028-12-31']]);
+  assert.equal(r.best.filings[0].special, true); // 飲食料品の特例: この期間の中に
+  // 選択済みの人には選択届は要らない
+  assert.deepEqual(forms(r.ifElected.filings), [['課税事業者選択不適用届出書', '2028-12-31']]);
+  const csv = require('../site/plancsv.js').rows(r, '2026-11-15').map((x) => x.join(',')).join('\n');
+  assert.match(csv, /課税事業者選択届出書,2027-12-31,2027年1月〜2027年12月,免税事業者（課税事業者を選択）,本則課税,飲食料品特例/);
+  assert.match(csv, /すでに課税事業者選択届出書を出していて、2年を過ぎている場合/);
+  const ui = require('node:fs').readFileSync(new URL('../site/planui.js', import.meta.url), 'utf8');
+  assert.match(ui, /calEvents\(r, r\.best\.filings/); // カレンダーは届出の一覧から作る（速やかに出す届出は入れない）
+});
+
+test('売上が1,000万円を超える人・インボイス登録の人は、今の方式から出発する（2つに分けない）', () => {
+  assert.equal(run({}).twoStarts, false);
+  assert.equal(run({}).ifElected, null);
+  assert.equal(run({ ...LOW, foodSales: 9000000, foodBuy: 5000000, otherBuy: 2000000, invoice: true }).twoStarts, false);
 });
 
 test('今のままが一番少ない時は、届出なし', () => {
