@@ -84,14 +84,9 @@ function filing(from, to, i, per, sellsFood) {
       ? { form: '課税事業者選択届出書', deadline: per.end, special: true }
       : { form: '課税事業者選択届出書', deadline: before, special: false };
   }
-  // 免税に戻る届出は、課税事業者になった理由で違う（国税庁 タックスアンサー No.6629）。
-  //   届出で課税事業者を選んでいる → 課税事業者選択不適用届出書。戻りたい期間の初日の前日まで（選んでから2年は出せない）
-  //   売上が1,000万円を超えて課税事業者になった → 基準期間の売上が1,000万円以下になれば届出なしで免税。
-  //     「消費税の納税義務者でなくなった旨の届出書」を速やかに出す（期限ではない）
-  // どちらかは入力からは分からないので、両方を返して画面で分けて案内する。期限は前の方（遅れると戻れない方）で持つ
-  if ((from === 'general' || from === 'simple') && to === 'exempt') {
-    return { form: '課税事業者選択不適用届出書', deadline: before, special: false, byCase: true, alt: { form: '消費税の納税義務者でなくなった旨の届出書', when: '速やかに' } };
-  }
+  // 届出で課税事業者を選んでいる人が免税に戻る: 課税事業者選択不適用届出書。戻りたい期間の初日の前日まで（国税庁 No.6629）
+  // （売上が1,000万円を超えて課税事業者になった人は、出発点を免税として計算するので、ここには来ない）
+  if ((from === 'general' || from === 'simple') && to === 'exempt') return { form: '課税事業者選択不適用届出書', deadline: before, special: false };
   // 免税⇄簡易は、免税（納税なし）より少なくならないので道に入れない
   return null;
 }
@@ -125,11 +120,19 @@ export function plan(input, today) {
     usable.forEach((k) => walk(i + 1, seq.concat(k)));
   })(0, []);
 
-  // strict=false: 売上が1,000万円を超えて課税事業者になった人。免税へは届出なしで移れるので、免税へ移る届出の期限で道を外さない
-  // strict=true:  課税事業者選択届出書を出して課税事業者になった人。課税事業者選択不適用届出書の期限（前日まで）を守る
-  function check(seq, strict) {
+  // 2つの出発点（国税庁 No.6501・No.6629）
+  //  新たに選ぶ人（主の結果）: 基準期間の売上が1,000万円以下で、課税事業者選択届出書を出していない人。届出をしなければ免税になるので、
+  //    出発点を免税として道を作る。課税で申告する期間には選択届が要り、選んだら2期間は課税のまま（免税に戻るのは不適用届）。
+  //    1つ目の期間が免税なら「消費税の納税義務者でなくなった旨の届出書」を速やかに出す（期限ではない）
+  //  選択済みの人（ifElected）: 選択届をすでに出していて、2年の継続期間を終えた人。今の方式から出発し、免税へは不適用届
+  // 売上が1,000万円を超える人・インボイス登録の人は、免税を選べないので、今の方式からの道だけ
+  const twoStarts = current !== 'exempt' && allowed.exempt;
+  function check(seq, start) {
     const filings = [];
-    let prev = current, lockSimple = 0, lockTaxable = 0;
+    let prev = start, lockSimple = 0, lockTaxable = 0;
+    if (start === 'exempt' && current !== 'exempt' && seq[0] === 'exempt') {
+      filings.push({ index: 0, from: current, to: 'exempt', form: '消費税の納税義務者でなくなった旨の届出書', deadline: null, when: '速やかに', special: false, info: true });
+    }
     for (let i = 0; i < n; i++) {
       const m = seq[i];
       if (lockSimple > 0 && m !== 'simple') return null;      // 簡易を選んだら2期間は続ける
@@ -139,9 +142,8 @@ export function plan(input, today) {
       if (m !== prev) {
         const f = filing(prev, m, i, table[i], sellsFood);
         if (!f) return null;
-        const late = f.deadline < today;
-        if (late && (strict || !f.byCase)) return null;        // 期限が過ぎた届出は出せない
-        filings.push({ index: i, from: prev, to: m, ...f, ...(f.byCase ? { late } : {}) });
+        if (f.deadline < today) return null;                   // 期限が過ぎた届出は出せない
+        filings.push({ index: i, from: prev, to: m, ...f, ...(prev === 'exempt' && current !== 'exempt' ? { elect: true } : {}) });
         if (m === 'simple') lockSimple = 1;                    // この期間と次の期間
         if (prev === 'exempt') lockTaxable = 1;
       }
@@ -152,16 +154,19 @@ export function plan(input, today) {
   }
 
   // 一番少ない道。同じ額なら、届出の少ない道（今のままを優先）
-  const pickBest = (list, stayOne) => list.reduce((a, b) => (b.total < a.total - 0.5 || (Math.abs(b.total - a.total) <= 0.5 && b.filings.length < a.filings.length) ? b : a), stayOne);
-  const valid = paths.map((q) => check(q, false)).filter(Boolean);
-  const stay = valid.find((v) => v.path.every((m) => m === current));
-  const best = pickBest(valid, stay);
-  // 課税事業者を選択している人は、免税へ戻る期限が違うので、道が変わることがある。変わる時だけ、その人向けの道も返す
+  const pickBest = (list) => {
+    const keep = list.find((v) => v.path.every((m) => m === current));
+    return list.reduce((a, b) => (!a || b.total < a.total - 0.5 || (Math.abs(b.total - a.total) <= 0.5 && b.filings.length < a.filings.length) ? b : a), keep || null);
+  };
+  const valid = paths.map((q) => check(q, twoStarts ? 'exempt' : current)).filter(Boolean);
+  const best = pickBest(valid);
+  // 今のまま（比べる相手）: 方式を変えなかった時の合計。届出の有無は問わない
+  const stayTaxes = table.map((t) => t.tax[current]);
+  const stay = { taxes: stayTaxes, total: stayTaxes.reduce((a, b) => a + b, 0) };
   let ifElected = null;
-  if (best.filings.some((f) => f.byCase)) {
-    const strictValid = paths.map((q) => check(q, true)).filter(Boolean);
-    const e = pickBest(strictValid, strictValid.find((v) => v.path.every((m) => m === current)));
-    if (e.path.join() !== best.path.join()) ifElected = { path: e.path, taxes: e.taxes, total: e.total, filings: e.filings, saving: Math.round(stay.total - e.total) };
+  if (twoStarts) {
+    const e = pickBest(paths.map((q) => check(q, current)).filter(Boolean));
+    if (e) ifElected = { path: e.path, taxes: e.taxes, total: e.total, filings: e.filings, saving: Math.round(stay.total - e.total), same: e.path.join() === best.path.join() };
   }
 
   // 1年目だけで選んだ時（無料の試算と同じ見方）: 1年目に一番少ない方式を選び、あとは決まりの中で一番少ない道
@@ -176,11 +181,9 @@ export function plan(input, today) {
   const notes = [];
   if (!allowed[input.current]) notes.push(`${LABEL[input.current]}は現在の条件では選択できないため、本則課税を現在の方式とみなして計算しております。`);
   if (current === 'simple') notes.push('簡易課税を始めてから2年が経過していない場合、通常の届出では本則課税に戻れません。令和9年4月1日を含む期間の特例でご提出いただく場合は、この決まりは適用されません。');
+  if (twoStarts) notes.push('この見通しは、課税事業者選択届出書をまだ出していない方の結果です。基準期間の売上が1,000万円以下のため、届出をしなければ免税事業者になります。課税事業者として申告する期間には選択届が必要で、選んだら2年間は課税事業者のままとなります。選択届をすでに出していて2年を過ぎている方は、「すでに課税事業者選択届出書を出している場合」をご覧ください。');
   if (best.path.includes('exempt') && current !== 'exempt') notes.push('免税事業者になるには、その期間の基準期間（個人は2年前、法人は2期前）の課税売上高が1,000万円以下で、特定期間（前年の1〜6月など）の判定でも免税の要件を満たし（売上に代えて給与等の支払額で判定することもできます）、インボイスの登録を受けていないことが必要です。取引先が事業者の場合は、取引先が仕入れの税を控除できなくなります。');
   if (best.path.includes('exempt') && current === 'exempt') notes.push('免税のままであれば納税はございません。取引先が事業者の場合は、値下げを求められることがございます。');
-  // 売上が1,000万円以下の人は、届出をしないと免税になる。課税事業者のままでいる道には選択届が要る（国税庁 No.6501・No.6629）
-  const needElect = current !== 'exempt' && allowed.exempt && best.path.some((m) => m !== 'exempt');
-  if (needElect) notes.push('基準期間の課税売上高が1,000万円以下のため、特定期間の判定でも要件を満たし、インボイスの登録を受けていなければ、届出をしなくても免税事業者になります。この見通しのとおり本則課税・簡易課税で申告するには、課税事業者選択届出書のご提出が必要です（すでに提出している場合は不要です）。');
   if (best.taxes.some((t) => t < 0)) notes.push('マイナスの期間は還付（納めた税金が戻ること）となります。還付金は申告の後に振り込まれます。');
 
   return {
@@ -188,12 +191,12 @@ export function plan(input, today) {
     periods: table.map((t) => ({ start: t.start, end: t.end, cutMonths: t.cutMonths, tax: t.tax })),
     allowed,
     stay: { method: current, taxes: stay.taxes, total: stay.total },
+    twoStarts,
     best: {
       path: best.path, taxes: best.taxes, total: best.total, filings: best.filings,
       monthly: best.taxes.map((t) => (t > 0 ? Math.ceil(t / 12 / 100) * 100 : 0)), // 毎月の取り置き（100円単位に切り上げ）
     },
     ifElected,
-    needElect,
     saving: Math.round(stay.total - best.total),
     shouldSwitch: stay.total - best.total >= 1 && best.filings.length > 0,
     firstYear: firstOnly ? { method: firstBest, total: firstOnly.total, differs: firstBest !== best.path[0], loss: Math.round(firstOnly.total - best.total) } : null,

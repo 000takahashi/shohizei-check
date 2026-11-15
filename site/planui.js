@@ -51,31 +51,28 @@
     box.hidden = false;
   }
 
-  // 免税に戻る届出は、課税事業者になった理由で違う（国税庁 タックスアンサー No.6629）。両方を並べて、ご自身で選んでもらう
-  function exemptCases(f, per, r) {
-    var d = el('div');
-    d.appendChild(el('b', perText(per) + ' の期間から、' + LABEL[f.from] + 'を免税事業者に変更します'));
-    d.appendChild(el('p', '必要な届出は、課税事業者になった理由によって異なります。'));
-    var ul = el('ul', null, 'pl-cases');
-    var a = el('li');
-    a.appendChild(el('b', '「課税事業者選択届出書」を出して課税事業者になっている場合'));
-    if (f.late) {
-      // 期限を過ぎていて、この期間からは戻れない。その人の場合の道を出す
-      var e = r.ifElected;
-      a.appendChild(el('p', f.form + 'の期限（' + wa(f.deadline) + '）を過ぎているため、この期間からは免税事業者に戻れません。'
-        + (e ? 'この場合の最も少ない道は「' + e.path.map(function (m) { return LABEL[m]; }).join(' → ') + '」で、通算 ' + taxText(e.total) + '（今のままより約' + man(e.saving) + '少ない）です。' + (e.filings.length ? 'ご提出いただく届出は、' + e.filings.map(function (g) { return g.form + '（' + wa(g.deadline) + ' まで）'; }).join('、') + 'です。' : '届出は不要です。') : '')));
-    } else {
-      a.appendChild(el('p', f.form + 'を、' + wa(f.deadline) + ' までにご提出ください（戻りたい課税期間が始まる前日が期限です）。課税事業者を選んだ期間の初日から2年（一定の場合は3年）を経過する日の属する課税期間が始まるまでは、この届出を出せません。'
-        + (r.ifElected ? '選んでから2年を経過していない場合の最も少ない道は「' + r.ifElected.path.map(function (m) { return LABEL[m]; }).join(' → ') + '」（通算 ' + taxText(r.ifElected.total) + '）です。' : '')));
+  // 届出1件の説明（一覧・選択済みの人の道で使う）
+  function filingItem(f, r) {
+    var li = el('li');
+    li.appendChild(el('b', f.form));
+    if (f.info) {
+      li.appendChild(el('span', f.when, 'pl-date'));
+      li.appendChild(el('p', perText(r.periods[f.index]) + ' の期間は、届出をしなくても免税事業者になります（基準期間の課税売上高が1,000万円以下で、特定期間の判定でも要件を満たす場合。特定期間は売上に代えて給与等の支払額で判定することもできます）。この届出は期限ではなく、事由が生じたら速やかにご提出ください。'));
+      return li;
     }
-    ul.appendChild(a);
-    var b = el('li');
-    b.appendChild(el('b', '売上が1,000万円を超えていたために課税事業者になっている場合'));
-    b.appendChild(el('p', 'その期間の基準期間の課税売上高が1,000万円以下になり、特定期間の判定でも免税の要件を満たせば（売上に代えて給与等の支払額で判定することもできます）、届出をしなくても免税事業者になります。上の見通しはこの場合の結果です。' + f.alt.form + 'を、' + f.alt.when + 'ご提出ください。'));
-    ul.appendChild(b);
-    d.appendChild(ul);
-    d.appendChild(el('p', 'インボイスの登録を受けている場合は、登録の取消しを求める届出書を、取り消したい課税期間の初日から起算して15日前の日までにご提出いただく必要がございます。どちらに当たるか分からない場合は、税務署にお問い合わせください。', 'bk-hint'));
-    return d;
+    li.appendChild(el('span', wa(f.deadline) + ' まで', 'pl-date'));
+    li.appendChild(el('p', perText(r.periods[f.index]) + ' の期間から、' + (f.elect ? '課税事業者を選んで' + LABEL[f.to] + 'で申告します。' : LABEL[f.from] + 'を' + LABEL[f.to] + 'に変更します。')
+      + (f.special ? '特例により、この期間の中にご提出いただければ間に合います。届出書の参考事項の欄には「飲食料品特例」とご記入ください。' : 'この期間が始まる前日が期限です。')
+      + (f.to === 'simple' ? '簡易課税は、選択すると2年間は継続していただく必要がございます。' : '')
+      + (f.from === 'exempt' ? '課税事業者を選択すると、2年間は課税事業者のままとなります（一定の場合は3年）。' : '')
+      + (f.to === 'exempt' ? '課税事業者を選んだ期間の初日から2年を経過する日の属する課税期間が始まるまでは、この届出を出せません。' : '')));
+    return li;
+  }
+  function pathText(path) { return path.map(function (m) { return LABEL[m]; }).join(' → '); }
+  function calEvents(r, filings, suffix) {
+    return filings.filter(function (f) { return !f.info; }).map(function (f) {
+      return { date: f.deadline, title: '【届出の期限】' + f.form + (suffix || ''), note: perText(r.periods[f.index]) + ' の期間から、' + (f.elect ? '課税事業者を選んで' + LABEL[f.to] + 'で申告する' : LABEL[f.from] + 'を' + LABEL[f.to] + 'に変更する') + '届出です。税務署へご提出ください。' + (f.special ? '参考事項の欄には「飲食料品特例」とご記入ください。' : '') + '消費税1%チェッカーによる試算（目安）です。ご提出の前に、税理士または税務署にご確認ください。 https://shohizei-check.com/' };
+    });
   }
 
   // ---------- 2年間の通しの見通し ----------
@@ -91,7 +88,7 @@
       v.appendChild(el('span', '現在の' + LABEL[r.current] + 'のままですと合計 ' + taxText(r.stay.total) + '、見直した場合は合計 ' + taxText(r.best.total) + ' です（' + perText({ start: first.start, end: last.end }) + '）。'));
     } else {
       v.appendChild(el('b', '現在の' + LABEL[r.current] + 'のままが、' + n + '年分の通算でも最も少なくなります'));
-      v.appendChild(el('span', '合計 ' + taxText(r.best.total) + ' です（' + perText({ start: first.start, end: last.end }) + '）。' + (r.needElect ? '課税事業者選択届出書をすでに提出している場合は、届出は不要です（下の注意をご覧ください）。' : '届出は不要です。')));
+      v.appendChild(el('span', '合計 ' + taxText(r.best.total) + ' です（' + perText({ start: first.start, end: last.end }) + '）。' + (r.best.filings.length ? '下の届出が必要です。' : '届出は不要です。')));
     }
     box.appendChild(v);
 
@@ -100,37 +97,39 @@
     }
 
     // 出す届出と期限
-    box.appendChild(el('h3', 'ご提出いただく届出と期限'));
-    if (!r.best.filings.length) box.appendChild(el('p', r.needElect ? '課税事業者選択届出書をすでに提出している場合は、届出は不要です。提出していない場合は、売上が1,000万円以下のため免税事業者になります。課税事業者のまま申告するには、課税事業者選択届出書のご提出が必要です。' : '届出は不要です。'));
+    box.appendChild(el('h3', r.twoStarts ? 'ご提出いただく届出と期限（課税事業者選択届出書をまだ出していない場合）' : 'ご提出いただく届出と期限'));
+    if (!r.best.filings.length) box.appendChild(el('p', '届出は不要です。'));
     else {
       var ol = el('ol', null, 'pl-steps');
-      r.best.filings.forEach(function (f) {
-        var li = el('li');
-        if (f.byCase) { li.appendChild(exemptCases(f, r.periods[f.index], r)); ol.appendChild(li); return; }
-        li.appendChild(el('b', f.form));
-        li.appendChild(el('span', wa(f.deadline) + ' まで', 'pl-date'));
-        li.appendChild(el('p', perText(r.periods[f.index]) + ' の期間から、' + LABEL[f.from] + 'を' + LABEL[f.to] + 'に変更します。'
-          + (f.special ? '特例により、この期間の中にご提出いただければ間に合います。届出書の参考事項の欄には「飲食料品特例」とご記入ください。' : 'この期間が始まる前日が期限です。')
-          + (f.to === 'simple' ? '簡易課税は、選択すると2年間は継続していただく必要がございます。' : '')
-          + (f.from === 'exempt' ? '課税事業者を選択すると、2年間は継続していただく必要がございます。' : '')));
-        ol.appendChild(li);
-      });
+      r.best.filings.forEach(function (f) { ol.appendChild(filingItem(f, r)); });
       box.appendChild(ol);
-      // 期限をカレンダーに入れる（ファイルはこの端末で作る。どこにも送らない）
-      if (window.IcsKit && r.best.filings.some(function (f) { return !(f.byCase && f.late); })) {
-        var cal = el('div', null, 'bk-actions pl-noprint'), cb = el('button', '期限をカレンダーに登録する', 'bk-btn'); cb.type = 'button';
+    }
+    // 選択届をすでに出していて、2年の継続期間を終えた人の道（出発点が違う）
+    var e = r.ifElected;
+    if (e) {
+      box.appendChild(el('h3', 'すでに課税事業者選択届出書を出している場合'));
+      if (e.same) box.appendChild(el('p', '選択届を出してから2年を過ぎている場合も、最も少ない道は同じです。' + (e.filings.length ? 'ご提出いただく届出は次のとおりです' + (r.best.filings.some(f => f.elect || f.info) ? '（上の一覧の' + r.best.filings.filter(f => f.elect || f.info).map(f => f.form).join('と') + 'は不要です）' : '') + '。' : '届出は不要です。')));
+      else box.appendChild(el('p', '選択届を出してから2年を過ぎている場合の最も少ない道は「' + pathText(e.path) + '」で、通算 ' + taxText(e.total) + '（今のままより約' + man(e.saving) + '少ない）です。' + (e.filings.length ? 'ご提出いただく届出は次のとおりです。' : '届出は不要です。')));
+      if (e.filings.length) { var ol2 = el('ol', null, 'pl-steps'); e.filings.forEach(function (f) { ol2.appendChild(filingItem(f, r)); }); box.appendChild(ol2); }
+      box.appendChild(el('p', '選んでから2年を過ぎていない場合は、上の「まだ出していない場合」と同じく、2年間は課税事業者のままとなります。インボイスの登録を受けている場合は、免税事業者になるには登録の取消しを求める届出書（取り消したい課税期間の初日から起算して15日前の日まで）も必要です。', 'bk-hint'));
+    }
+    // 期限をカレンダーに入れる（ファイルはこの端末で作る。どこにも送らない）
+    var evMain = calEvents(r, r.best.filings, r.twoStarts ? '（選択届をまだ出していない場合）' : '');
+    var evElect = e && !e.same ? calEvents(r, e.filings, '（選択届を出している場合）') : [];
+    if (window.IcsKit && (evMain.length || evElect.length)) {
+      var cal = el('div', null, 'bk-actions pl-noprint');
+      var addCal = function (label, ev) {
+        var cb = el('button', label, 'bk-btn'); cb.type = 'button';
         cb.addEventListener('click', function () {
-          var ev = r.best.filings.map(function (f) {
-            if (f.byCase && f.late) return null; // 期限を過ぎた届出は、カレンダーに入れない
-            if (f.byCase) return { date: f.deadline, title: '【届出の期限】' + f.form + '（届出で課税事業者を選んでいる場合）', note: perText(r.periods[f.index]) + ' の期間から免税事業者に戻る届出です。売上が1,000万円を超えて課税事業者になった方は、この届出は不要で、' + f.alt.form + 'を' + f.alt.when + 'ご提出ください。消費税1%チェッカーによる試算（目安）です。ご提出の前に、税理士または税務署にご確認ください。 https://shohizei-check.com/' };
-            return { date: f.deadline, title: '【届出の期限】' + f.form, note: perText(r.periods[f.index]) + ' の期間から、' + LABEL[f.from] + 'を' + LABEL[f.to] + 'に変更する届出です。税務署へご提出ください。' + (f.special ? '参考事項の欄には「飲食料品特例」とご記入ください。' : '') + '消費税1%チェッカーによる試算（目安）です。ご提出の前に、税理士または税務署にご確認ください。 https://shohizei-check.com/' };
-          }).filter(Boolean);
           var a = el('a'); a.href = URL.createObjectURL(new Blob([window.IcsKit.build(ev, new Date().toISOString().replace(/[-:]|\.\d+/g, ''))], { type: 'text/calendar' })); a.download = 'shohizei-check-kigen.ics';
           document.body.appendChild(a); a.click(); a.remove();
         });
-        cal.appendChild(cb); box.appendChild(cal);
-        box.appendChild(el('p', '期限の14日前と3日前に、カレンダーからお知らせが届きます。iPhone・Google カレンダー・Outlook でお使いいただけます。', 'bk-hint pl-noprint'));
-      }
+        cal.appendChild(cb);
+      };
+      if (evMain.length) addCal(evElect.length ? '期限をカレンダーに登録する（選択届をまだ出していない場合）' : '期限をカレンダーに登録する', evMain);
+      if (evElect.length) addCal('期限をカレンダーに登録する（選択届を出している場合）', evElect);
+      box.appendChild(cal);
+      box.appendChild(el('p', '期限の14日前と3日前に、カレンダーからお知らせが届きます。iPhone・Google カレンダー・Outlook でお使いいただけます。', 'bk-hint pl-noprint'));
     }
 
     // 年ごとの見込み

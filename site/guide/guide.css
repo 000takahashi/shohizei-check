@@ -118,6 +118,7 @@ body {
 }
 h1, h2, h3, legend, label, .verdict b, .hint { text-wrap: pretty; }
 .nw { white-space: nowrap; }
+@media (max-width: 480px) { .lead .nw { white-space: normal; } }
 .wrap {
   max-width: 1160px;
   margin: 0 auto;
