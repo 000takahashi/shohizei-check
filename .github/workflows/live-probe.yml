@@ -1,0 +1,22 @@
+name: live-probe
+
+# 本番の AI 向け窓口を外から呼んで、やりとりをログに残す（読むだけ・鍵なし）。
+on:
+  workflow_dispatch:
+  push:
+    branches: [claude/project-thread-r8fgl6]
+    paths: [scripts/probe-live.sh, .github/workflows/live-probe.yml]
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - name: Probe
+        run: bash scripts/probe-live.sh
