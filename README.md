@@ -49,12 +49,23 @@
 - `site/bulk.js` 税区分の読み方（freee の1列型、マネーフォワード・弥生の借方・貸方型）と集計。テストは `tests/csv.test.js`
 - 形の違う明細は、お客様のAIに整えてもらうお願い文（`AI_PROMPT`）を画面に出している
 
+## AI 向けの窓口（MCP と API）
+
+輸入利益チェッカーと同じ作り。よその AI（Claude・ChatGPT など）から、画面の**無料の計算と同じ物だけ**を鍵なしで呼べる。入力も結果も保存しない。AI は使わない。
+
+- `/mcp` MCP サーバー（Streamable HTTP・JSON 応答・認証なし）。道具: `compare_tax_methods`（`/api/v1/compare`・令和9年4月1日を含む期間の方式くらべと届出の期限）・`get_filing_period`（`/api/v1/period`・期間と期限だけ）・`compare_normal_year`（`/api/v1/normal-year`・8%の年）
+- `/api/v1/*` は同じ道具をふつうの HTTP で（GET はクエリ、POST は JSON、引数なしの GET は入力の説明）。知らない項目や範囲外の値は、勝手に直さずに 400 を返す
+- 道具の中身は `functions/_lib/tools.mjs`（計算は `site/calc.js` をそのまま使う）。受け答えは `functions/_lib/mcpserver.mjs`・`functions/_lib/open.mjs`（姉妹サイトと同じファイル）。テストは `tests/ai.test.mjs`
+- 有料の2年間の通しの見通し（`/api/v1/plan`）と値付け（`/api/v1/pricing`）は道具に入れない（無料に広げない）。有料の窓口は今までどおりパス（`Authorization: Bearer`）が要る
+- `server.json` は公式の MCP 一覧（registry.modelcontextprotocol.io）に載せるための説明。登録は運営者の一言のあとで
+- `site/llms.txt` に AI 向けの使い方を書いている
+
 ## 公開（Cloudflare Workers）
 
 輸入利益チェッカーと同じ形。正式なURLは https://shohizei-check.com （2026-11-08 Cloudflare で購入）。
 
 - `wrangler.jsonc` 設定。`site/` をそのまま配る。`routes` で独自ドメインと www をつなぐ
-- `src/worker.js` `/api/v1/*` を `functions/` へ渡し、www を正式なURLへ転送し、仮URL（`*.workers.dev`）に noindex を付ける
+- `src/worker.js` `/mcp` と `/api/v1/*` を `functions/` へ渡し、www を正式なURLへ転送し、仮URL（`*.workers.dev`）に noindex を付ける
 - `site/_headers` CSP など全ページ共通の守り。`site/robots.txt`・`site/sitemap.xml`・`site/llms.txt`（AI 向けの説明）
 - 検索向けの構造化データ（JSON-LD）は画面の「よくある質問」から `node scripts/seo-sync.js` で作る。Google・Bing への登録手順は `docs/search-registration.md`
 - 最初の1回だけ人の作業: Cloudflare の Workers & Pages で「Import a repository」からこのリポジトリを選ぶ

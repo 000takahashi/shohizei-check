@@ -1,0 +1,12 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.000takahashi/shohizei-check",
+  "title": "Japan Food Consumption Tax 1% Checker",
+  "description": "Japan's planned 1% consumption tax on food (2027-2029): compare filing methods and deadlines.",
+  "version": "1.0.0",
+  "websiteUrl": "https://shohizei-check.com/",
+  "repository": { "url": "https://github.com/000takahashi/shohizei-check", "source": "github" },
+  "remotes": [
+    { "type": "streamable-http", "url": "https://shohizei-check.com/mcp" }
+  ]
+}
