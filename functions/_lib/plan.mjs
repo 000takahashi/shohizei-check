@@ -145,6 +145,9 @@ export function plan(input, today) {
     if (start === current && input.since !== 'old') {
       const left = input.since === 'this' ? 2 : 1;
       if (current === 'simple') lockSimple = left;
+      // 簡易課税を始めた時に課税事業者も選んでいたかもしれない人（出していない、と答えた人以外）は、課税事業者の2年も残す。
+      // 選んだのがもっと前なら抜けられる道を1つ隠すだけで、出せない届出を示すことはない
+      if (current === 'simple' && input.elected !== 'no' && allowed.exempt) lockTaxable = left;
       if (current === 'general') lockTaxable = left;
     }
     if (start === 'exempt' && current !== 'exempt' && seq[0] === 'exempt') {
@@ -201,6 +204,7 @@ export function plan(input, today) {
   const notes = [];
   if (!allowed[input.current]) notes.push(`${LABEL[input.current]}は現在の条件では選択できないため、本則課税を現在の方式とみなして計算しております。`);
   if (current === 'simple' && input.since === 'old') notes.push('簡易課税を始めてから2年が経過していない場合、通常の届出では本則課税に戻れません。始めた時期を選び直すと、その決まりを入れて計算いたします。令和9年4月1日を含む期間の特例でご提出いただく場合は、この決まりは適用されません。');
+  if (current === 'simple' && input.since !== 'old' && input.elected !== 'no' && allowed.exempt) notes.push('課税事業者選択届出書も簡易課税と同じ時期に出したものとして、その2年間は免税事業者に戻らない道で計算しております。選択届をもっと前に出している場合は、免税に戻れる時期が早まることがございます。');
   if (current === 'simple' && input.since !== 'old') notes.push('簡易課税を始めてから2年間は、通常の届出では本則課税に戻れないため、その決まりを入れて計算しております。令和9年4月1日を含む期間の特例でご提出いただく場合は、この決まりは適用されません。');
   if (current === 'general' && input.since !== 'old' && input.current === 'general' && input.elected !== 'no') notes.push('届出で課税事業者を選んでから2年間は、免税事業者に戻れないため、その決まりを入れて計算しております（売上が1,000万円を超えて課税事業者になった方には関係ございません）。');
   if (twoStarts && !showElected) notes.push('この見通しは、課税事業者選択届出書を出していない方の結果です。基準期間の売上が1,000万円以下のため、届出をしなければ免税事業者になります。課税事業者として申告する期間には選択届が必要で、選んだら2年間は課税事業者のままとなります。');

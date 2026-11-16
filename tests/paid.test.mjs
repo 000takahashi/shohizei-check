@@ -126,6 +126,14 @@ test('★選択届を出しているか: 出している人は今の方式から
   const noNew = run({ ...o, elected: 'no', since: 'this' });
   assert.equal(noNew.twoStarts, true);
   assert.ok(!noNew.notes.some((n) => n.startsWith('届出で課税事業者を選んでから2年間')));
+  // 簡易と課税事業者を同じ時期に選んだ人は、特例で本則へ移っても、課税事業者の2年が残る（すぐ免税には戻らない）
+  const w = { eatIn: 0, foodSales: 14000000, foodBuy: 13000000, otherBuy: 0, baseSales: 9000000, current: 'simple', foodKubun: 1, since: 'this' };
+  for (const el of ['yes', 'unknown']) {
+    const r = run({ ...w, elected: el });
+    assert.notEqual(r.best.path[0], 'exempt');
+    assert.notEqual(r.best.path[1], 'exempt');
+    assert.ok(r.notes.some((n) => n.startsWith('課税事業者選択届出書も簡易課税と同じ時期に')));
+  }
   // 売上が1,000万円を超えていれば、答えにかかわらず今の方式から
   assert.equal(run({ ...o, baseSales: 20000000, elected: 'no' }).twoStarts, false);
 });
