@@ -1853,6 +1853,15 @@ form.simple .assume { display: flex; align-items: flex-start; justify-content: s
     <section class="doc-card">
       <h3 class="pl-noprint">入力の数字で見る</h3>
       <p class="pl-noprint">「申告方式の試算」に入れた売上と仕入れを、そのまま使用します。</p>
+      <div class="bk-grid pl-noprint">
+        <label>今の申告方式（簡易課税、または届出で選んだ課税事業者）を始めた時期
+          <select id="plSince">
+            <option value="old">2つ前の課税期間より前から（2年たっている）</option>
+            <option value="last">令和9年4月1日を含む課税期間の、1つ前の課税期間から</option>
+            <option value="this">令和9年4月1日を含む課税期間から</option>
+          </select>
+        </label>
+      </div>
       <div class="bk-actions pl-noprint">
         <button type="button" class="bk-btn primary" id="plGo">通しの見通しを出す</button>
         <button type="button" class="bk-btn" id="plSample">見本で見る</button>

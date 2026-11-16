@@ -94,7 +94,7 @@ export function restEndpoint(tool, extra = {}) {
       args = Object.fromEntries(params);
       const v = validate(args, tool.inputSchema, true);
       if (v.errors) return json({ error: 'invalid_input', details: v.errors }, 400);
-      return json(await tool.run(v.value, context));
+      return toolJson(await tool.run(v.value, context));
     }
     if (request.method !== 'POST') return json({ error: 'Use GET or POST.' }, 405, { Allow: 'GET, POST, OPTIONS' });
     const read = await readJson(request);
@@ -102,6 +102,11 @@ export function restEndpoint(tool, extra = {}) {
     args = read.body;
     const v = validate(args, tool.inputSchema);
     if (v.errors) return json({ error: 'invalid_input', details: v.errors }, 400);
-    return json(await tool.run(v.value, context));
+    return toolJson(await tool.run(v.value, context));
   };
+}
+
+// 道具が入力を断った時（{ error }）は 400 で返す。成功と見分けられるように
+function toolJson(out) {
+  return json(out, out && out.error ? 400 : 200);
 }
