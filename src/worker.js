@@ -1,6 +1,7 @@
 // 消費税1%チェッカー（Cloudflare Workers）
 // /mcp と /api/v1/* は functions/ の処理で答え、それ以外は site/ の静的ファイルを返す。
 // www 付きは正式なURLへ転送し、仮URL（*.workers.dev）は検索に載せない。
+import { count } from './count.mjs';
 import { onStatus as passStatus, onCheckout as passCheckout, onClaim as passClaim, onCheck as passCheck } from '../functions/api/pass.mjs';
 import { onPlan, onPricing } from '../functions/api/paid.mjs';
 import { onRequest as mcp } from '../functions/mcp.mjs';
@@ -16,7 +17,7 @@ const ROUTES = {
 };
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
     if (url.hostname === 'www.shohizei-check.com') {
       url.hostname = 'shohizei-check.com';
@@ -28,6 +29,7 @@ export default {
       res = new Response(res.body, res);
       res.headers.set('X-Robots-Tag', 'noindex');
     }
+    count(env, ctx, 'shohizei', request, res, !!handler); // 日ごとの合計の数だけ（src/count.mjs）
     return res;
   },
 };

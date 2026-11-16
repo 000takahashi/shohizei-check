@@ -13,5 +13,9 @@
     { "pattern": "shohizei-check.com", "custom_domain": true },
     { "pattern": "www.shohizei-check.com", "custom_domain": true }
   ],
+  // 見られた数・使われた数（日ごとの合計だけ・src/count.mjs）。Traveln・ChronoDrawer と同じ D1 の ck_count に書く
+  "d1_databases": [
+    { "binding": "COUNTS", "database_name": "chronodrawer-reports", "database_id": "65392442-29b6-4eef-a354-b8d9024d3442" }
+  ],
   "observability": { "enabled": true }
 }
