@@ -171,6 +171,7 @@
   function runPlan(sample) {
     var input = sample ? null : (window.ShohizeiInput ? window.ShohizeiInput() : null);
     if (!sample && !input) { msg('plMsg', 'お手数ですが、先に「申告方式の試算」で売上と仕入れをご入力ください。', true); $('plOut').hidden = true; $('plLock').hidden = true; return; }
+    if (input) { input = Object.assign({}, input); input.since = $('plSince') ? $('plSince').value : 'old'; input.elected = $('plElected') ? $('plElected').value : 'unknown'; }
     msg('plMsg', '計算しております…');
     post('/api/v1/plan', sample ? { sample: true } : input).then(function (r) {
       if (r.status === 200) { msg('plMsg', ''); renderPlan(r.data.result, !!r.data.sample); return; }

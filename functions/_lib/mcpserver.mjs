@@ -44,7 +44,8 @@ export function makeMcp(cfg) {
         if (!tool) return err(msg.id, -32602, `Unknown tool: ${safeText(params.name)}`);
         const v = validate(params.arguments === undefined ? {} : params.arguments, tool.inputSchema);
         if (v.errors) return ok(msg.id, toolResult({ error: 'invalid_input', details: v.errors }, true));
-        return ok(msg.id, toolResult(await tool.run(v.value, context)));
+        const out = await tool.run(v.value, context);
+        return ok(msg.id, toolResult(out, !!(out && out.error))); // 道具が入力を断った時は isError で返す
       }
       default:
         return err(msg.id, -32601, `Method not found: ${safeText(msg.method)}`);

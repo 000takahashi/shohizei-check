@@ -76,6 +76,68 @@ test('飲食料品を売っていない事業者には特例が無い（期間�
   r.best.filings.forEach((f) => assert.equal(f.special, false));
 });
 
+test('★今の方式を始めた時期: 2年たっていなければ、通常の届出ではその間は抜けられない（特例は別）', () => {
+  // 飲食料品を売っていない・売上1,000万円超・今は簡易。本則が少ない事業
+  const o = { foodSales: 0, eatIn: 20000000, foodBuy: 3000000, otherBuy: 15000000, baseSales: 20000000, current: 'simple' };
+  assert.deepEqual(run({ ...o, since: 'old' }).best.path, ['general', 'general', 'general', 'general']);
+  const last = run({ ...o, since: 'last' });
+  assert.deepEqual(last.best.path.slice(0, 2), ['simple', 'general']);
+  assert.equal(last.best.filings[0].deadline, '2027-12-31');
+  const now = run({ ...o, since: 'this' });
+  assert.deepEqual(now.best.path.slice(0, 3), ['simple', 'simple', 'general']);
+  assert.ok(now.notes.some((n) => n.includes('その決まりを入れて計算しております')));
+  // 食品の卸は、令和9年4月1日を含む期間の特例なら、始めたばかりでも本則へ移れる
+  const w = { eatIn: 0, foodSales: 30000000, foodBuy: 20000000, otherBuy: 6000000, baseSales: 30000000, current: 'simple', foodKubun: 1 };
+  const sp = run({ ...w, since: 'this' });
+  assert.equal(sp.best.path[0], 'general');
+  assert.equal(sp.best.filings[0].special, true);
+  // 届出で課税事業者を選んだばかりの人（選択済みの見通し）は、その間は免税に戻らない
+  const g = run({ eatIn: 0, foodSales: 9000000, foodBuy: 2000000, otherBuy: 1000000, baseSales: 9000000, current: 'general', foodKubun: 2, since: 'this' });
+  // 始めた時期を選んだ人は、今の方式から出発する道だけが主の結果（免税からの道と混ぜない）
+  assert.equal(g.twoStarts, false);
+  assert.equal(g.ifElected, null);
+  assert.notEqual(g.best.path[0], 'exempt');
+  assert.notEqual(g.best.path[1], 'exempt');
+  assert.equal(run({ eatIn: 0, foodSales: 9000000, foodBuy: 2000000, otherBuy: 1000000, baseSales: 9000000, current: 'general', foodKubun: 2, since: 'old' }).twoStarts, true);
+  // 簡易を始めたばかりの人も、主の結果で最初の期間から免税にはならない
+  const s1 = run({ eatIn: 0, foodSales: 9000000, foodBuy: 2000000, otherBuy: 1000000, baseSales: 9000000, current: 'simple', foodKubun: 2, since: 'last' });
+  assert.equal(s1.twoStarts, false);
+  assert.equal(s1.best.path[0], 'simple');
+  assert.equal(cleanPlan({ ...SAMPLE, since: 'x' }).input.since, 'old');
+});
+
+test('★選択届を出しているか: 出している人は今の方式から、出していない人は免税から。わからない人は両方', () => {
+  const o = { eatIn: 0, foodSales: 9000000, foodBuy: 2000000, otherBuy: 1000000, baseSales: 9000000, current: 'general', foodKubun: 2 };
+  const un = run(o);
+  assert.equal(cleanPlan(o).input.elected, 'unknown');
+  assert.equal(un.twoStarts, true);
+  assert.ok(un.ifElected);
+  const yes = run({ ...o, elected: 'yes' });
+  assert.equal(yes.twoStarts, false);
+  assert.equal(yes.ifElected, null);
+  assert.deepEqual(yes.best.path, un.ifElected.path); // 出している人の主の結果は、わからない人の2つ目の欄と同じ
+  const no = run({ ...o, elected: 'no' });
+  assert.equal(no.twoStarts, true);
+  assert.equal(no.ifElected, null);
+  assert.deepEqual(no.best.path, un.best.path);
+  assert.ok(no.notes.some((n) => n.startsWith('この見通しは、課税事業者選択届出書を出していない方')));
+  assert.ok(!no.notes.some((n) => n.includes('「すでに課税事業者選択届出書を出している場合」')));
+  // 始めたばかりでも、出していないと答えた人は免税から（選んだ2年の決まりは無い）
+  const noNew = run({ ...o, elected: 'no', since: 'this' });
+  assert.equal(noNew.twoStarts, true);
+  assert.ok(!noNew.notes.some((n) => n.startsWith('届出で課税事業者を選んでから2年間')));
+  // 簡易と課税事業者を同じ時期に選んだ人は、特例で本則へ移っても、課税事業者の2年が残る（すぐ免税には戻らない）
+  const w = { eatIn: 0, foodSales: 14000000, foodBuy: 13000000, otherBuy: 0, baseSales: 9000000, current: 'simple', foodKubun: 1, since: 'this' };
+  for (const el of ['yes', 'unknown']) {
+    const r = run({ ...w, elected: el });
+    assert.notEqual(r.best.path[0], 'exempt');
+    assert.notEqual(r.best.path[1], 'exempt');
+    assert.ok(r.notes.some((n) => n.startsWith('課税事業者選択届出書も簡易課税と同じ時期に')));
+  }
+  // 売上が1,000万円を超えていれば、答えにかかわらず今の方式から
+  assert.equal(run({ ...o, baseSales: 20000000, elected: 'no' }).twoStarts, false);
+});
+
 test('免税から課税事業者を選んだら、次の期間は免税に戻れない', () => {
   const r = run({ eatIn: 0, foodSales: 9000000, foodBuy: 5000000, otherBuy: 3000000, baseSales: 9000000, current: 'exempt', foodKubun: 2 });
   assert.equal(r.allowed.exempt, true);
@@ -193,7 +255,13 @@ const req = (path, body, token) => new Request('https://shohizei-check.com' + pa
 });
 
 test('★有料の線: パスが無ければ 402。道・届出・値段の表は返さない。金額の一部だけ返す', async () => {
-  for (const env of [{}, { PASS_SIGNING_SECRET: SECRET }]) {
+  // 署名の鍵が無い間は、パスが要るとは言わず 503（買った方を「パスが無い」と案内しない）
+  for (const call of [onPlan, onPricing]) {
+    const down = await call({ request: req(call === onPlan ? '/api/v1/plan' : '/api/v1/pricing', call === onPlan ? SAMPLE : PRICE_SAMPLE), env: {} }, { now: NOW });
+    assert.equal(down.status, 503);
+    assert.equal((await down.json()).teaser, undefined);
+  }
+  for (const env of [{ PASS_SIGNING_SECRET: SECRET }]) {
     const res = await onPlan({ request: req('/api/v1/plan', SAMPLE), env }, { now: NOW });
     assert.equal(res.status, 402);
     const out = await res.json();

@@ -29,6 +29,8 @@ function make(clean, run, tease, SAMPLE, max) {
     if (c.error) return json({ error: c.error }, 400);
     const result = run(c.input, today);
     if (env.PAID_OPEN !== '1' && !Shop.freeOpen(deps.now)) {
+      // 署名の鍵が無い間は、買った方のパスも確かめられない。「パスが要る」と見せず、一時的な不具合として返す
+      if (!env.PASS_SIGNING_SECRET) return json({ error: 'pass_not_configured', message: '現在、有料の機能を一時的にご利用いただけません。' }, 503);
       const pass = await verifyPass(env.PASS_SIGNING_SECRET, bearer(request), deps.now);
       if (!pass.ok) return json({ error: pass.reason, teaser: tease(result) }, 402);
     }

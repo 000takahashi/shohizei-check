@@ -41,6 +41,11 @@ test('MCP: おかしな入力は、直さずに断る（知らない項目・範
   assert.equal(bad.result.structuredContent.details.length, 3);
   const blank = TOOL.compare_tax_methods.run({});
   assert.equal(blank.error, 'no_amounts');
+  // 道具が断った時も、MCP は isError、API は 400（成功と見分けられるように）
+  const empty = await (await rpc({ jsonrpc: '2.0', id: 7, method: 'tools/call', params: { name: 'compare_tax_methods', arguments: {} } })).json();
+  assert.equal(empty.result.isError, true);
+  assert.equal(empty.result.structuredContent.error, 'no_amounts');
+  assert.equal((await call('/api/v1/compare', { method: 'POST', body: '{}' })).status, 400);
   const unk = await (await rpc({ jsonrpc: '2.0', id: 5, method: 'tools/call', params: { name: 'plan<script>' } })).json();
   assert.equal(unk.error.message, 'Unknown tool: planscript');
   const nf = await (await rpc({ jsonrpc: '2.0', id: 6, method: 'nope' })).json();
