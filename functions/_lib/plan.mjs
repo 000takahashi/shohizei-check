@@ -130,7 +130,8 @@ export function plan(input, today) {
   //    1つ目の期間が免税なら「消費税の納税義務者でなくなった旨の届出書」を速やかに出す（期限ではない）
   //  選択済みの人（ifElected）: 選択届をすでに出していて、2年の継続期間を終えた人。今の方式から出発し、免税へは不適用届
   // 売上が1,000万円を超える人・インボイス登録の人は、免税を選べないので、今の方式からの道だけ
-  const twoStarts = current !== 'exempt' && allowed.exempt;
+  // 始めた時期を選んだ人（since が old 以外）は、今の方式をすでに始めている＝出発点は今の方式だけ（2年の決まりを主の結果にも入れる）
+  const twoStarts = current !== 'exempt' && allowed.exempt && input.since === 'old';
   function check(seq, start) {
     const filings = [];
     let prev = start, lockSimple = 0, lockTaxable = 0;

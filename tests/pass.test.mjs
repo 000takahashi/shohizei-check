@@ -43,6 +43,8 @@ test('支払い画面: 値段と日数は定数と同じ。カードだけ。戻
   const f = checkoutForm('https://shohizei-check.com', now, D30.id);
   assert.equal(f.get('line_items[0][price_data][unit_amount]'), String(D30.yen));
   assert.equal(f.get('metadata[plan]'), D30.id);
+  assert.equal(f.get('metadata[yen]'), String(D30.yen));
+  assert.equal(f.get('metadata[days]'), String(D30.days));
   assert.match(f.get('line_items[0][price_data][product_data][name]'), new RegExp('消費税1%チェッカー 有料パス（' + D30.days + '日間）'));
   assert.equal(f.get('line_items[0][price_data][currency]'), 'jpy');
   assert.equal(f.get('allowed_payment_method_types[0]'), 'card');
@@ -92,6 +94,19 @@ test('受け取る: 未払い・額が足りない・別の商品・おかしな
   assert.equal((await claim({ session_id: '../v1/customers' }, { fetch: stripe(paid()) })).status, 400);
   assert.equal((await claim({ session_id: SID }, { fetch: stripe(paid({ created: now / 1000 - (D30.days + 10) * 86400 })) })).status, 410);
   assert.equal((await onClaim({ request: post('/api/v1/pass/claim', { session_id: SID }), env: {} }, { fetch: stripe(paid()) })).status, 503);
+});
+
+test('受け取る: 値段を変えた後でも、支払い画面を作った時の額と日数で受け取れる', async () => {
+  const claim = (over) => onClaim({ request: post('/api/v1/pass/claim', { session_id: SID }), env }, { now, fetch: stripe(paid(over)) });
+  const meta = { product: Shop.PRODUCT, plan: D30.id, yen: String(D30.yen + 100), days: '20' };
+  const ok = await claim({ amount_total: D30.yen + 100, metadata: meta });
+  assert.equal(ok.status, 200);
+  const j = await ok.json();
+  assert.equal(j.days, 20);
+  assert.equal(j.expiresAt, now - 60000 + 20 * 86400000 + CHECKOUT_TTL_MIN * 60000);
+  // 書いた額より少なければ受け取れない。おかしな値は無視して今の定価で比べる
+  assert.equal((await claim({ amount_total: D30.yen, metadata: meta })).status, 402);
+  assert.equal((await claim({ metadata: { ...meta, yen: '-5', days: 'x' } })).status, 200);
 });
 
 test('状態: 売り出し中かと値段を返す（鍵は返さない）', async () => {

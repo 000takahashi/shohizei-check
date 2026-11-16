@@ -93,8 +93,16 @@ test('★今の方式を始めた時期: 2年たっていなければ、通常�
   assert.equal(sp.best.filings[0].special, true);
   // 届出で課税事業者を選んだばかりの人（選択済みの見通し）は、その間は免税に戻らない
   const g = run({ eatIn: 0, foodSales: 9000000, foodBuy: 2000000, otherBuy: 1000000, baseSales: 9000000, current: 'general', foodKubun: 2, since: 'this' });
-  assert.notEqual(g.ifElected.path[0], 'exempt');
-  assert.notEqual(g.ifElected.path[1], 'exempt');
+  // 始めた時期を選んだ人は、今の方式から出発する道だけが主の結果（免税からの道と混ぜない）
+  assert.equal(g.twoStarts, false);
+  assert.equal(g.ifElected, null);
+  assert.notEqual(g.best.path[0], 'exempt');
+  assert.notEqual(g.best.path[1], 'exempt');
+  assert.equal(run({ eatIn: 0, foodSales: 9000000, foodBuy: 2000000, otherBuy: 1000000, baseSales: 9000000, current: 'general', foodKubun: 2, since: 'old' }).twoStarts, true);
+  // 簡易を始めたばかりの人も、主の結果で最初の期間から免税にはならない
+  const s1 = run({ eatIn: 0, foodSales: 9000000, foodBuy: 2000000, otherBuy: 1000000, baseSales: 9000000, current: 'simple', foodKubun: 2, since: 'last' });
+  assert.equal(s1.twoStarts, false);
+  assert.equal(s1.best.path[0], 'simple');
   assert.equal(cleanPlan({ ...SAMPLE, since: 'x' }).input.since, 'old');
 });
 

@@ -41,6 +41,9 @@ export function checkoutForm(origin, now = Date.now(), planId = '', up = null) {
   f.set('custom_text[submit][message]', `お支払い後のキャンセル・返金はお受けいたしかねます。自動で更新されません。[特定商取引法に基づく表記](${origin}/#legal)`);
   f.set('metadata[product]', Shop.PRODUCT);
   f.set('metadata[plan]', P.id);
+  // 支払い画面を作った時の額と日数も書いておく（値段を変えた後に、前の値段の支払いを受け取っても断らない）
+  f.set('metadata[yen]', String(up ? up.yen : P.yen));
+  f.set('metadata[days]', String(P.days));
   if (up) { f.set('metadata[upgrade_from]', up.from.id); f.set('metadata[upgrade_exp]', String(Math.floor(up.expSec))); }
   f.set('locale', 'ja');
   f.set('success_url', `${origin}/?session_id={CHECKOUT_SESSION_ID}#pass`);
@@ -120,9 +123,11 @@ export async function onClaim(context, deps = {}) {
   // 切り替えの時は、差額を払っていること。期限は、支払い画面を作った時に書いた値（最初のお支払いから数えた日数）
   const u = meta.upgrade_from ? Shop.upgradeFrom(meta.upgrade_from) : null;
   if (meta.upgrade_from && (!u || !plan || u.to.id !== plan.id)) return json({ error: 'not_paid' }, 402);
-  const price = u ? u.yen : plan && plan.yen;
+  // 額と日数は、支払い画面を作った時に書いた値（サーバーだけが書く）。古い支払い画面で書いていない時は、今の定数
+  const posInt = (v) => (/^[1-9]\d{0,6}$/.test(String(v || '')) ? Number(v) : 0);
+  const price = posInt(meta.yen) || (u ? u.yen : plan && plan.yen);
   if (!plan || s.payment_status !== 'paid' || s.currency !== 'jpy' || s.amount_total !== price) return json({ error: 'not_paid' }, 402);
-  const days = plan.days;
+  const days = posInt(meta.days) || plan.days;
   // 支払い画面を開いた時から数える（受け取り直しても延びない）。支払いはその後35分以内なので、その分を足す
   const expMs = u ? (Number(meta.upgrade_exp) || 0) * 1000 : (Number(s.created) || 0) * 1000 + days * 86400000 + CHECKOUT_TTL_MIN * 60000;
   const now = deps.now || Date.now();
