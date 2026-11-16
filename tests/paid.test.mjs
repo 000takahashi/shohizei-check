@@ -106,6 +106,30 @@ test('★今の方式を始めた時期: 2年たっていなければ、通常�
   assert.equal(cleanPlan({ ...SAMPLE, since: 'x' }).input.since, 'old');
 });
 
+test('★選択届を出しているか: 出している人は今の方式から、出していない人は免税から。わからない人は両方', () => {
+  const o = { eatIn: 0, foodSales: 9000000, foodBuy: 2000000, otherBuy: 1000000, baseSales: 9000000, current: 'general', foodKubun: 2 };
+  const un = run(o);
+  assert.equal(cleanPlan(o).input.elected, 'unknown');
+  assert.equal(un.twoStarts, true);
+  assert.ok(un.ifElected);
+  const yes = run({ ...o, elected: 'yes' });
+  assert.equal(yes.twoStarts, false);
+  assert.equal(yes.ifElected, null);
+  assert.deepEqual(yes.best.path, un.ifElected.path); // 出している人の主の結果は、わからない人の2つ目の欄と同じ
+  const no = run({ ...o, elected: 'no' });
+  assert.equal(no.twoStarts, true);
+  assert.equal(no.ifElected, null);
+  assert.deepEqual(no.best.path, un.best.path);
+  assert.ok(no.notes.some((n) => n.startsWith('この見通しは、課税事業者選択届出書を出していない方')));
+  assert.ok(!no.notes.some((n) => n.includes('「すでに課税事業者選択届出書を出している場合」')));
+  // 始めたばかりでも、出していないと答えた人は免税から（選んだ2年の決まりは無い）
+  const noNew = run({ ...o, elected: 'no', since: 'this' });
+  assert.equal(noNew.twoStarts, true);
+  assert.ok(!noNew.notes.some((n) => n.startsWith('届出で課税事業者を選んでから2年間')));
+  // 売上が1,000万円を超えていれば、答えにかかわらず今の方式から
+  assert.equal(run({ ...o, baseSales: 20000000, elected: 'no' }).twoStarts, false);
+});
+
 test('免税から課税事業者を選んだら、次の期間は免税に戻れない', () => {
   const r = run({ eatIn: 0, foodSales: 9000000, foodBuy: 5000000, otherBuy: 3000000, baseSales: 9000000, current: 'exempt', foodKubun: 2 });
   assert.equal(r.allowed.exempt, true);

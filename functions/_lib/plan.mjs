@@ -17,6 +17,7 @@ export const PLAN_LIMIT = { amount: 1e12 };
 const KEYS = ['general', 'simple', 'exempt'];
 const LABEL = { general: '本則課税', simple: '簡易課税', exempt: '免税事業者' };
 const SINCE = ['old', 'last', 'this'];
+const ELECTED = ['unknown', 'yes', 'no'];
 
 const iso = (d) => d.toISOString().slice(0, 10);
 const dayBefore = (s) => iso(new Date(Date.parse(s + 'T00:00:00Z') - 86400000));
@@ -61,6 +62,8 @@ export function cleanPlan(b) {
     // 今の方式（簡易課税、または届出で選んだ課税事業者）を始めた時期。2年続ける決まりが残っているかを決める
     //  'this' 令和9年4月1日を含む課税期間から / 'last' その1つ前の課税期間から / 'old' それより前から
     since: SINCE.includes(b.since) ? b.since : 'old',
+    // 課税事業者選択届出書を出しているか。'yes' 出している / 'no' 出していない / 'unknown' わからない（両方の道を見せる）
+    elected: ELECTED.includes(b.elected) ? b.elected : 'unknown',
   };
   if (!(input.eatIn + input.foodSales + input.otherSales + input.foodBuy + input.otherBuy > 0)) return { error: 'empty' };
   return { input };
@@ -131,7 +134,10 @@ export function plan(input, today) {
   //  選択済みの人（ifElected）: 選択届をすでに出していて、2年の継続期間を終えた人。今の方式から出発し、免税へは不適用届
   // 売上が1,000万円を超える人・インボイス登録の人は、免税を選べないので、今の方式からの道だけ
   // 始めた時期を選んだ人（since が old 以外）は、今の方式をすでに始めている＝出発点は今の方式だけ（2年の決まりを主の結果にも入れる）
-  const twoStarts = current !== 'exempt' && allowed.exempt && input.since === 'old';
+  //  選択届を「出している」人は今の方式から、「出していない」人は免税から。わからない人は始めた時期で決め、両方の道を見せる
+  const canExempt = current !== 'exempt' && allowed.exempt;
+  const twoStarts = canExempt && (input.elected === 'no' || (input.elected === 'unknown' && input.since === 'old'));
+  const showElected = twoStarts && input.elected === 'unknown';
   function check(seq, start) {
     const filings = [];
     let prev = start, lockSimple = 0, lockTaxable = 0;
@@ -178,7 +184,7 @@ export function plan(input, today) {
   const stayTaxes = table.map((t) => t.tax[current]);
   const stay = { taxes: stayTaxes, total: stayTaxes.reduce((a, b) => a + b, 0) };
   let ifElected = null;
-  if (twoStarts) {
+  if (showElected) {
     const e = pickBest(paths.map((q) => check(q, current)).filter(Boolean));
     if (e) ifElected = { path: e.path, taxes: e.taxes, total: e.total, filings: e.filings, saving: Math.round(stay.total - e.total), same: e.path.join() === best.path.join() };
   }
@@ -196,8 +202,9 @@ export function plan(input, today) {
   if (!allowed[input.current]) notes.push(`${LABEL[input.current]}は現在の条件では選択できないため、本則課税を現在の方式とみなして計算しております。`);
   if (current === 'simple' && input.since === 'old') notes.push('簡易課税を始めてから2年が経過していない場合、通常の届出では本則課税に戻れません。始めた時期を選び直すと、その決まりを入れて計算いたします。令和9年4月1日を含む期間の特例でご提出いただく場合は、この決まりは適用されません。');
   if (current === 'simple' && input.since !== 'old') notes.push('簡易課税を始めてから2年間は、通常の届出では本則課税に戻れないため、その決まりを入れて計算しております。令和9年4月1日を含む期間の特例でご提出いただく場合は、この決まりは適用されません。');
-  if (current === 'general' && input.since !== 'old' && input.current === 'general') notes.push('届出で課税事業者を選んでから2年間は、免税事業者に戻れないため、その決まりを入れて計算しております（売上が1,000万円を超えて課税事業者になった方には関係ございません）。');
-  if (twoStarts) notes.push('この見通しは、課税事業者選択届出書をまだ出していない方の結果です。基準期間の売上が1,000万円以下のため、届出をしなければ免税事業者になります。課税事業者として申告する期間には選択届が必要で、選んだら2年間は課税事業者のままとなります。選択届をすでに出していて2年を過ぎている方は、「すでに課税事業者選択届出書を出している場合」をご覧ください。');
+  if (current === 'general' && input.since !== 'old' && input.current === 'general' && input.elected !== 'no') notes.push('届出で課税事業者を選んでから2年間は、免税事業者に戻れないため、その決まりを入れて計算しております（売上が1,000万円を超えて課税事業者になった方には関係ございません）。');
+  if (twoStarts && !showElected) notes.push('この見通しは、課税事業者選択届出書を出していない方の結果です。基準期間の売上が1,000万円以下のため、届出をしなければ免税事業者になります。課税事業者として申告する期間には選択届が必要で、選んだら2年間は課税事業者のままとなります。');
+  if (showElected) notes.push('この見通しは、課税事業者選択届出書をまだ出していない方の結果です。基準期間の売上が1,000万円以下のため、届出をしなければ免税事業者になります。課税事業者として申告する期間には選択届が必要で、選んだら2年間は課税事業者のままとなります。選択届をすでに出していて2年を過ぎている方は、「すでに課税事業者選択届出書を出している場合」をご覧ください。');
   if (best.path.includes('exempt') && current !== 'exempt') notes.push('免税事業者になるには、その期間の基準期間（個人は2年前、法人は2期前）の課税売上高が1,000万円以下で、特定期間（前年の1〜6月など）の判定でも免税の要件を満たし（売上に代えて給与等の支払額で判定することもできます）、インボイスの登録を受けていないことが必要です。取引先が事業者の場合は、取引先が仕入れの税を控除できなくなります。');
   if (best.path.includes('exempt') && current === 'exempt') notes.push('免税のままであれば納税はございません。取引先が事業者の場合は、値下げを求められることがございます。');
   if (best.taxes.some((t) => t < 0)) notes.push('マイナスの期間は還付（納めた税金が戻ること）となります。還付金は申告の後に振り込まれます。');

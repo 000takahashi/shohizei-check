@@ -1861,6 +1861,13 @@ form.simple .assume { display: flex; align-items: flex-start; justify-content: s
             <option value="this">令和9年4月1日を含む期間から</option>
           </select>
         </label>
+        <label>課税事業者選択届出書を出していますか
+          <select id="plElected">
+            <option value="unknown">わからない（両方の場合を見る）</option>
+            <option value="yes">出している</option>
+            <option value="no">出していない</option>
+          </select>
+        </label>
       </div>
       <div class="bk-actions pl-noprint">
         <button type="button" class="bk-btn primary" id="plGo">通しの見通しを出す</button>
