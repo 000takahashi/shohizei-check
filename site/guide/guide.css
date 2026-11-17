@@ -1454,6 +1454,36 @@ form.simple .assume { display: flex; align-items: flex-start; justify-content: s
 .assume .mini-btn { flex: none; }
 .sheet.blank .hero-kpi, .sheet.blank .summary, .sheet.blank .cost-bar-wrap, .sheet.blank .plan-cta, .sheet.blank .breakdown, .sheet.blank #toInput, .sheet.blank .todo { display: none !important; }
 @media (max-width: 640px) { form.simple .assume { flex-direction: column; } .page-head .trust { display: none; } }
+/* 文字の折り返しを整える（2026-11-18）。文章（段落・箇条書き・表の中・説明）は行の端まで詰めて折り返し、右側がガタガタにならないようにする。
+   文節で折る（auto-phrase）のは見出し・ボタン・メニュー・欄の名前など短い言葉だけ。文章の中の .nw（ここで折らない印）も外す。 */
+p,li,dd,td,blockquote,figcaption,.lead,.hint,.disclaimer,#verdictText,#assumeText{word-break:normal;text-wrap:pretty}
+h1,h2,h3,h4,legend,summary,th,button,label,.page-title,.kicker,.nav-item,.bk-btn,.btn,.action-btn,.mini-btn{word-break:auto-phrase}
+p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
+.lead,.page-head .lead{max-width:48em}
+.doc p,.doc li,.content p,.content li,footer p{max-width:none}
+/* 左のメニューは1行に収める（「運営者・プライバシー」などが2行に割れないように） */
+@media (min-width:1200px){.shell{grid-template-columns:228px minmax(0,1fr)}.nav-item{letter-spacing:.01em}}
+/* トップの説明の開閉（2026-11-18）。閉じていても本文は HTML にあり、ページ内検索で見つかると自動で開く */
+.guide-acc{margin-top:28px;max-width:940px;padding:22px 24px 8px}
+.home-guide>.guide-acc{margin-top:0}
+.doc-card .tablewrap + p{margin-top:12px}
+.guide-acc .acc-title{margin:0 0 4px;font-size:1.08rem;font-weight:700;letter-spacing:.04em}
+.guide-acc .acc-sub{margin:0 0 10px;font-size:.85rem;color:var(--muted)}
+.doc-card.guide-acc details{background:none;border:0;border-top:1px solid var(--line);border-radius:0;padding:0;margin:0}
+.doc-card.guide-acc details + details{margin-top:0}
+.doc-card.guide-acc summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:52px;padding:14px 2px;font-size:.98rem;font-weight:600;cursor:pointer;color:var(--ink)}
+.doc-card.guide-acc summary::-webkit-details-marker{display:none}
+.doc-card.guide-acc summary::after{content:"";flex:none;width:8px;height:8px;margin-right:6px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg) translate(-2px,-2px);transition:transform .18s}
+.doc-card.guide-acc details[open]>summary::after{transform:rotate(-135deg) translate(-2px,-2px)}
+.doc-card.guide-acc summary:hover{color:var(--accent)}
+.doc-card.guide-acc summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+.guide-acc .acc-body{padding:0 2px 18px}
+.doc-card.guide-acc .acc-body p{margin:0 0 10px;font-size:.94rem;color:var(--ink)}
+.guide-acc .acc-body ol,.guide-acc .acc-body ul{padding-left:1.4em;margin:0 0 12px}
+.guide-acc .acc-body li{font-size:.94rem;margin-bottom:6px}
+.guide-acc .acc-body .tablewrap{margin:0 0 12px}
+@media (prefers-reduced-motion:reduce){.doc-card.guide-acc summary::after{transition:none}}
+@media print{.guide-acc details>*:not(summary){display:block}}
 /* 解説ページの枠 */
 body.g-body { display: block; margin: 0; background: var(--bg); color: var(--ink); }
 .g-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; background: var(--paper); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 5; }

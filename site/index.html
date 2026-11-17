@@ -1479,6 +1479,36 @@ form.simple .assume { display: flex; align-items: flex-start; justify-content: s
 .assume .mini-btn { flex: none; }
 .sheet.blank .hero-kpi, .sheet.blank .summary, .sheet.blank .cost-bar-wrap, .sheet.blank .plan-cta, .sheet.blank .breakdown, .sheet.blank #toInput, .sheet.blank .todo { display: none !important; }
 @media (max-width: 640px) { form.simple .assume { flex-direction: column; } .page-head .trust { display: none; } }
+/* 文字の折り返しを整える（2026-11-18）。文章（段落・箇条書き・表の中・説明）は行の端まで詰めて折り返し、右側がガタガタにならないようにする。
+   文節で折る（auto-phrase）のは見出し・ボタン・メニュー・欄の名前など短い言葉だけ。文章の中の .nw（ここで折らない印）も外す。 */
+p,li,dd,td,blockquote,figcaption,.lead,.hint,.disclaimer,#verdictText,#assumeText{word-break:normal;text-wrap:pretty}
+h1,h2,h3,h4,legend,summary,th,button,label,.page-title,.kicker,.nav-item,.bk-btn,.btn,.action-btn,.mini-btn{word-break:auto-phrase}
+p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
+.lead,.page-head .lead{max-width:48em}
+.doc p,.doc li,.content p,.content li,footer p{max-width:none}
+/* 左のメニューは1行に収める（「運営者・プライバシー」などが2行に割れないように） */
+@media (min-width:1200px){.shell{grid-template-columns:228px minmax(0,1fr)}.nav-item{letter-spacing:.01em}}
+/* トップの説明の開閉（2026-11-18）。閉じていても本文は HTML にあり、ページ内検索で見つかると自動で開く */
+.guide-acc{margin-top:28px;max-width:940px;padding:22px 24px 8px}
+.home-guide>.guide-acc{margin-top:0}
+.doc-card .tablewrap + p{margin-top:12px}
+.guide-acc .acc-title{margin:0 0 4px;font-size:1.08rem;font-weight:700;letter-spacing:.04em}
+.guide-acc .acc-sub{margin:0 0 10px;font-size:.85rem;color:var(--muted)}
+.doc-card.guide-acc details{background:none;border:0;border-top:1px solid var(--line);border-radius:0;padding:0;margin:0}
+.doc-card.guide-acc details + details{margin-top:0}
+.doc-card.guide-acc summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:52px;padding:14px 2px;font-size:.98rem;font-weight:600;cursor:pointer;color:var(--ink)}
+.doc-card.guide-acc summary::-webkit-details-marker{display:none}
+.doc-card.guide-acc summary::after{content:"";flex:none;width:8px;height:8px;margin-right:6px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg) translate(-2px,-2px);transition:transform .18s}
+.doc-card.guide-acc details[open]>summary::after{transform:rotate(-135deg) translate(-2px,-2px)}
+.doc-card.guide-acc summary:hover{color:var(--accent)}
+.doc-card.guide-acc summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+.guide-acc .acc-body{padding:0 2px 18px}
+.doc-card.guide-acc .acc-body p{margin:0 0 10px;font-size:.94rem;color:var(--ink)}
+.guide-acc .acc-body ol,.guide-acc .acc-body ul{padding-left:1.4em;margin:0 0 12px}
+.guide-acc .acc-body li{font-size:.94rem;margin-bottom:6px}
+.guide-acc .acc-body .tablewrap{margin:0 0 12px}
+@media (prefers-reduced-motion:reduce){.doc-card.guide-acc summary::after{transition:none}}
+@media print{.guide-acc details>*:not(summary){display:block}}
 </style>
 <link rel="stylesheet" href="csvkit.css">
 <link rel="stylesheet" href="print.css">
@@ -1788,6 +1818,86 @@ form.simple .assume { display: flex; align-items: flex-start; justify-content: s
   </div>
 
   <aside class="adslot" id="adTop" data-ad-slot="" data-ad-name="試算結果の下" aria-label="広告" hidden><span class="adlabel">広告</span><div class="adbox"></div></aside>
+
+  <!-- 試算の画面の下の読み物（使い方・結果の読み方・計算例・期限・つまずきやすい所）。押すと開く。2026-11-18 -->
+  <div class="doc home-guide">
+    <section class="doc-card guide-acc" id="home-guide" aria-labelledby="homeGuideTitle">
+    <h2 class="acc-title" id="homeGuideTitle">使い方と、結果の読み方</h2>
+    <p class="acc-sub">知りたい項目を押すと、説明が開きます。</p>
+    <details>
+      <summary>このツールでわかること</summary>
+      <div class="acc-body">
+      <p>令和9年4月1日から令和11年3月31日までの2年間、食料品（お酒と外食を除く飲食料品）の消費税が8%から1%に下がる予定です。このツールは、お店の1年分の売上と仕入れから、<b>本則課税（一般課税）・簡易課税・免税事業者のどれで申告すると、納める消費税が一番少なくなるか</b>を試算します。方式を変える場合は、出す届出の名前と期限もあわせて示します。</p>
+      <p>店内飲食が中心の飲食店、持ち帰り・弁当・惣菜のお店、食品の卸・小売・製造のお店を想定しています。同じ「食料品が1%になる」でも、店内飲食が多いお店は納税が増え、食品を売るお店は納税が減るか還付が出るなど、業種によって向きが逆になります。</p>
+      <p>法案は令和8年11月6日に衆議院で可決され、参議院で審議中です。この試算は法案の成立を前提にしています。入れた数字はお使いの端末の中だけで計算し、当サイトのサーバーには送りません。</p>
+      </div>
+    </details>
+    <details>
+      <summary>使い方は3つの手順です</summary>
+      <div class="acc-body">
+      <ol>
+        <li><b>業種と今の申告方式を選ぶ</b>：業種を選ぶと、簡易課税の事業区分（みなし仕入率）が自動で入ります。今の申告方式が分からない時は、去年の確定申告書の控えか、税理士さんに確かめてください。</li>
+        <li><b>1年分の売上を入れる</b>：店内飲食・ケータリング（10%のまま）と、食料品の販売（持ち帰り・出前・卸・小売）を分けて入れます。レジの数字のまま税込で入れても、1か月の平均で入れてもかまいません。</li>
+        <li><b>仕入れと経費を入れる</b>：食材・食品の仕入れと、10%の仕入れ・経費（お酒・消耗品・家賃・光熱費・設備など）を分けて入れます。給与と社会保険料には消費税がかからないので、入れません。</li>
+      </ol>
+      <p>「くわしく」を開いて、2年前の課税売上高・インボイスの登録・決算月を入れると、免税事業者を選べるか、簡易課税を選べるか（2年前の課税売上高が5,000万円以下か）まで判定します。おおよその数字でも、どの方式が少ないかの向きはつかめます。</p>
+      </div>
+    </details>
+    <details>
+      <summary>結果の読み方</summary>
+      <div class="acc-body">
+      <p><b>この期間の納税</b>：令和9年4月1日を含む課税期間に、一番少なくなる方式で納める消費税の目安です。個人の場合、令和9年は1〜3月が8%、4〜12月が1%なので、1年分の金額を月数で分けて計算しています。</p>
+      <p><b>方式を変えた時の差</b>：今の方式のまま申告した場合と、一番少ない方式に変えた場合の差です。差が小さい時は、届出の手間や、2年間続ける決まりも考えて決めてください。</p>
+      <p><b>方式ごとの納税</b>：本則課税・簡易課税・免税事業者を並べています。2年前の売上やインボイスの登録の条件で選べない方式は、比べる対象から外します。本則課税がマイナスの時は、その分が還付になります。簡易課税には還付がありません。</p>
+      <p>結果の下の「印刷する」で、入れた数字と結果を1枚にまとめられます。税理士さんへの相談にお持ちください。</p>
+      </div>
+    </details>
+    <details>
+      <summary>計算例：飲食店と食品の小売で、向きが逆になります</summary>
+      <div class="acc-body">
+      <p><b>店内飲食が中心の飲食店</b>（1年分・税抜）：店内飲食3,600万円、持ち帰り400万円、食材の仕入れ1,200万円、10%の経費900万円。簡易課税の区分は、店内飲食が第4種（60%）、持ち帰りが第3種（70%）です。</p>
+      <div class="tablewrap"><table>
+        <thead><tr><th>申告方式</th><th>食料品8%の今</th><th>1%の2年間</th></tr></thead>
+        <tbody>
+          <tr><td>本則課税</td><td class="num">206万円</td><td class="num">262万円</td></tr>
+          <tr><td>簡易課税</td><td class="num">153.6万円</td><td class="num">144万円</td></tr>
+        </tbody>
+      </table></div>
+      <p>本則課税では、売上の税（店内飲食の10%）はそのままで、食材の仕入れで差し引ける税だけが96万円から12万円に減るため、納税が56万円増えます。簡易課税は売上の税にみなし仕入率をかけて差し引くので、仕入れの税率が下がった影響を受けません。持ち帰りの売上の税が下がった分だけ、少し減ります。</p>
+      <p><b>食品の小売店</b>（1年分・税抜）：食料品の販売3,000万円、食料品の仕入れ2,200万円、10%の経費500万円。簡易課税の区分は第2種（80%）です。</p>
+      <div class="tablewrap"><table>
+        <thead><tr><th>申告方式</th><th>食料品8%の今</th><th>1%の2年間</th></tr></thead>
+        <tbody>
+          <tr><td>本則課税</td><td class="num">14万円</td><td class="num">42万円の還付</td></tr>
+          <tr><td>簡易課税</td><td class="num">48万円</td><td class="num">0円</td></tr>
+        </tbody>
+      </table></div>
+      <p>売上の税が1%に下がる一方で、家賃や光熱費などの経費の税は10%のままなので、本則課税では差し引ける税の方が多くなり、還付が出ます。どちらの例も、国と地方を合わせた税率で計算した目安です。ご自身の数字は、上の欄に入れてお確かめください。</p>
+      </div>
+    </details>
+    <details>
+      <summary>年内に気をつけること（届出の期限）</summary>
+      <div class="acc-body">
+      <p><b>本則課税から簡易課税へ移る届出には、特例がありません。</b>簡易課税制度選択届出書を、適用を受けたい課税期間が始まる前日までに出します。個人のお店が令和9年分から簡易課税にする場合、期限は<b>令和8年12月31日</b>です。</p>
+      <p>免税事業者から課税事業者へ移る届出と、簡易課税から本則課税へ戻る届出には特例があり、令和9年4月1日を含む課税期間の中に出せば、その期間から変えられます。届出書の参考事項の欄には「飲食料品特例」と書きます。</p>
+      <p>簡易課税は、一度選ぶと2年間はやめられません。1%が終わる令和11年4月以降の年も含めて考える必要があります。法人の期限は決算月で変わるので、「<a href="#deadline" data-view="deadline">届出と期限</a>」の画面でお確かめください。くわしい手順は「<a href="/guide/nennai/">飲食店が年内に決めておくこと</a>」にまとめています。</p>
+      </div>
+    </details>
+    <details>
+      <summary>つまずきやすい所</summary>
+      <div class="acc-body">
+      <ul>
+        <li><b>店内飲食と持ち帰りで税率が違う</b>：店内で食べる場合とケータリングは10%のまま、持ち帰りと出前は1%です。差は9%に広がります。どちらかは、ご提供の時にお客様へ確かめて決めます。</li>
+        <li><b>お酒は食料品に入らない</b>：お酒の販売と仕入れは10%のままです。「その他の売上」と「10%の仕入れ・経費」に入れてください。</li>
+        <li><b>インボイスに登録していると免税事業者になれない</b>：2年前の課税売上高が1,000万円以下でも、登録中は課税事業者です。</li>
+        <li><b>簡易課税は5,000万円まで</b>：2年前の課税売上高が5,000万円を超えると、簡易課税は選べません。</li>
+        <li><b>含めていない計算がある</b>：端数処理、75%ルール、インボイスの2割特例・3割特例、8%のまま残る取引は、この試算に入っていません。対象になりそうな方は、税理士または税務署に確かめてください。</li>
+      </ul>
+      <p>税率の表は「<a href="#changes" data-view="changes">何が変わるか</a>」、計算式は「<a href="#howto" data-view="howto">計算のしくみ</a>」、よくあるご質問は「<a href="#faq" data-view="faq">よくある質問</a>」にまとめています。</p>
+      </div>
+    </details>
+    </section>
+  </div>
   </section>
 
   <section class="view doc" id="v-bulk" data-view="bulk" hidden>
@@ -2034,6 +2144,32 @@ form.simple .assume { display: flex; align-items: flex-start; justify-content: s
       <p><b>食品の卸・小売</b>：売上の税が1%になる一方で、家賃・光熱費・設備などの経費は10%のままです。本則課税なら還付が出ることがあります。</p>
       <p>店内飲食（10%）と持ち帰り（1%）の差は9%に広がります。値付けやレジの設定も、この機会に見直されることをおすすめします。</p>
     </section>
+    <section class="doc-card">
+      <h3>1%になる範囲</h3>
+      <p>1%の対象は、今8%の対象になっている飲食料品と同じ範囲です。お酒と外食は含みません。ここでいう外食は、テーブルや椅子などの設備がある場所でお客様に食事を出すことで、店内飲食がこれに当たります。お客様の指定した場所で料理を作ったり盛り付けたりするケータリング・出張料理も、10%のままです。</p>
+      <p>持ち帰りと出前（配達）は、食べ物を売るだけなので1%になります。同じお弁当でも、店内で食べるか持ち帰るかで税率が変わるので、ご提供の時にお客様へ確かめて区別します。</p>
+      <p>おもちゃ付きのお菓子のように、食品と食品以外を一緒にした商品は、今の8%と同じ考え方で扱われる見込みです。税抜1万円以下で、食品の部分の価額が全体の3分の2以上なら、全体が飲食料品になります。</p>
+    </section>
+    <section class="doc-card">
+      <h3>2年間の流れ</h3>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>期間</th><th>食料品の税率</th></tr></thead>
+          <tbody>
+            <tr><td>令和9年3月31日まで</td><td class="num">8%</td></tr>
+            <tr><td>令和9年4月1日〜令和11年3月31日</td><td class="num">1%</td></tr>
+            <tr><td>令和11年4月1日から</td><td class="num">8%に戻る予定</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>個人の課税期間は1月〜12月なので、令和9年は1〜3月が8%、4〜12月が1%の年になります。法人は決算月によって、1%が始まる期間と終わる期間がそれぞれ違います。どの期間にどちらの税率がかかるかは、「<a href="#deadline" data-view="deadline">届出と期限</a>」で決算月を選ぶと確かめられます。</p>
+      <p>1%が終わる年は、8%に戻る分だけ、店内飲食が中心のお店では納税が下がり、食品を売るお店では納税が上がります。1%の間に選んだ申告方式が、戻った後も一番少ないとは限りません。</p>
+    </section>
+    <section class="doc-card">
+      <h3>レジと値札の準備</h3>
+      <p>4月1日から、持ち帰りと食品の販売は1%で計算します。レジや会計ソフトの税率の設定を、1%の区分で打てるように切り替えておく必要があります。レジの会社によっては、設定の変更や機種の入れ替えに時間がかかることがあります。</p>
+      <p>値札やメニューは、税込の総額で表示する決まりがあります。持ち帰りのお値段を下げるか、据え置くかを決めておくと、4月1日の表示の切り替えがあわてずに済みます。持ち帰りのお値段の決め方は、「<a href="#price" data-view="price">持ち帰りの値付け</a>」で試せます。</p>
+    </section>
   </section>
 
   <section class="view doc" id="v-guide" data-view="guide" hidden>
@@ -2049,6 +2185,21 @@ form.simple .assume { display: flex; align-items: flex-start; justify-content: s
     <section class="doc-card">
       <h3>ご利用にあたって</h3>
       <p>入力された数字は、お使いの端末にだけ保存します。計算の結果は目安です。届出と申告の前に、税理士または税務署へ確認してください。ご不明な点は、<a href="#faq" data-view="faq">よくある質問</a>も見てください。</p>
+    </section>
+    <section class="doc-card">
+      <h3>入れる数字の集め方</h3>
+      <p>去年の確定申告書の控えか、会計ソフトの1年分の集計を手元に置くと早く入れられます。おおよその数字でも、どの申告方式が少ないかの向きはつかめます。</p>
+      <ul>
+        <li><b>店内飲食と食料品の販売</b>：レジで税率ごとの集計（10%と8%）が出せる場合は、その数字をそのまま使えます。8%の売上が、1%になる食料品の販売です。</li>
+        <li><b>食材・食品の仕入れ</b>：仕入れのうち、8%で仕入れている食材と食品です。お酒の仕入れは10%の方に入れます。</li>
+        <li><b>10%の仕入れ・経費</b>：家賃、水道光熱費、消耗品、備品・設備、外注費などです。給与、社会保険料、保険料、利息、土地の代金には消費税がかからないので入れません。</li>
+        <li><b>2年前の課税売上高</b>：個人なら2年前の1〜12月の売上（税抜）です。免税事業者と簡易課税を選べるかの判定に使います。</li>
+      </ul>
+    </section>
+    <section class="doc-card">
+      <h3>結果を相談に使う</h3>
+      <p>判定の下の「印刷する」で、入れた数字・方式ごとの納税・届出の名前と期限を1枚にまとめられます。PDFに保存して、顧問の税理士さんへメールで送ることもできます。</p>
+      <p>簡易課税へ移る届出は、適用を受けたい期間が始まる前日までが期限で、今回の特例もありません。個人のお店は令和8年12月31日までです。迷っている時ほど、早めに相談してください。</p>
     </section>
   </section>
 
@@ -2071,6 +2222,38 @@ form.simple .assume { display: flex; align-items: flex-start; justify-content: s
     <section class="doc-card">
       <h3>免税事業者</h3>
       <p>納税はありません。2年前の課税売上高が1,000万円以下で、前年の1〜6月（特定期間）も1,000万円を超えておらず、インボイスの登録をしていない場合です。還付は受けられません。取引先が事業者の場合は、取引先が仕入れの税を引けなくなります。</p>
+    </section>
+    <section class="doc-card">
+      <h3>簡易課税のみなし仕入率</h3>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>事業区分</th><th>主な事業</th><th>みなし仕入率</th></tr></thead>
+          <tbody>
+            <tr><td>第1種</td><td>卸売</td><td class="num">90%</td></tr>
+            <tr><td>第2種</td><td>小売</td><td class="num">80%</td></tr>
+            <tr><td>第3種</td><td>製造・持ち帰りの調理品など</td><td class="num">70%</td></tr>
+            <tr><td>第4種</td><td>飲食店の店内飲食など</td><td class="num">60%</td></tr>
+            <tr><td>第5種</td><td>サービス業など</td><td class="num">50%</td></tr>
+            <tr><td>第6種</td><td>不動産業</td><td class="num">40%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>1%の期間は、食料品の販売の税は事業区分にかかわらず同じ額を差し引ける特例があります。そのため、食料品の販売にはみなし仕入率を使いません。店内飲食とその他の売上には、上の率をかけます。</p>
+    </section>
+    <section class="doc-card">
+      <h3>計算例：店内飲食が中心の飲食店</h3>
+      <p>1年分（税抜）で、店内飲食3,600万円、持ち帰り400万円、食材の仕入れ1,200万円、10%の仕入れ・経費900万円のお店です。</p>
+      <div class="formula">売上の税 = 3,600万円 × 10% + 400万円 × 1% = 364万円
+仕入れの税 = 1,200万円 × 1% + 900万円 × 10% = 102万円
+
+本則課税 = 364万円 − 102万円 = 262万円
+簡易課税 = 364万円 −（4万円 + 360万円 × 60%）= 144万円</div>
+      <p>食料品が8%の今は、同じ数字で本則課税206万円、簡易課税153.6万円です。本則課税のままだと、1%の間は1年で56万円増えます。食材の仕入れで差し引ける税が、96万円から12万円に減るためです。</p>
+    </section>
+    <section class="doc-card">
+      <h3>1%が途中から始まる期間の計算</h3>
+      <p>令和9年4月1日を含む課税期間は、4月より前の売上と仕入れが8%のままです。このツールは、1年分の売上と仕入れが毎月同じように出ると仮定して、1%になる月数の割合で8%の年と1%の年の税額を分けて足しています。個人なら、12か月のうち9か月が1%です。</p>
+      <p>季節によって売上が大きく変わるお店や、4月より前に大きな設備を買うお店は、実際の税額がこの目安からずれます。実際の申告では、取引ごとの日付で税率を分けて計算します。</p>
     </section>
   </section>
 
@@ -2101,7 +2284,27 @@ form.simple .assume { display: flex; align-items: flex-start; justify-content: s
         <summary>2割特例や3割特例は入っていますか？</summary>
         <p>含まれていません。インボイスの登録により課税事業者となった方の特例は、この試算には含めていません。対象となる方は、税理士または税務署に確認してください。</p>
       </details>
-    </section>
+          <details>
+        <summary>お酒も1%になりますか？</summary>
+        <p>なりません。お酒は飲食料品に含まれないので、10%のままです。売上は「その他の売上」、仕入れは「10%の仕入れ・経費」に入れてください。</p>
+      </details>
+      <details>
+        <summary>ケータリングや出張料理は何%ですか？</summary>
+        <p>10%のままです。お客様の指定した場所で料理を作ったり盛り付けたりするサービスは、外食と同じ扱いです。料理を届けるだけの出前は1%です。</p>
+      </details>
+      <details>
+        <summary>簡易課税を選んだら、何年続けますか？</summary>
+        <p>選んだ課税期間から2年間は、やめることができません。1%が終わる令和11年4月以降の期間も含めて考える必要があるので、「2年間の通しの見通し」で、1%の前後の年まで並べて比べられるようにしています。</p>
+      </details>
+      <details>
+        <summary>2年前の課税売上高が5,000万円を超えています。</summary>
+        <p>簡易課税は選べません。この場合、本則課税で申告します。本ツールでは、2年前の課税売上高に5,000万円を超える数字を入れると、簡易課税を比べる対象から外します。</p>
+      </details>
+      <details>
+        <summary>入れた数字は、どこかに送られますか？</summary>
+        <p>送られません。計算はお使いのブラウザの中で行い、入れた数字はその端末にだけ保存します。「すべてクリア」で消せます。</p>
+      </details>
+</section>
   </section>
 
   <section class="view doc" id="v-about" data-view="about" hidden>
@@ -2814,6 +3017,46 @@ form.simple .assume { display: flex; align-items: flex-start; justify-content: s
       "acceptedAnswer": {
         "@type": "Answer",
         "text": "含まれていません。インボイスの登録により課税事業者となった方の特例は、この試算には含めていません。対象となる方は、税理士または税務署に確認してください。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "お酒も1%になりますか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "なりません。お酒は飲食料品に含まれないので、10%のままです。売上は「その他の売上」、仕入れは「10%の仕入れ・経費」に入れてください。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "ケータリングや出張料理は何%ですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "10%のままです。お客様の指定した場所で料理を作ったり盛り付けたりするサービスは、外食と同じ扱いです。料理を届けるだけの出前は1%です。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "簡易課税を選んだら、何年続けますか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "選んだ課税期間から2年間は、やめることができません。1%が終わる令和11年4月以降の期間も含めて考える必要があるので、「2年間の通しの見通し」で、1%の前後の年まで並べて比べられるようにしています。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "2年前の課税売上高が5,000万円を超えています。",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "簡易課税は選べません。この場合、本則課税で申告します。本ツールでは、2年前の課税売上高に5,000万円を超える数字を入れると、簡易課税を比べる対象から外します。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "入れた数字は、どこかに送られますか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "送られません。計算はお使いのブラウザの中で行い、入れた数字はその端末にだけ保存します。「すべてクリア」で消せます。"
       }
     }
   ]
