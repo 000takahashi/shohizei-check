@@ -129,7 +129,7 @@
       if (evMain.length) addCal(evElect.length ? '期限をカレンダーに登録する（選択届をまだ出していない場合）' : '期限をカレンダーに登録する', evMain);
       if (evElect.length) addCal('期限をカレンダーに登録する（選択届を出している場合）', evElect);
       box.appendChild(cal);
-      box.appendChild(el('p', '期限の14日前と3日前に、カレンダーからお知らせが届きます。iPhone・Google カレンダー・Outlook でお使いいただけます。', 'bk-hint pl-noprint'));
+      box.appendChild(el('p', '期限の14日前と3日前に通知する設定です。Outlookでは通知が1件のみになる場合があります。登録後、予定の通知設定をご確認ください。', 'bk-hint pl-noprint'));
     }
 
     // 年ごとの見込み
