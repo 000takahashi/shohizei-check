@@ -81,6 +81,7 @@
           document.body.appendChild(l); l.click(); l.remove();
         });
         act.appendChild(cb); box.appendChild(act);
+        box.appendChild(el('p', '期限の14日前と3日前に通知する設定です。Outlookでは通知が1件のみになる場合があります。登録後、予定の通知設定をご確認ください。', 'bk-hint pl-noprint'));
       }
     }
     box.appendChild(el('p', '結果は目安でございます。国と地方を合わせた税率で計算しており、端数処理・75%ルール・インボイスの2割特例や3割特例は含めておりません。届出と申告につきましては、税理士または税務署にご確認ください。', 'bk-hint'));
