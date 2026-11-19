@@ -70,7 +70,7 @@ function shell(o) {
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=M+PLUS+2:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="/guide/guide.css">
 ${blocks.map(ld).join("\n")}
 </head>
@@ -99,10 +99,12 @@ ${o.more || ""}
 `;
 }
 
-// index.html の <style> をそのまま使い、解説ページだけの枠を足す（色や部品の見た目をトップとそろえるため）
+// index.html の <style> と redesign.css をそのまま使い、解説ページだけの枠を足す（色や部品の見た目をトップとそろえるため）
 function css(html) {
   const styles = [...html.matchAll(/<style>([\s\S]*?)<\/style>/g)].map((m) => m[1].trim());
-  return "/* scripts/build-guides.js が site/index.html の <style> から作ります。直接は直さない。 */\n" + styles.join("\n") + `
+  const redesign = path.join(SITE_DIR, "redesign.css");
+  if (fs.existsSync(redesign)) styles.push(fs.readFileSync(redesign, "utf8").trim());
+  return "/* scripts/build-guides.js が site/index.html の <style> と site/redesign.css から作ります。直接は直さない。 */\n" + styles.join("\n") + `
 /* 解説ページの枠 */
 body.g-body { display: block; margin: 0; background: var(--bg); color: var(--ink); }
 .g-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; background: var(--paper); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 5; }
