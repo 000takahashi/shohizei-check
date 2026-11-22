@@ -1361,6 +1361,14 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
 .howto-link { margin: 12px 0 0; font-size: .92rem; }
 .howto-link a { color: var(--accent); font-weight: 700; }
 .free-note { margin: 10px 0 0; padding: 8px 12px; border-radius: var(--radius-sm); background: var(--accent-soft); color: var(--accent); font-weight: 700; font-size: .92rem; line-height: 1.6; }
+.free-note[hidden] { display: none; }
+.free-note.fn-box { display: grid; gap: 8px; }
+.fn-box p { margin: 0; }
+.fn-acts { display: flex; flex-wrap: wrap; gap: 8px; }
+.fn-btn { display: inline-flex; align-items: center; min-height: 44px; padding: 8px 14px; border: 1.5px solid var(--accent); border-radius: 999px; background: var(--paper, #fff); color: var(--accent); text-decoration: none; font-weight: 700; line-height: 1.4; }
+.fn-btn:hover { background: var(--accent); color: #fff; }
+.fn-note { font-weight: 400; font-size: .86rem; color: var(--ink, inherit); }
+.fn-note a { color: var(--accent); font-weight: 700; }
 .nav-paid { display: inline-block; max-width: 100%; margin-left: 6px; font-size: .68rem; font-weight: 700; padding: 1px 6px; border-radius: 999px; background: var(--soft); color: var(--accent); vertical-align: middle; letter-spacing: 0; white-space: normal; }
 .plan-cta { display: grid; gap: 2px; margin: 14px 0; padding: 12px 16px; border: 1px dashed var(--accent); border-radius: var(--radius-sm); text-decoration: none; color: inherit; }
 .plan-cta:hover { background: var(--accent-soft); }

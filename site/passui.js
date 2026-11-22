@@ -21,17 +21,39 @@
   }
   function msg(text, isErr) { $('psMsg').textContent = text || ''; $('psMsg').className = 'bk-msg' + (isErr ? ' err' : ''); }
 
+  // トップの案内（2026-11-22 毎週の手直し）。有料の機能へ1押しで行けるボタンと、無料の期間の後の値段を先にお見せする。
+  // 無料の期間：誰にでも出す。期間の後：パスを持たない方にだけ出す（販売者の表示が無い間は出さない）。値段は shopinfo.js の PLANS だけ。
+  function homeOffer(items) {
+    var box = $('homeFree'); if (!box) return;
+    var free = !!(S.freeOpen && S.freeOpen());
+    if (!free && (!S.hasOperator() || expiryOf(getPass()) > Date.now())) return;
+    var price = S.PLANS.map(function (p) { return p.days + '日間 ' + p.yen.toLocaleString('ja-JP') + '円'; }).join('・');
+    var next = '';
+    if (free) { var d = new Date(Date.parse(S.FREE_UNTIL + 'T00:00:00Z') + 86400000); next = (d.getUTCMonth() + 1) + '月' + d.getUTCDate() + '日'; }
+    box.textContent = '';
+    box.appendChild(el('p', free ? S.freeText() + 'まで、有料の機能も無料でお使いいただけます。ご登録もお支払いも不要です。' : '有料パスで、次の機能をお使いいただけます。', 'fn-lead'));
+    var acts = el('div', '', 'fn-acts');
+    items.forEach(function (it) { var a = el('a', it[0], 'fn-btn'); a.href = it[1]; acts.appendChild(a); });
+    box.appendChild(acts);
+    var note = el('p', (free ? next + 'からは、' : '') + '有料パス（' + price + '、税込・自動更新なし）でご利用いただけます。', 'fn-note');
+    var more = el('a', '有料パスのご案内'); more.href = '#pass';
+    note.appendChild(document.createTextNode(' ')); note.appendChild(more);
+    box.appendChild(note);
+    box.hidden = false;
+  }
+
   // 無料開放の期間は、「有料」の印を「◯月◯日まで無料」に変え、有料の画面の上に知らせを出す
   if (S.freeOpen()) {
     var until = S.freeText();
     Array.prototype.forEach.call(document.querySelectorAll('.nav-paid'), function (n) { n.textContent = until + 'まで無料'; });
     Array.prototype.forEach.call(document.querySelectorAll('.plan-cta span'), function (n) { n.textContent = n.textContent.replace('（有料）', '（' + until + 'まで無料）'); });
-    if ($('homeFree')) { $('homeFree').textContent = until + 'まで、「2年間の通しの見通し」と「持ち帰りの値付け」も無料でお使いいただけます。ご登録もお支払いも不要です。'; $('homeFree').hidden = false; }
     ['v-plan', 'v-price', 'v-pass'].forEach(function (id) {
       var head = document.querySelector('#' + id + ' .page-head-text');
       if (head) head.appendChild(el('p', until + 'まで、この機能を無料でご利用いただけます。ご登録もお支払いも不要です。翌日からは、有料パスが必要となります。', 'free-note'));
     });
   }
+
+  homeOffer([['2年間の通しの見通し', '#plan'], ['持ち帰りの値付け', '#price']]);
 
   S.FEATURES.forEach(function (t) { $('psFeatures').appendChild(el('li', t)); });
   $('psPrice').textContent = S.PLANS.map(S.planText).join(' ／ ');
