@@ -1514,7 +1514,7 @@ p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
   --accent-border: #bfdbfe;
   --accent-ring: rgb(37 99 235 / 0.18);
 
-  --good: #059669;
+  --good: #047857;
   --good-soft: #ecfdf5;
   --good-border: #a7f3d0;
 
@@ -2509,6 +2509,12 @@ footer {
 .page-head-text > h1, .page-head-text > .page-title { overflow-wrap: anywhere; }
 /* メニューの中を動かせるようにした時、項目が縮んで重ならないようにする */
 .sidenav > * { flex-shrink: 0; }
+
+/* 2026-11-23 Codex の点検: 暗い表示では明るい色のボタンに白い字だと読みにくい（コントラスト不足）ので、濃い字にする */
+:root[data-theme="dark"] .bk-btn.primary, :root[data-theme="dark"] .bk-btn.primary:hover, :root[data-theme="dark"] #mJump { color: #0b1120; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .bk-btn.primary, :root:not([data-theme="light"]) .bk-btn.primary:hover, :root:not([data-theme="light"]) #mJump { color: #0b1120; }
+}
 /* 解説ページの枠 */
 body.g-body { display: block; margin: 0; background: var(--bg); color: var(--ink); }
 .g-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; background: var(--paper); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 5; }
