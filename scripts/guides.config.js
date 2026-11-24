@@ -60,7 +60,7 @@ function nennai(C) {
 module.exports = {
   site: "https://shohizei-check.com",
   name: "消費税1%チェッカー",
-  operator: "輸入利益チェッカー 編集室",
+  operator: "チェッカー編集室",
   updated: "2026-11-12",
   cta: "申告方式を試算する（無料）",
   ctaTitle: "ご自身のお店の数字で、お確かめください",

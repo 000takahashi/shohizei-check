@@ -17,7 +17,7 @@ const stripe = (body, status = 200) => async () => new Response(JSON.stringify(b
 
 test('★売り出しの扉: 販売者の表示は運営者が決めた値。鍵が無い間は売らない', () => {
   // サイトの「運営者情報」に出している物と同じ値。勝手に変えない（変えると特定商取引法の表記が変わる）
-  assert.deepEqual(Shop.OPERATOR, { name: '', tradeName: '輸入利益チェッカー 編集室', contact: 'contact@shohizei-check.com' });
+  assert.deepEqual(Shop.OPERATOR, { name: '', tradeName: 'チェッカー編集室', contact: 'contact@shohizei-check.com' });
   assert.equal(Shop.hasOperator(), true);
   assert.equal(Shop.hasOperator({ contact: '  ' }), false);
   assert.deepEqual(Shop.legalRows({ contact: '' }), []);
