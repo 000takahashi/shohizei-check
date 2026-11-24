@@ -170,11 +170,11 @@ test('★無料開放の間は、パスを売らない（無料の物を売ら�
   const free = Date.parse('2026-11-20T03:00:00Z');
   const st = await (await onStatus({ request: new Request('https://shohizei-check.com/api/v1/pass/status'), env }, { operator, now: free })).json();
   assert.equal(st.onSale, false);
-  assert.equal(st.freeUntil, '2026-11-30');
+  assert.equal(st.freeUntil, '2026-12-31');
   const buy = await onCheckout({ request: post('/api/v1/pass/checkout', { plan: D30.id }), env }, { operator, now: free, fetch: stripe({ url: 'https://checkout.stripe.com/c/pay/x' }) });
   assert.equal(buy.status, 503);
   assert.equal((await buy.json()).error, 'free_period');
-  const after = Date.parse('2026-11-30T15:00:00Z');
+  const after = Date.parse('2026-12-31T15:00:00Z');
   assert.equal((await onCheckout({ request: post('/api/v1/pass/checkout', { plan: D30.id }), env }, { operator, now: after, fetch: stripe({ url: 'https://checkout.stripe.com/c/pay/x' }) })).status, 200);
 });
 
