@@ -4,11 +4,14 @@
 //        { plan, upgrade: true } といまのパス（Authorization: Bearer）→ 差額だけで長いパスへ切り替える
 //   POST /api/v1/pass/claim     { session_id } → 支払い済みなら、署名つきのパスを返す（何度でも同じ期限で受け取り直せる）
 //   POST /api/v1/pass/check     Authorization: Bearer <パス> → 本物で期限の内か（控えからパスを戻す時に使う）
+//        { device } を付けると、その端末を数える（1つの支払いで3台まで）
+//   POST /api/v1/pass/recover   { email, last4, device } → 控えが無い時に、支払いのメールとカードの下4桁でパスを渡す
 // 登録もデータベースも無い。支払い済みかは Stripe に聞く。パスは期限入りの印で、名前・メール・カードは入れない。
 // 鍵は Worker の秘密の値: STRIPE_SECRET_KEY・PASS_SIGNING_SECRET。どちらかが無い間と、販売者の表示が無い間は売らない（503）。
 import Shop from '../../site/shopinfo.js';
 import { json, readJson, SITE } from '../_lib/http.mjs';
 import { signPass, verifyPass, bearer } from '../_lib/pass.mjs';
+import { cleanDevice, bindDevice, receiptUrl, stripeGet, piIdOk, findForRecovery, MAX_DEVICES } from '../_lib/passdevice.mjs';
 
 const STRIPE = 'https://api.stripe.com/v1';
 export const CHECKOUT_TTL_MIN = 35; // 支払い画面が開いている時間。パスはこの分を足して「お支払いから30日」を守る
@@ -98,6 +101,39 @@ export async function onCheckout(context, deps = {}) {
   }
 }
 
+const LIMIT_MESSAGE = `このパスは、すでに${MAX_DEVICES}台の端末で使われています。お困りの時は、運営者情報のメールアドレスへご連絡ください。`;
+
+// 支払い（Checkout の支払い画面）から、パスを作る。端末が分かる時は、その端末を数える
+async function passFromSession(s, sid, env, deps, dev) {
+  const meta = s.metadata || {};
+  if (meta.product !== Shop.PRODUCT) return [404, { error: 'unknown_session' }];
+  // どのパスかは、支払い画面を作った時に書いた名前で決める。払った額がそのパスの定価と同じ時だけ渡す
+  // （値引きも別の通貨も無い。500円を払って30日のパスを受け取ることはできない）
+  const plan = Shop.planById(meta.plan);
+  // 切り替えの時は、差額を払っていること。期限は、支払い画面を作った時に書いた値（最初のお支払いから数えた日数）
+  const u = meta.upgrade_from ? Shop.upgradeFrom(meta.upgrade_from) : null;
+  if (meta.upgrade_from && (!u || !plan || u.to.id !== plan.id)) return [402, { error: 'not_paid' }];
+  // 額と日数は、支払い画面を作った時に書いた値（サーバーだけが書く）。古い支払い画面で書いていない時は、今の定数
+  const posInt = (v) => (/^[1-9]\d{0,6}$/.test(String(v || '')) ? Number(v) : 0);
+  const price = posInt(meta.yen) || (u ? u.yen : plan && plan.yen);
+  if (!plan || s.payment_status !== 'paid' || s.currency !== 'jpy' || s.amount_total !== price) return [402, { error: 'not_paid' }];
+  const days = posInt(meta.days) || plan.days;
+  // 支払い画面を開いた時から数える（受け取り直しても延びない）。支払いはその後35分以内なので、その分を足す
+  const expMs = u ? (Number(meta.upgrade_exp) || 0) * 1000 : (Number(s.created) || 0) * 1000 + days * 86400000 + CHECKOUT_TTL_MIN * 60000;
+  const now = deps.now || Date.now();
+  if (expMs <= now) return [410, { error: 'pass_expired' }];
+  const pi = s.payment_intent && typeof s.payment_intent === 'object' && piIdOk(s.payment_intent.id) ? s.payment_intent : null;
+  let id = `${plan.id}-${await sha16(sid)}`;
+  if (pi) {
+    // 端末を数える。支払いの番号はパスに入れる（控えから戻す時に、どの支払いか分かるように）
+    if (!dev) return [400, { error: 'no_device' }];
+    const b = await bindDevice(env, deps, pi, dev);
+    if (!b.ok) return [403, { error: 'device_limit', message: LIMIT_MESSAGE }];
+    id = `${plan.id}-${pi.id}`;
+  }
+  return [200, { token: await signPass(env.PASS_SIGNING_SECRET, expMs / 1000, id), expiresAt: expMs, days, plan: plan.id, receiptUrl: receiptUrl(pi) }];
+}
+
 export async function onClaim(context, deps = {}) {
   const { request, env } = context;
   if (request.method !== 'POST') return json({ error: 'Use POST.' }, 405, { Allow: 'POST' });
@@ -106,33 +142,51 @@ export async function onClaim(context, deps = {}) {
   if (read.error) return json({ error: read.error }, read.status);
   const sid = read.body && typeof read.body.session_id === 'string' ? read.body.session_id : '';
   if (!/^cs_(test|live)_[A-Za-z0-9]{10,200}$/.test(sid)) return json({ error: 'bad_session' }, 400);
+  const dev = cleanDevice(read.body.device);
   let s;
   try {
-    const res = await (deps.fetch || fetch)(`${STRIPE}/checkout/sessions/${sid}`, { headers: { Authorization: `Bearer ${env.STRIPE_SECRET_KEY}` } });
+    const res = await stripeGet(env, deps, `/checkout/sessions/${sid}?expand[]=payment_intent.latest_charge`);
     if (res.status === 404) return json({ error: 'unknown_session' }, 404);
     if (!res.ok) return json({ error: 'claim_failed' }, 502);
     s = await res.json();
   } catch (e) {
     return json({ error: 'claim_failed' }, 502);
   }
-  const meta = s.metadata || {};
-  if (meta.product !== Shop.PRODUCT) return json({ error: 'unknown_session' }, 404);
-  // どのパスかは、支払い画面を作った時に書いた名前で決める。払った額がそのパスの定価と同じ時だけ渡す
-  // （値引きも別の通貨も無い。500円を払って30日のパスを受け取ることはできない）
-  const plan = Shop.planById(meta.plan);
-  // 切り替えの時は、差額を払っていること。期限は、支払い画面を作った時に書いた値（最初のお支払いから数えた日数）
-  const u = meta.upgrade_from ? Shop.upgradeFrom(meta.upgrade_from) : null;
-  if (meta.upgrade_from && (!u || !plan || u.to.id !== plan.id)) return json({ error: 'not_paid' }, 402);
-  // 額と日数は、支払い画面を作った時に書いた値（サーバーだけが書く）。古い支払い画面で書いていない時は、今の定数
-  const posInt = (v) => (/^[1-9]\d{0,6}$/.test(String(v || '')) ? Number(v) : 0);
-  const price = posInt(meta.yen) || (u ? u.yen : plan && plan.yen);
-  if (!plan || s.payment_status !== 'paid' || s.currency !== 'jpy' || s.amount_total !== price) return json({ error: 'not_paid' }, 402);
-  const days = posInt(meta.days) || plan.days;
-  // 支払い画面を開いた時から数える（受け取り直しても延びない）。支払いはその後35分以内なので、その分を足す
-  const expMs = u ? (Number(meta.upgrade_exp) || 0) * 1000 : (Number(s.created) || 0) * 1000 + days * 86400000 + CHECKOUT_TTL_MIN * 60000;
-  const now = deps.now || Date.now();
-  if (expMs <= now) return json({ error: 'pass_expired' }, 410);
-  return json({ token: await signPass(env.PASS_SIGNING_SECRET, expMs / 1000, `${plan.id}-${await sha16(sid)}`), expiresAt: expMs, days, plan: plan.id });
+  const [status, body] = await passFromSession(s, sid, env, deps, dev);
+  return json(body, status);
+}
+
+// 控えが無い時: 支払いに使ったメールアドレスと、カードの下4桁でパスを渡す。
+// どちらかが違う時は、どちらが違うかを言わない（メールアドレスが使われたかを探られないように）
+export async function onRecover(context, deps = {}) {
+  const { request, env } = context;
+  if (request.method !== 'POST') return json({ error: 'Use POST.' }, 405, { Allow: 'POST' });
+  if (!(env.STRIPE_SECRET_KEY && env.PASS_SIGNING_SECRET)) return json({ error: 'pass_not_configured' }, 503);
+  const read = await readJson(request, 2000);
+  if (read.error) return json({ error: read.error }, read.status);
+  const b = read.body || {};
+  const email = typeof b.email === 'string' ? b.email.trim().toLowerCase() : '';
+  const last4 = typeof b.last4 === 'string' ? b.last4.trim() : '';
+  const dev = cleanDevice(b.device);
+  if (!/^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,}$/.test(email) || !/^\d{4}$/.test(last4) || !dev) return json({ error: 'bad_input' }, 400);
+  let r;
+  try {
+    r = await findForRecovery(env, deps, Shop.PRODUCT, email, last4);
+  } catch (e) {
+    return json({ error: 'recover_failed' }, 502);
+  }
+  if (r.error) return json({ error: 'recover_failed' }, 502);
+  if (r.locked) return json({ error: 'locked' }, 429);
+  // 合った支払いのうち、期限がいちばん遅いパスを渡す（切り替えた時は、切り替えた後の支払い）
+  let best = null;
+  for (const s of r.found) {
+    const [status, body] = await passFromSession(s, s.id || 'cs_unknown', env, deps, dev);
+    if (status === 403) return json(body, 403);
+    if (status === 200 && (!best || body.expiresAt > best.expiresAt)) best = body;
+  }
+  if (best) return json(best, 200);
+  if (r.found.length) return json({ error: 'pass_expired' }, 410);
+  return json({ error: 'not_found' }, 404);
 }
 
 // 控えから戻すパスが本物で、期限の内かを確かめる。中身（期限）だけ返す
@@ -142,5 +196,19 @@ export async function onCheck(context, deps = {}) {
   if (!env.PASS_SIGNING_SECRET) return json({ error: 'pass_not_configured' }, 503);
   const v = await verifyPass(env.PASS_SIGNING_SECRET, bearer(request), deps.now || Date.now());
   if (!v.ok) return json({ ok: false, reason: v.reason }, v.reason === 'expired' ? 410 : 401);
+  // 控えから別の端末へ戻す時は、その端末を数える（1つの支払いで3台まで）
+  const read = await readJson(request, 2000);
+  const dev = cleanDevice(read.body && read.body.device);
+  const m = /(?:^|-)(pi_[A-Za-z0-9]{8,40})$/.exec(v.id || '');
+  if (dev && m && env.STRIPE_SECRET_KEY) {
+    try {
+      const res = await stripeGet(env, deps, `/payment_intents/${m[1]}`);
+      if (res.ok) {
+        const b = await bindDevice(env, deps, await res.json(), dev);
+        if (!b.ok) return json({ ok: false, reason: 'device_limit', message: LIMIT_MESSAGE }, 403);
+      }
+      // Stripe に聞けない時は、払った方を止めない
+    } catch (e) { /* 同上 */ }
+  }
   return json({ ok: true, expiresAt: v.expiresAt });
 }

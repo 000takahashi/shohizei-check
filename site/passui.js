@@ -10,6 +10,27 @@
   var PENDING_KEY = 'shohizei_pass_pending';
   var busy = false;
 
+  var DEVICE_KEY = PASS_KEY + '_device', RECEIPT_KEY = PASS_KEY + '_receipt';
+  var LIMIT_TEXT = 'このパスは、すでに3台の端末で使われています。お困りの時は、運営者情報のメールアドレスへご連絡ください。';
+  // この端末のでたらめな番号。1つのパスを使える端末は3台まで（名前などは入っていない）
+  function deviceId() {
+    var d = '';
+    try { d = localStorage.getItem(DEVICE_KEY) || ''; } catch (e) {}
+    if (/^[A-Za-z0-9_-]{8,32}$/.test(d)) return d;
+    var a = new Uint8Array(16), abc = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+    crypto.getRandomValues(a);
+    d = Array.prototype.map.call(a, function (b) { return abc.charAt(b & 63); }).join('');
+    try { localStorage.setItem(DEVICE_KEY, d); } catch (e) {}
+    return d;
+  }
+  // 領収書（Stripe の領収書のページ）のアドレス。受け取った端末にだけ残す
+  function okReceipt(u) { return typeof u === 'string' && u.indexOf('https://pay.stripe.com/receipts/') === 0; }
+  function setReceipt(u) { if (okReceipt(u)) { try { localStorage.setItem(RECEIPT_KEY, u); } catch (e) {} } }
+  function getReceipt() { var u = ''; try { u = localStorage.getItem(RECEIPT_KEY) || ''; } catch (e) {} return okReceipt(u) ? u : ''; }
+  // 期限までの残り（3日を切ったら知らせる）
+  var SOON_MS = 3 * 86400000;
+  function leftText(ms) { return ms < 86400000 ? Math.max(1, Math.ceil(ms / 3600000)) + '時間' : Math.ceil(ms / 86400000) + '日'; }
+
   function el(tag, text, cls) { var e = document.createElement(tag); if (text) e.textContent = text; if (cls) e.className = cls; return e; }
   function getPass() { try { return localStorage.getItem(PASS_KEY) || ''; } catch (e) { return ''; } }
   // 印の中の期限（ミリ秒）。形が違えば 0
@@ -100,7 +121,12 @@
     var exp = expiryOf(getPass()), active = exp > Date.now();
     upgradeBox(active, exp);
     $('psHave').hidden = !active;
-    if (active) $('psHaveText').textContent = 'パスをご利用いただけます。' + dateText(exp) + ' まで有効です。';
+    if (active) {
+      var left = exp - Date.now();
+      $('psHaveText').textContent = 'パスをご利用いただけます。' + dateText(exp) + ' まで有効です。' + (left < SOON_MS ? 'まもなく期限です（あと' + leftText(left) + '）。' : '');
+      var ru = getReceipt(), acts = $('psHave').querySelector('.bk-actions');
+      if (ru && acts && !$('psReceipt')) { var ra = el('a', '領収書を開く（Stripe）', 'bk-btn'); ra.id = 'psReceipt'; ra.href = ru; ra.target = '_blank'; ra.rel = 'noopener'; acts.appendChild(ra); }
+    }
     $('psKeep').hidden = !active;
     if (active) $('psKeepCode').value = getPass();
     if (!active && exp > 0) msg('以前のパスは有効期限が切れています。');
@@ -173,7 +199,7 @@
     var done = function () { busy = false; $('psRetryGo').disabled = false; };
     var retry = function (text) { msg(text, true); $('psRetry').hidden = false; done(); };
     var finish = function () { setPending(''); memSid = ''; done(); };
-    post('/api/v1/pass/claim', { session_id: id }).then(function (r) {
+    post('/api/v1/pass/claim', { session_id: id, device: deviceId() }).then(function (r) {
       if (r.status === 200 && r.data.token) {
         var saved = true;
         try { localStorage.setItem(PASS_KEY, r.data.token); } catch (e) { saved = false; }
@@ -183,6 +209,7 @@
           $('psKeep').hidden = false; $('psKeepCode').value = r.data.token;
           return;
         }
+        setReceipt(r.data.receiptUrl);
         finish();
         msg('ご購入いただき、誠にありがとうございます。パスを発行しました。' + dateText(Number(r.data.expiresAt) || expiryOf(r.data.token)) + ' まで有効です。下の「パスの控え」を保存しておいてください。');
         if (window.AdsUI) window.AdsUI.hideAll();
@@ -190,6 +217,7 @@
         render(null);
         return;
       }
+      if (r.status === 403) { finish(); releaseAds(); msg((r.data && r.data.message) || LIMIT_TEXT, true); return; }
       if (r.status === 402) { finish(); releaseAds(); msg('お支払いを確認できませんでした。お支払いがお済みでない場合は、もう一度お手続きください。', true); return; }
       if (r.status === 410) { finish(); releaseAds(); msg('このお支払いのパスは、有効期限が切れています。', true); return; }
       if (r.status === 400 || r.status === 404) { finish(); releaseAds(); msg('お支払いの情報が見つかりませんでした。お支払いがお済みの場合は、お手数ですがお問い合わせください。', true); return; }
@@ -211,7 +239,7 @@
     if (!/^v1\.\d{1,12}\.[A-Za-z0-9_-]{1,40}\.[A-Za-z0-9_-]{20,80}$/.test(code)) { rmsg('控えの形が正しくありません。「v1.」から最後まで、すべて貼り付けてください。', true); return; }
     if (expiryOf(code) <= Date.now()) { rmsg('この控えのパスは、有効期限（' + dateText(expiryOf(code)) + '）が切れています。', true); return; }
     $('psRestoreGo').disabled = true; rmsg('控えを確認しています…');
-    post('/api/v1/pass/check', {}, code).then(function (r) {
+    post('/api/v1/pass/check', { device: deviceId() }, code).then(function (r) {
       $('psRestoreGo').disabled = false;
       if (r.status === 200 && r.data.ok) {
         try { localStorage.setItem(PASS_KEY, code); } catch (e) { rmsg('この端末にパスを保存できませんでした。ブラウザの設定（プライベートモードなど）をご確認ください。', true); return; }
@@ -221,9 +249,67 @@
         render(null);
         return;
       }
-      rmsg(r.status === 410 ? 'この控えのパスは、有効期限が切れています。' : r.status === 503 ? '現在、パスを確認できません。恐れ入りますが、しばらくしてからもう一度お試しください。' : 'この控えは確認できませんでした。お手数ですが、控えが途中で切れていないかご確認ください。', true);
+      rmsg(r.status === 403 ? LIMIT_TEXT : r.status === 410 ? 'この控えのパスは、有効期限が切れています。' : r.status === 503 ? '現在、パスを確認できません。恐れ入りますが、しばらくしてからもう一度お試しください。' : 'この控えは確認できませんでした。お手数ですが、控えが途中で切れていないかご確認ください。', true);
     }).catch(function () { $('psRestoreGo').disabled = false; rmsg('通信できませんでした。恐れ入りますが、電波の良い場所でもう一度お試しください。', true); });
   });
+
+
+  // ---------- 控えが無い時に取り戻す ----------
+  (function () {
+    var restore = $('psRestoreMsg') && $('psRestoreMsg').parentNode;
+    if (!restore || !restore.parentNode) return;
+    var c = el('section', null, 'doc-card'); c.id = 'psRecover';
+    c.appendChild(el('h3', '控えが無い時に取り戻す'));
+    c.appendChild(el('p', 'お支払いの時に Stripe の画面で入れたメールアドレスと、お支払いに使ったカードの下4桁を入れてください。1つのパスは、3台の端末まで使えます。'));
+    var grid = el('div', null, 'ps-rec-grid');
+    function field(label, id, type, mode, max, ac) {
+      var l = el('label', label), i = document.createElement('input');
+      i.type = type; i.id = id; i.inputMode = mode; i.maxLength = max; i.autocomplete = ac;
+      l.appendChild(i); grid.appendChild(l); return i;
+    }
+    var em = field('メールアドレス', 'psRecEmail', 'email', 'email', 254, 'email');
+    var l4 = field('カードの下4桁', 'psRecLast4', 'text', 'numeric', 4, 'off');
+    c.appendChild(grid);
+    var go = el('button', 'パスを取り戻す', 'bk-btn'); go.type = 'button'; go.id = 'psRecGo';
+    var w = el('div', null, 'bk-actions'); w.appendChild(go); c.appendChild(w);
+    var m = el('p', null, 'bk-msg'); m.id = 'psRecMsg'; m.setAttribute('role', 'status'); c.appendChild(m);
+    c.appendChild(el('p', '入れた内容は、お支払いを探すためだけに Stripe へ送ります。当サイトには保存しません。うまくいかない時は、運営者情報のメールアドレスへ、お支払いの日時と金額をお知らせください。', 'bk-hint'));
+    restore.parentNode.insertBefore(c, restore.nextSibling);
+    function cmsg(text, isErr) { m.textContent = text || ''; m.className = 'bk-msg' + (isErr ? ' err' : ''); }
+    go.addEventListener('click', function () {
+      var email = em.value.trim(), last4 = l4.value.replace(/[^0-9]/g, '');
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { cmsg('メールアドレスの形が正しくありません。', true); return; }
+      if (!/^\d{4}$/.test(last4)) { cmsg('カードの下4桁を、数字4つで入れてください。', true); return; }
+      go.disabled = true; cmsg('お支払いを探しています…');
+      post('/api/v1/pass/recover', { email: email, last4: last4, device: deviceId() }).then(function (r) {
+        go.disabled = false;
+        if (r.status === 200 && r.data.token) {
+          try { localStorage.setItem(PASS_KEY, r.data.token); } catch (e) { cmsg('この端末にパスを保存できませんでした。ブラウザの設定（プライベートモードなど）をご確認ください。', true); return; }
+          setReceipt(r.data.receiptUrl);
+          em.value = ''; l4.value = '';
+          cmsg('パスを取り戻しました。' + dateText(Number(r.data.expiresAt) || expiryOf(r.data.token)) + ' まで有効です。');
+          if (window.AdsUI) window.AdsUI.hideAll();
+          render(null);
+          return;
+        }
+        cmsg(r.status === 403 ? LIMIT_TEXT
+          : r.status === 404 ? 'お支払いが見つかりませんでした。メールアドレスとカードの下4桁をお確かめください。'
+          : r.status === 410 ? 'このお支払いのパスは、有効期限が切れています。'
+          : r.status === 429 ? '違う番号が何度も入ったため、取り戻しを止めています。お手数ですが、運営者情報のメールアドレスへご連絡ください。'
+          : r.status === 503 ? '現在、パスを取り戻せません。恐れ入りますが、しばらくしてからもう一度お試しください。'
+          : '取り戻せませんでした。恐れ入りますが、しばらくしてからもう一度お試しください。', true);
+      }).catch(function () { go.disabled = false; cmsg('通信できませんでした。電波の良い場所でもう一度お試しください。', true); });
+    });
+  })();
+
+  // 期限の3日前から、どの画面でも上に知らせる
+  (function () {
+    var exp = expiryOf(getPass()), left = exp - Date.now(), main = $('views');
+    if (!(left > 0 && left < SOON_MS) || !main) return;
+    var p = el('p', '有料パスの期限まで、あと' + leftText(left) + 'です（' + dateText(exp) + ' まで）。', 'ps-soon'); p.setAttribute('role', 'status');
+    var a = el('a', 'パスのページへ'); a.href = '#pass'; a.setAttribute('data-view', 'pass'); p.appendChild(a);
+    main.insertBefore(p, main.firstChild);
+  })();
 
   render(null);
   fetch('/api/v1/pass/status').then(function (res) { return res.json(); }).then(render).catch(function () {});
