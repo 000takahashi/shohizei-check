@@ -49,6 +49,15 @@
     '持ち帰りと店内の価格をご入力いただくと、1%になった時の値付けの案をお示しします。',
     'パスの期間中は、広告を表示しません。',
   ];
+  // 無料のまま使えること（有料パスのページで、パスで増えることと並べて見せる）
+  var FREE_FEATURES = [
+    '1年分の申告方式の試算（どの方式が少なくなるか）',
+    '帳簿から読み込む（CSV）',
+    '8%の年の申告方式と、届出と期限の一覧',
+    '何が変わるか、使い方、解説とよくある質問',
+  ];
+  // 値段の表の「向いている使い方」
+  var PLAN_FIT = { d7: '申告方式と届出をまとめて決める時に', d30: '値付けまで、ひと月かけて見直す時に' };
   function hasOperator(op) { return !!String((op || OPERATOR).contact || '').trim(); }
   var ON_REQUEST = 'ご請求があれば、遅滞なく開示します。メールにてご請求ください。';
   // 特定商取引法に基づく表記の行。販売者の表示が無い間は空（＝ページを出さない）
@@ -79,5 +88,5 @@
       ? '販売事業者の所在地と電話番号は、ご請求をいただければ、これらを記載したメールを遅滞なくお送りします。ご請求は、下記のメールアドレスまでお送りください。'
       : '販売事業者の氏名、所在地、電話番号は、ご請求をいただければ、これらを記載したメールを遅滞なくお送りします。ご請求は、下記のメールアドレスまでお送りください。';
   }
-  return { PRODUCT: PRODUCT, PLANS: PLANS, planById: planById, planText: planText, FREE_UNTIL: FREE_UNTIL, freeOpen: freeOpen, freeText: freeText, paidStartText: paidStartText, upgradeFrom: upgradeFrom, planOfToken: planOfToken, upgradeText: upgradeText, OPERATOR: OPERATOR, FEATURES: FEATURES, hasOperator: hasOperator, legalRows: legalRows, legalNote: legalNote };
+  return { PRODUCT: PRODUCT, PLANS: PLANS, planById: planById, planText: planText, FREE_UNTIL: FREE_UNTIL, freeOpen: freeOpen, freeText: freeText, paidStartText: paidStartText, upgradeFrom: upgradeFrom, planOfToken: planOfToken, upgradeText: upgradeText, OPERATOR: OPERATOR, FEATURES: FEATURES, FREE_FEATURES: FREE_FEATURES, PLAN_FIT: PLAN_FIT, hasOperator: hasOperator, legalRows: legalRows, legalNote: legalNote };
 });
