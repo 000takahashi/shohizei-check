@@ -94,7 +94,7 @@
     const simple = Math.max(0, salesTaxTotal - deduct);
 
     const base = num(p.baseSales);
-    // 免税は、2年前の売上が1,000万円以下で、特定期間も超えておらず、インボイスに登録していない時だけ。
+    // 免税は、2年前の売上が1,000万円以下で、特定期間も超えていなくて、インボイスに登録していない時だけ。
     const canExempt = p.baseSales !== undefined && p.baseSales !== "" && base <= LIMIT.exempt
       && !truthy(p.invoice) && !truthy(p.specifiedOver);
     const canSimple = !(p.baseSales !== undefined && p.baseSales !== "" && base > LIMIT.simple);
@@ -147,8 +147,8 @@
       saveBySwitch: stayTax - best.tax,
       shouldSwitch: best.key !== current && stayTax - best.tax >= 1,
       notes: (currentAllowed ? [] : [input === "exempt"
-        ? "現在の条件では免税事業者になれません（2年前や前年前半の売上、インボイスの登録によります）。課税事業者として、本則課税を現在の方式とみなして比較しております。"
-        : "2年前の課税売上高が5,000万円を超えているため、簡易課税はご利用になれません。本則課税を現在の方式とみなして比較しております。"]).concat(notesFor({ s: { food: num(p.foodSales), eatIn: num(p.eatIn) },
+        ? "現在の条件では免税事業者になれません（2年前や前年前半の売上、インボイスの登録によります）。課税事業者として、本則課税を現在の方式とみなして比較しています。"
+        : "2年前の課税売上高が5,000万円を超えているため、簡易課税はご利用になれません。本則課税を現在の方式とみなして比較しています。"]).concat(notesFor({ s: { food: num(p.foodSales), eatIn: num(p.eatIn) },
         general: options.find((o) => o.key === "general").tax, canExempt: cut.canExempt, best })),
       full: { bestKey: cut.best.key, bestTax: cut.best.tax, stayTax: pick(cut, current).tax }, // 丸1年が1%の時
     };
@@ -169,12 +169,12 @@
 
   function notesFor({ s, general, simple, canExempt, best }) {
     const n = [];
-    if (general < 0) n.push("本則課税であれば還付（納めた税金が戻ること）となります。還付を受けるには、本則課税で申告していただく必要がございます。");
-    if (best.key === "exempt") n.push("免税のままでも納税はございません。ただし、取引先が仕入れの税を控除できなくなるため、取引先が事業者の場合は値下げを求められることがございます。");
+    if (general < 0) n.push("本則課税であれば還付（納めた税金が戻ること）となります。還付を受けるには、本則課税で申告していただく必要があります。");
+    if (best.key === "exempt") n.push("免税のままでも納税はありません。ただし、取引先が仕入れの税を控除できなくなるため、取引先が事業者の場合は値下げを求められることがあります。");
     if (canExempt && general < 0) n.push(s.food > 0
       ? "免税事業者の方も、課税事業者を選択すれば還付を受けられます（飲食料品を販売されているため、特例により令和9年4月1日を含む期間の中に届出をご提出いただけます）。"
       : "免税事業者の方も、課税事業者を選択すれば還付を受けられます（届出の期限は、その課税期間が始まる前日までです）。");
-    if (s.eatIn > 0 && s.food > 0) n.push("店内飲食（10%）と持ち帰り（1%）の差が9%に広がります。値付けやレジの設定も、この機会に見直されることをおすすめいたします。");
+    if (s.eatIn > 0 && s.food > 0) n.push("店内飲食（10%）と持ち帰り（1%）の差が9%に広がります。値付けやレジの設定も、この機会に見直されることをおすすめします。");
     return n;
   }
 
@@ -231,7 +231,7 @@
     }
     if (best === "simple") {
       return { need: true, form: "簡易課税制度選択届出書", deadline: before, special: false, period: pr,
-        text: "簡易課税には今回の特例がございません。適用を受けたい課税期間が始まる前日までにご提出ください。原則として2年間は継続していただく必要がございます。" };
+        text: "簡易課税には今回の特例がありません。適用を受けたい課税期間が始まる前日までにご提出ください。原則として2年間は継続していただく必要があります。" };
     }
     return { need: true, form: null, deadline: null, special: false, period: pr,
       text: "免税事業者に戻る届出は、課税事業者になった理由で異なります。「課税事業者選択届出書」を出している場合は、課税事業者選択不適用届出書を戻りたい課税期間が始まる前日までに（選んでから2年間は出せません）。売上が1,000万円を超えていたために課税事業者になっている場合は、基準期間の売上が1,000万円以下になり、特定期間の判定（売上に代えて給与等の支払額でも可）でも要件を満たせば届出なしで免税となり、「消費税の納税義務者でなくなった旨の届出書」を速やかに提出します。インボイスの登録を受けている場合は、登録の取消しも必要です。" };

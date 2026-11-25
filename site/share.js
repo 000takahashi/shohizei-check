@@ -4,7 +4,7 @@
 (function () {
   'use strict';
   function copy(text, done) {
-    function ok() { if (done) { done.textContent = 'コピーいたしました'; setTimeout(function () { done.textContent = ''; }, 2500); } }
+    function ok() { if (done) { done.textContent = 'コピーしました'; setTimeout(function () { done.textContent = ''; }, 2500); } }
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(text).then(ok, function () { fallback(); });
     } else { fallback(); }
