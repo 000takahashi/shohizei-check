@@ -2,7 +2,7 @@
 // /mcp と /api/v1/* は functions/ の処理で答え、それ以外は site/ の静的ファイルを返す。
 // www 付きは正式なURLへ転送し、仮URL（*.workers.dev）は検索に載せない。
 import { count } from './count.mjs';
-import { maintenanceOn, passThrough, maintenanceResponse } from './maintenance.mjs';
+import { maintenanceOn, passThrough, maintenanceResponse, previewGate, markPreview } from './maintenance.mjs';
 import { onStatus as passStatus, onCheckout as passCheckout, onClaim as passClaim, onCheck as passCheck, onRecover as passRecover } from '../functions/api/pass.mjs';
 import { onPlan, onPricing } from '../functions/api/paid.mjs';
 import { onRequest as mcp } from '../functions/mcp.mjs';
@@ -26,7 +26,10 @@ export default {
     }
     const path = url.pathname.replace(/\/+$/, '') || '/';
     // 更新中のあいだは、ページも窓口も「休止中」を返す（src/maintenance.mjs・戻すときはそこを false に）
-    if (maintenanceOn(env) && !passThrough(path)) {
+    // 運営者だけは、専用のリンクで付けた印があれば本物のページを見られる（src/maintenance.mjs）
+    const preview = maintenanceOn(env) ? await previewGate(request, url) : { ok: false, redirect: null };
+    if (preview.redirect) return preview.redirect;
+    if (maintenanceOn(env) && !preview.ok && !passThrough(path)) {
       const res = maintenanceResponse(path);
       count(env, ctx, 'shohizei', request, res, false);
       return res;
@@ -37,6 +40,7 @@ export default {
       res = new Response(res.body, res);
       res.headers.set('X-Robots-Tag', 'noindex');
     }
+    if (preview.ok) res = markPreview(res);
     count(env, ctx, 'shohizei', request, res, !!handler); // 日ごとの合計の数だけ（src/count.mjs）
     return res;
   },
