@@ -2527,6 +2527,111 @@ footer {
 }
 @media (max-width: 420px) { .brand-name { font-size: .96rem; letter-spacing: .02em; } .appbar-actions #btnMenu .lbl { display: none; } }
 @media (max-width: 350px) { .brand-name { font-size: .9rem; letter-spacing: 0; } .appbar .brand { gap: 8px; } .appbar .brand img, .appbar .brand .logo { width: 30px; height: 30px; } }
+
+
+
+
+/* ==========================================================================
+   落ち着いた計器の見た目（2026-11-25 高橋さん決定・3チェッカー共通）
+   黒に近い上の帯・漢字の印・細い線・数字は等幅・答えは薄い色の枠。
+   色は 2026-11-23 に決めた色を少し深くしたもの。サイトごとの違いはこの先頭の変数だけ。
+   ========================================================================== */
+:root {
+  --c-ac: #1d4ed8;
+  --c-ac-hover: #1e40af;
+  --c-soft: #e9effd;
+  --c-border: #c2d2f6;
+  --c-bar: #23262b;
+  --c-bar-line: #3a3e45;
+  --c-bar-ink: #e9eaec;
+  --c-bar-muted: #a9adb4;
+  --bg: #f4f4f2;
+  --paper-subtle: #f6f6f4;
+  --soft: #f1f1ee;
+  --ink: #1c1d1f;
+  --ink-secondary: #3a3c40;
+  --muted: #5b5e64;
+  --line: #e3e3de;
+  --line-strong: #cfcfc8;
+  --accent: var(--c-ac);
+  --accent-hover: var(--c-ac-hover);
+  --accent-soft: var(--c-soft);
+  --accent-border: var(--c-border);
+  --accent-ring: color-mix(in srgb, var(--c-ac) 22%, transparent);
+  --font-body: "BIZ UDPGothic", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, system-ui, sans-serif;
+  --font-num: "IBM Plex Mono", "BIZ UDPGothic", ui-monospace, Menlo, monospace;
+  --radius: 6px;
+  --radius-sm: 4px;
+  --shadow-card: none;
+  --shadow-float: 0 6px 20px -8px rgb(0 0 0 / 0.18);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --c-ac: #7aa2ff; --c-ac-hover: #7aa2ff; --c-soft: #16213d; --c-border: #2a3b66;
+    --bg: #141517; --paper: #1b1c1f; --paper-subtle: #222327; --field: #17181b; --field-hover: #222327; --soft: #222327;
+    --ink: #f0f0ee; --ink-secondary: #cfd0cc; --muted: #a3a5a0; --line: #2c2e32; --line-strong: #3a3c41;
+    --c-bar: #0f1012; --c-bar-line: #2c2e32;
+  }
+}
+:root[data-theme="dark"] {
+  --c-ac: #7aa2ff; --c-ac-hover: #7aa2ff; --c-soft: #16213d; --c-border: #2a3b66;
+  --bg: #141517; --paper: #1b1c1f; --paper-subtle: #222327; --field: #17181b; --field-hover: #222327; --soft: #222327;
+  --ink: #f0f0ee; --ink-secondary: #cfd0cc; --muted: #a3a5a0; --line: #2c2e32; --line-strong: #3a3c41;
+  --c-bar: #0f1012; --c-bar-line: #2c2e32;
+}
+body { font-family: var(--font-body); background: var(--bg); color: var(--ink); }
+button, input, select, textarea { font-family: inherit; }
+
+/* 上の帯 */
+.appbar { background: var(--c-bar); border-bottom: 1px solid var(--c-bar-line); -webkit-backdrop-filter: none; backdrop-filter: none; }
+.appbar .brand, .appbar .brand-name { color: #fff; }
+.appbar .brand-sub { display: none; }
+.appbar .brand-name { letter-spacing: .04em; font-weight: 700; }
+.appbar .mark { width: 34px; height: 34px; flex: none; display: grid; place-items: center; background: var(--c-ac); color: #fff; border-radius: 4px; font-weight: 700; font-size: 19px; line-height: 1; }
+:root[data-theme="dark"] .appbar .mark { color: #111; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .appbar .mark { color: #111; } }
+.appbar-meta, .meta-item { color: var(--c-bar-muted); }
+.meta-item { background: transparent; border-color: var(--c-bar-line); }
+.meta-item b { color: var(--c-bar-ink); font-family: var(--font-num); font-weight: 500; }
+.meta-dot { box-shadow: none; }
+.appbar .action-btn { background: transparent; color: var(--c-bar-ink); border: 1px solid var(--c-bar-line); border-radius: 4px; }
+.appbar .action-btn .ic { color: var(--c-bar-muted); }
+.appbar .action-btn:hover { background: #2f3339; color: #fff; border-color: #50555d; }
+.appbar .action-btn:hover .ic { color: #fff; }
+@media (max-width: 350px) { .appbar .mark { width: 30px; height: 30px; font-size: 17px; } }
+
+/* 見出しまわり */
+.page-title { font-weight: 700; letter-spacing: .01em; }
+.kicker { border-radius: 2px; }
+.trust li { background: transparent; border: 0; padding: 0 14px 0 0; border-radius: 0; color: var(--muted); }
+.trust li .ic { display: none; }
+.trust li::before { content: ""; display: inline-block; width: 7px; height: 7px; background: var(--c-ac); margin-right: 7px; vertical-align: .1em; }
+
+/* 面・線 */
+.card, .sheet, .field, .doc-card, .guide-acc { box-shadow: none; }
+.sidenav { box-shadow: none; }
+.nav-item { border-radius: 4px; }
+.chip, .example-pill, .nav-paid { border-radius: 3px; }
+
+/* ボタン */
+.btn, .seg-btn, .preset-btn, .bk-btn, .mini-btn, .action-btn, .plan-cta { border-radius: 4px; }
+.seg-switch, .mode-switch { border-radius: 6px; }
+
+/* 答え */
+.hero-cell { background: var(--c-soft); border: 1px solid var(--c-border); border-left: 5px solid var(--c-ac); border-radius: 4px; }
+.hero-cell .v { font-family: var(--font-num); font-weight: 600; letter-spacing: -.01em; color: var(--c-ac); }
+.hero-cell .v.pos { color: var(--c-ac); }
+.hero-cell .v.neg { color: var(--bad); }
+.summary .v, .breakdown td:last-child, .breakdown .num, .num { font-family: var(--font-num); }
+.verdict { border-radius: 4px; }
+
+/* 丸い錠剤の形をやめ、角を少しだけ丸くする（バーと点はそのまま） */
+.action-btn, .ai-badge, .bk-guess, .bk-sum span, .bk-v, .cat-tab, .ch-tag, .chip, .example-pill, .linkbtn, .meta-item, .nav-paid, .page-head-text > .kicker, .kicker, .pl-sample, .yr-sample, .preset-btn, .sh-v, .share-btns a, .share-btns button, .tagline { border-radius: 4px; }
+.appbar .action-btn { border-radius: 4px; }
+.hero-kpi { gap: 10px; background: transparent; border-bottom: 1px solid var(--line); padding: 14px 16px; }
+.hero-cell .sub-v { font-family: var(--font-body); }
+.appbar .action-btn.primary { background: var(--c-ac); border-color: var(--c-ac); color: #fff; }
+.appbar .action-btn.primary .ic { color: #fff; }
 /* 解説ページの枠 */
 body.g-body { display: block; margin: 0; background: var(--bg); color: var(--ink); }
 .g-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; background: var(--paper); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 5; }
@@ -2538,6 +2643,14 @@ body.g-body { display: block; margin: 0; background: var(--bg); color: var(--ink
 /* 2026-11-24 Codex の点検: 暗い表示では明るい色の上の白い字が読みにくいので、上の「試す」ボタンも濃い字にする */
 :root[data-theme="dark"] .g-try { color: #0b1120; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .g-try { color: #0b1120; } }
+/* 落ち着いた計器の見た目（2026-11-25）: トップと同じ黒に近い上の帯と漢字の印 */
+.g-head { background: var(--c-bar); border-bottom-color: var(--c-bar-line); }
+.g-brand { color: #fff; }
+.g-brand .mark { width: 30px; height: 30px; flex: none; display: grid; place-items: center; background: var(--c-ac); color: #fff; border-radius: 4px; font-size: 17px; line-height: 1; }
+.g-try { border-radius: 4px; background: var(--c-ac); color: #fff; }
+:root[data-theme="dark"] .g-try, :root[data-theme="dark"] .g-brand .mark { color: #111; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .g-try, :root:not([data-theme="light"]) .g-brand .mark { color: #111; } }
+.g-main .bk-btn { border-radius: 4px; }
 .g-main { max-width: 780px; margin: 0 auto; padding: 16px 16px 40px; }
 .g-main .view { display: block; }
 .g-crumbs { font-size: .82rem; color: var(--muted); margin: 4px 0 14px; display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; }

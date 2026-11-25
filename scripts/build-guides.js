@@ -75,12 +75,12 @@ function shell(o) {
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
 <link rel="stylesheet" href="/guide/guide.css">
 ${blocks.map(ld).join("\n")}
 </head>
 <body class="g-body">
-<header class="g-head"><a class="g-brand" href="/"><img src="/favicon.svg" alt="" width="30" height="30"><span>${esc(CFG.name)}</span></a><a class="g-try" href="/">${esc(CFG.cta)}</a></header>
+<header class="g-head"><a class="g-brand" href="/"><span class="mark" aria-hidden="true">${esc(CFG.name.slice(0, 1))}</span><span>${esc(CFG.name)}</span></a><a class="g-try" href="/">${esc(CFG.cta)}</a></header>
 <main class="g-main">
 <nav class="g-crumbs" aria-label="現在の位置">${crumbs.map((c, i) => (i < crumbs.length - 1 ? `<a href="${c.item.replace(CFG.site, "") || "/"}">${esc(c.name)}</a>` : `<span>${esc(c.name)}</span>`)).join("<i>›</i>")}</nav>
 <div class="view doc">
@@ -121,6 +121,14 @@ body.g-body { display: block; margin: 0; background: var(--bg); color: var(--ink
 /* 2026-11-24 Codex の点検: 暗い表示では明るい色の上の白い字が読みにくいので、上の「試す」ボタンも濃い字にする */
 :root[data-theme="dark"] .g-try { color: #0b1120; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .g-try { color: #0b1120; } }
+/* 落ち着いた計器の見た目（2026-11-25）: トップと同じ黒に近い上の帯と漢字の印 */
+.g-head { background: var(--c-bar); border-bottom-color: var(--c-bar-line); }
+.g-brand { color: #fff; }
+.g-brand .mark { width: 30px; height: 30px; flex: none; display: grid; place-items: center; background: var(--c-ac); color: #fff; border-radius: 4px; font-size: 17px; line-height: 1; }
+.g-try { border-radius: 4px; background: var(--c-ac); color: #fff; }
+:root[data-theme="dark"] .g-try, :root[data-theme="dark"] .g-brand .mark { color: #111; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .g-try, :root:not([data-theme="light"]) .g-brand .mark { color: #111; } }
+.g-main .bk-btn { border-radius: 4px; }
 .g-main { max-width: 780px; margin: 0 auto; padding: 16px 16px 40px; }
 .g-main .view { display: block; }
 .g-crumbs { font-size: .82rem; color: var(--muted); margin: 4px 0 14px; display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; }
