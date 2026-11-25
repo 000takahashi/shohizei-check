@@ -2,6 +2,7 @@
 // /mcp と /api/v1/* は functions/ の処理で答え、それ以外は site/ の静的ファイルを返す。
 // www 付きは正式なURLへ転送し、仮URL（*.workers.dev）は検索に載せない。
 import { count } from './count.mjs';
+import { maintenanceOn, passThrough, maintenanceResponse } from './maintenance.mjs';
 import { onStatus as passStatus, onCheckout as passCheckout, onClaim as passClaim, onCheck as passCheck } from '../functions/api/pass.mjs';
 import { onPlan, onPricing } from '../functions/api/paid.mjs';
 import { onRequest as mcp } from '../functions/mcp.mjs';
@@ -23,7 +24,14 @@ export default {
       url.hostname = 'shohizei-check.com';
       return Response.redirect(url.toString(), 301);
     }
-    const handler = ROUTES[url.pathname.replace(/\/+$/, '') || '/'];
+    const path = url.pathname.replace(/\/+$/, '') || '/';
+    // 更新中のあいだは、ページも窓口も「休止中」を返す（src/maintenance.mjs・戻すときはそこを false に）
+    if (maintenanceOn(env) && !passThrough(path)) {
+      const res = maintenanceResponse(path);
+      count(env, ctx, 'shohizei', request, res, false);
+      return res;
+    }
+    const handler = ROUTES[path];
     let res = handler ? await handler({ request, env }) : await env.ASSETS.fetch(request);
     if (url.hostname.endsWith('.workers.dev')) {
       res = new Response(res.body, res);

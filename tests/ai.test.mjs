@@ -6,7 +6,7 @@ import { TOOL, TOOLS } from '../functions/_lib/tools.mjs';
 import { validate } from '../functions/_lib/open.mjs';
 import S from '../site/calc.js';
 
-const env = { ASSETS: { fetch: async () => new Response('asset', { status: 200 }) } };
+const env = { MAINTENANCE: 'off', ASSETS: { fetch: async () => new Response('asset', { status: 200 }) } }; // 更新中の画面は止めて、元の窓口を確かめる
 const call = (path, init) => worker.fetch(new Request('https://shohizei-check.com' + path, init), env);
 const rpc = (body) => call('/mcp', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
 const SAMPLE = { preset: 'restaurant', eatIn: 30000000, foodSales: 8000000, foodBuy: 9000000, otherBuy: 6000000, baseSales: 38000000, current: 'general' };
