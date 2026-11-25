@@ -26,10 +26,9 @@
     var until = S.freeText();
     Array.prototype.forEach.call(document.querySelectorAll('.nav-paid'), function (n) { n.textContent = until + 'まで無料'; });
     Array.prototype.forEach.call(document.querySelectorAll('.plan-cta span'), function (n) { n.textContent = n.textContent.replace('（有料）', '（' + until + 'まで無料）'); });
-    if ($('homeFree')) { $('homeFree').textContent = until + 'まで、「2年間の通しの見通し」と「持ち帰りの値付け」も無料でお使いいただけます。ご登録もお支払いも不要です。'; $('homeFree').hidden = false; }
     ['v-plan', 'v-price', 'v-pass'].forEach(function (id) {
       var head = document.querySelector('#' + id + ' .page-head-text');
-      if (head) head.appendChild(el('p', until + 'まで、この機能を無料でご利用いただけます。ご登録もお支払いも不要です。翌日からは、有料パスが必要となります。', 'free-note'));
+      if (head) head.appendChild(el('p', until + 'まで、この機能を無料でご利用いただけます。ご登録もお支払いも不要です。' + S.paidStartText() + 'からは、有料パスが必要となります。', 'free-note'));
     });
   }
 
@@ -96,7 +95,7 @@
     if (!active && exp > 0) msg('以前のパスは有効期限が切れております。');
     $('psBuy').hidden = !(sale && sale.onSale) || active;
     $('psSoon').hidden = !!(sale && sale.onSale) || active;
-    if (S.freeOpen()) $('psSoon').textContent = S.freeText() + 'までは、パスなしですべての機能をご利用いただけます。パスは、その翌日からご購入いただけます。';
+    if (S.freeOpen()) $('psSoon').textContent = S.freeText() + 'までは、パスなしですべての機能をご利用いただけます。パスは、' + S.paidStartText() + 'からご購入いただけます。';
   }
 
   // 表記のページ。販売者の表示が入るまでは「準備中」

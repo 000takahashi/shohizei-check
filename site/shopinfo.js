@@ -21,6 +21,8 @@
     return today <= FREE_UNTIL;
   }
   function freeText() { var m = /^(\d+)-(\d+)-(\d+)$/.exec(FREE_UNTIL); return m ? Number(m[2]) + '月' + Number(m[3]) + '日' : ''; }
+  // 無料の期間が終わった次の日（パスを買えるようになる日）。年もつけて「2027年1月1日」の形にする
+  function paidStartText() { var m = /^(\d+)-(\d+)-(\d+)$/.exec(FREE_UNTIL); if (!m) return ''; var d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3] + 1)); return d.getUTCFullYear() + '年' + (d.getUTCMonth() + 1) + '月' + d.getUTCDate() + '日'; }
   function planById(id) { for (var i = 0; i < PLANS.length; i++) if (PLANS[i].id === id) return PLANS[i]; return null; }
   // 短いパスから長いパスへの切り替え。払うのは差額だけ。期限は、最初のお支払いから数えた長いパスの日数になる
   function upgradeFrom(fromId) {
@@ -77,5 +79,5 @@
       ? '販売事業者の所在地と電話番号は、ご請求をいただければ、これらを記載したメールを遅滞なくお送りいたします。ご請求は、下記のメールアドレスまでお送りください。'
       : '販売事業者の氏名、所在地、電話番号は、ご請求をいただければ、これらを記載したメールを遅滞なくお送りいたします。ご請求は、下記のメールアドレスまでお送りください。';
   }
-  return { PRODUCT: PRODUCT, PLANS: PLANS, planById: planById, planText: planText, FREE_UNTIL: FREE_UNTIL, freeOpen: freeOpen, freeText: freeText, upgradeFrom: upgradeFrom, planOfToken: planOfToken, upgradeText: upgradeText, OPERATOR: OPERATOR, FEATURES: FEATURES, hasOperator: hasOperator, legalRows: legalRows, legalNote: legalNote };
+  return { PRODUCT: PRODUCT, PLANS: PLANS, planById: planById, planText: planText, FREE_UNTIL: FREE_UNTIL, freeOpen: freeOpen, freeText: freeText, paidStartText: paidStartText, upgradeFrom: upgradeFrom, planOfToken: planOfToken, upgradeText: upgradeText, OPERATOR: OPERATOR, FEATURES: FEATURES, hasOperator: hasOperator, legalRows: legalRows, legalNote: legalNote };
 });

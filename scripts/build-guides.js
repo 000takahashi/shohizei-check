@@ -66,8 +66,13 @@ function shell(o) {
 <meta property="og:description" content="${esc(o.desc)}">
 <meta property="og:type" content="article">
 <meta property="og:url" content="${url}">
+<meta property="og:image" content="${CFG.site}/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="${url}">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&display=swap">
@@ -75,7 +80,7 @@ function shell(o) {
 ${blocks.map(ld).join("\n")}
 </head>
 <body class="g-body">
-<header class="g-head"><a class="g-brand" href="/">${esc(CFG.name)}</a><a class="g-try" href="/">${esc(CFG.cta)}</a></header>
+<header class="g-head"><a class="g-brand" href="/"><img src="/favicon.svg" alt="" width="30" height="30"><span>${esc(CFG.name)}</span></a><a class="g-try" href="/">${esc(CFG.cta)}</a></header>
 <main class="g-main">
 <nav class="g-crumbs" aria-label="現在の位置">${crumbs.map((c, i) => (i < crumbs.length - 1 ? `<a href="${c.item.replace(CFG.site, "") || "/"}">${esc(c.name)}</a>` : `<span>${esc(c.name)}</span>`)).join("<i>›</i>")}</nav>
 <div class="view doc">
@@ -108,7 +113,10 @@ function css(html) {
 /* 解説ページの枠 */
 body.g-body { display: block; margin: 0; background: var(--bg); color: var(--ink); }
 .g-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; background: var(--paper); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 5; }
-.g-brand { font-weight: 700; color: var(--ink); text-decoration: none; }
+.g-brand { display: flex; align-items: center; gap: 10px; min-width: 0; font-weight: 700; color: var(--ink); text-decoration: none; white-space: nowrap; }
+.g-brand img { width: 30px; height: 30px; border-radius: 8px; flex: none; }
+.g-brand span { overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 420px) { .g-head { gap: 8px; } .g-try { padding: 8px 12px; font-size: .8rem; } }
 .g-try { flex: none; padding: 8px 14px; border-radius: 999px; background: var(--accent); color: #fff; font-weight: 600; font-size: .88rem; text-decoration: none; }
 /* 2026-11-24 Codex の点検: 暗い表示では明るい色の上の白い字が読みにくいので、上の「試す」ボタンも濃い字にする */
 :root[data-theme="dark"] .g-try { color: #0b1120; }
