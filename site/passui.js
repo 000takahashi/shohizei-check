@@ -33,7 +33,18 @@
   }
 
   S.FEATURES.forEach(function (t) { $('psFeatures').appendChild(el('li', t)); });
-  $('psPrice').textContent = S.PLANS.map(S.planText).join(' ／ ');
+  (S.FREE_FEATURES || []).forEach(function (t) { $('psFree').appendChild(el('li', t)); });
+  // 値段の表。1日あたりは四捨五入した目安
+  S.PLANS.forEach(function (p) {
+    var row = el('div', '', 'ps-pr'), left = el('div', '', 'ps-pr-l'), right = el('div', '', 'ps-pr-r');
+    left.appendChild(el('b', p.days + '日間'));
+    left.appendChild(el('span', (S.PLAN_FIT && S.PLAN_FIT[p.id]) || ''));
+    right.appendChild(el('b', p.yen.toLocaleString('ja-JP') + '円'));
+    right.appendChild(el('span', '税込・1日あたり約' + Math.round(p.yen / p.days) + '円'));
+    row.appendChild(left); row.appendChild(right);
+    $('psPriceRows').appendChild(row);
+  });
+  $('psPrice').textContent = 'どちらも、買った時から数えた日数だけ使えます。自動で更新されず、会員登録も要りません。';
   // 買うパスを選ぶ（最初は日数の長い方）
   var chosen = S.PLANS[S.PLANS.length - 1].id;
   S.PLANS.forEach(function (p) {

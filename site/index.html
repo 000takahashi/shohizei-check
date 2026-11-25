@@ -1428,6 +1428,25 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
 .ps-restore-label .ps-code { margin-top: 4px; font-weight: 400; }
 .ps-features { margin: 0 0 14px; padding-left: 1.2em; line-height: 1.8; }
 .ps-price { margin: 0 0 14px; font-size: 1.25rem; font-weight: 700; font-family: var(--font-num); }
+.ps-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 0 0 18px; }
+.ps-col { padding: 12px 16px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--paper-subtle); }
+.ps-col-paid { border-color: var(--accent-border, var(--line-strong)); border-left: 4px solid var(--accent); background: var(--paper); }
+.ps-col h4 { margin: 0 0 6px; font-size: .95rem; }
+.ps-col ul { margin: 0; padding-left: 1.2em; line-height: 1.75; font-size: .92rem; }
+.ps-col .ps-features { margin: 0; }
+.ps-price-rows { display: grid; gap: 8px; margin: 0 0 8px; }
+.ps-pr { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 16px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--paper); }
+.ps-pr-l, .ps-pr-r { display: flex; flex-direction: column; gap: 2px; }
+.ps-pr-r { text-align: right; flex: none; }
+.ps-pr-l b { font-size: 1rem; }
+.ps-pr-l span, .ps-pr-r span { font-size: .84rem; color: var(--ink-secondary); }
+.ps-pr-r b { font-family: var(--font-num); font-size: 1.25rem; font-weight: 600; color: var(--accent); }
+.ps-price-note { margin: 0 0 16px; font-size: .88rem; color: var(--ink-secondary); }
+@media (max-width: 640px) { .ps-compare { grid-template-columns: 1fr; } }
+.tm-body h4 { margin: 18px 0 4px; font-size: 1rem; }
+.tm-body p, .tm-body li { line-height: 1.8; }
+.tm-body ol { margin: 4px 0; padding-left: 1.4em; }
+.tm-date { margin-top: 18px; color: var(--muted); font-size: .88rem; }
 .ps-plans { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 0 0 12px; }
 .ps-plan { display: flex; flex-direction: column; gap: 2px; padding: 12px 14px; border: 2px solid var(--line-strong); border-radius: var(--radius-sm); background: var(--paper); cursor: pointer; position: relative; }
 .ps-plan input { position: absolute; top: 12px; right: 12px; width: 18px; height: 18px; accent-color: var(--accent); }
@@ -2034,9 +2053,14 @@ p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
   <section class="view doc" id="v-pass" data-view="pass" hidden>
     <div class="page-head"><div class="page-head-text"><p class="kicker">有料パス</p><h2 class="page-title">届出の前に、2年間を通してお確かめください</h2><p class="lead">無料の試算に加えて、<span class="nw">届出と値付けをお決めいただくための機能をご利用いただけます。</span><span class="nw">会員登録は不要です。</span></p></div></div>
     <section class="doc-card">
-      <h3>パスでご利用いただける機能</h3>
-      <ul class="ps-features" id="psFeatures"></ul>
-      <p class="ps-price" id="psPrice"></p>
+      <h3>無料でできることと、パスで増えること</h3>
+      <div class="ps-compare">
+        <div class="ps-col"><h4>無料のまま使えること</h4><ul id="psFree"></ul></div>
+        <div class="ps-col ps-col-paid"><h4>パスで増えること</h4><ul class="ps-features" id="psFeatures"></ul></div>
+      </div>
+      <h3>値段</h3>
+      <div class="ps-price-rows" id="psPriceRows"></div>
+      <p class="ps-price-note" id="psPrice"></p>
       <div class="ps-have" id="psHave" hidden><p id="psHaveText"></p><div class="bk-actions"><a class="bk-btn primary" href="#plan" data-view="plan">2年間の通しの見通しを出す</a><a class="bk-btn" href="#price" data-view="price">持ち帰りの値付けをする</a></div>
         <div class="ps-up" id="psUp" hidden><p id="psUpText"></p><dl class="ps-terms" id="psUpTerms"></dl><div class="bk-actions"><button type="button" class="bk-btn" id="psUpGo">30日間に切り替える</button></div></div>
       </div>
@@ -2044,7 +2068,7 @@ p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
         <div class="ps-plans" id="psPlans" role="radiogroup" aria-label="ご購入になるパスを選ぶ"></div>
         <dl class="ps-terms" id="psTerms"></dl>
         <div class="bk-actions"><button type="button" class="bk-btn primary" id="psGo">お支払いへ進む</button></div>
-        <p class="bk-hint">お支払いは Stripe の画面で行っていただきます。カード番号が当サイトに届くことはありません。お支払いの画面のアドレスは https://checkout.stripe.com/ で始まります。<a href="#legal" data-view="legal">特定商取引法に基づく表記</a></p>
+        <p class="bk-hint">お支払いは Stripe の画面で行っていただきます。カード番号が当サイトに届くことはありません。お支払いの画面のアドレスは https://checkout.stripe.com/ で始まります。<a href="#legal" data-view="legal">特定商取引法に基づく表記</a>・<a href="#terms" data-view="terms">利用規約</a></p>
       </div>
       <p class="bk-hint" id="psSoon" hidden>有料パスは現在準備中です。販売開始まで、今しばらくお待ちくださいませ。各画面の「見本で見る」から、結果の形式をお確かめいただけます。</p>
       <p class="bk-msg" id="psMsg" role="status"></p>
@@ -2078,6 +2102,38 @@ p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
         <p id="lgNote"></p>
         <div class="tablewrap"><table class="lg-table"><tbody id="lgRows"></tbody></table></div>
       </div>
+    </section>
+  </section>
+
+  <section class="view doc" id="v-terms" data-view="terms" hidden>
+    <div class="page-head"><div class="page-head-text"><p class="kicker">決まり</p><h2 class="page-title">利用規約</h2></div></div>
+    <section class="doc-card tm-body">
+      <p>この規約は、消費税1%チェッカー（このサイト）を使う時の決まりです。運営はチェッカー編集室です。このサイトを使った時点で、この規約に同意したものとします。</p>
+      <h4>1. 計算の結果について</h4>
+      <p>結果は目安です。実際の納税額は、申告の内容にもとづいて決まります。公的な資料をもとに作っていますが、正確さや新しさを約束するものではありません。大事な判断の前には、税理士や税務署などに確かめてください。</p>
+      <h4>2. 有料パス</h4>
+      <p>値段、日数、使える機能は、<a href="#pass" data-view="pass">有料パス</a>のページと<a href="#legal" data-view="legal">特定商取引法に基づく表記</a>のとおりです。パスは、買った方ご本人と、その方の事業の中で使えます。パスや控えを、ほかの人に渡したり売ったりしないでください。</p>
+      <h4>3. キャンセルと返金</h4>
+      <p>お支払いの後のキャンセルと返金は、お受けしていません。こちらの不具合でパスを使えなかった時は、全額を返金します。くわしくは<a href="#legal" data-view="legal">特定商取引法に基づく表記</a>のとおりです。</p>
+      <h4>4. してはいけないこと</h4>
+      <ol>
+        <li>法律や公の秩序に反する使い方</li>
+        <li>サーバーに大きな負担をかける、大量の自動のアクセス</li>
+        <li>パスや控えの使い回し、転売</li>
+        <li>このサイトや運営者になりすますこと</li>
+        <li>ほかの方の利用や、このサイトの運営を邪魔すること</li>
+      </ol>
+      <p>これらに当たる時は、このサイトの利用をお断りすることがあります。</p>
+      <h4>5. 中身の変更と休止</h4>
+      <p>機能や画面は、よりよくするために、予告なく変えることがあります。点検や障害のために、止まることもあります。</p>
+      <h4>6. 責任の範囲</h4>
+      <p>このサイトの結果を使って生じた損害について、こちらが責任を負う場合でも、その方が払ったパスの代金を上限とします。ただし、こちらの故意または重い過失による場合は、この上限はありません。</p>
+      <h4>7. 規約の変更</h4>
+      <p>この規約を変える時は、変える日と中身を、このページで前もってお知らせします。</p>
+      <h4>8. 法律と裁判所</h4>
+      <p>この規約は、日本の法律に従います。争いになった時は、運営者の住所地を受け持つ地方裁判所を、最初の裁判所とします。</p>
+      <p>お問い合わせは、<a href="#about" data-view="about">運営者情報</a>のメールアドレスへお送りください。</p>
+      <p class="tm-date">2026年11月25日 制定</p>
     </section>
   </section>
 
@@ -2381,7 +2437,7 @@ p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
     </div>
   </section>
   <footer>
-    <p class="foot-links"><a href="#about">運営者情報・プライバシーポリシー</a><a href="#pass">有料パス</a><a href="#legal">特定商取引法に基づく表記</a><a href="https://yunyu-rieki.com/" target="_blank" rel="noopener">姉妹サイト：輸入利益チェッカー</a><a href="https://menzei-check.com/" target="_blank" rel="noopener">姉妹サイト：免税チェッカー</a></p>
+    <p class="foot-links"><a href="#about">運営者情報・プライバシーポリシー</a><a href="#pass">有料パス</a><a href="#legal">特定商取引法に基づく表記</a><a href="#terms">利用規約</a><a href="https://yunyu-rieki.com/" target="_blank" rel="noopener">姉妹サイト：輸入利益チェッカー</a><a href="https://menzei-check.com/" target="_blank" rel="noopener">姉妹サイト：免税チェッカー</a></p>
     <p class="foot-official">公式サイトは https://shohizei-check.com のみです。当サイトの画面で、お名前・ご住所・お電話番号・メールアドレス・カード番号をお伺いすることはありません。<a href="#about" data-view="about">なりすましへのご注意</a></p>
     <p>出典：国税庁<span class="nwl">「飲食料品に係る2年間の消費税率引下げについて」（令和8年9月）</span>。法案は令和8年11月6日に衆議院で可決され、参議院で審議中です（まだ成立していません）。計算結果は一般的な目安であり、個別の税務相談に代わるものではありません。本ツールのご利用により生じた損害につきましては、責任を負いかねますので、あらかじめご了承ください。</p>
   </footer>
@@ -2817,7 +2873,7 @@ p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
   });
 
   // 左のタブ（スマホはメニュー）で画面を切り替える
-  var VIEWS = ['calc', 'bulk', 'plan', 'price', 'pass', 'legal', 'year', 'deadline', 'changes', 'guide', 'howto', 'faq', 'about'];
+  var VIEWS = ['calc', 'bulk', 'plan', 'price', 'pass', 'legal', 'terms', 'year', 'deadline', 'changes', 'guide', 'howto', 'faq', 'about'];
   var currentView = 'calc';
   var updMbar = function () {};
   // 文字の拡大や折り返しで上のバーが高くなっても、メニューをその下に置く。
