@@ -1416,6 +1416,12 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
 .ps-pr-l span, .ps-pr-r span { font-size: .84rem; color: var(--ink-secondary); }
 .ps-pr-r b { font-family: var(--font-num); font-size: 1.25rem; font-weight: 600; color: var(--accent); }
 .ps-price-note { margin: 0 0 16px; font-size: .88rem; color: var(--ink-secondary); }
+.ps-rec-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; margin: 0 0 12px; }
+.ps-rec-grid label { display: flex; flex-direction: column; gap: 4px; font-size: .9rem; font-weight: 700; color: var(--ink-secondary); }
+.ps-rec-grid input { min-height: 44px; padding: 8px 10px; border: 1px solid var(--line-strong); border-radius: var(--radius-sm); background: var(--field, var(--paper)); color: var(--ink); font: inherit; font-weight: 400; }
+.ps-soon { margin: 0 0 12px; padding: 10px 14px; border: 1px solid var(--accent-border, var(--line-strong)); border-left: 4px solid var(--accent); border-radius: var(--radius-sm); background: var(--accent-soft, var(--paper-subtle)); font-size: .92rem; }
+.ps-soon a { margin-left: 8px; font-weight: 700; }
+@media (max-width: 540px) { .ps-rec-grid { grid-template-columns: 1fr; } }
 @media (max-width: 640px) { .ps-compare { grid-template-columns: 1fr; } }
 .tm-body h4 { margin: 18px 0 4px; font-size: 1rem; }
 .tm-body p, .tm-body li { line-height: 1.8; }

@@ -3,7 +3,7 @@
 // www 付きは正式なURLへ転送し、仮URL（*.workers.dev）は検索に載せない。
 import { count } from './count.mjs';
 import { maintenanceOn, passThrough, maintenanceResponse } from './maintenance.mjs';
-import { onStatus as passStatus, onCheckout as passCheckout, onClaim as passClaim, onCheck as passCheck } from '../functions/api/pass.mjs';
+import { onStatus as passStatus, onCheckout as passCheckout, onClaim as passClaim, onCheck as passCheck, onRecover as passRecover } from '../functions/api/pass.mjs';
 import { onPlan, onPricing } from '../functions/api/paid.mjs';
 import { onRequest as mcp } from '../functions/mcp.mjs';
 import { onCompare, onPeriod, onNormalYear } from '../functions/api/open.mjs';
@@ -14,7 +14,7 @@ const ROUTES = {
   '/api/v1/compare': onCompare, '/api/v1/period': onPeriod, '/api/v1/normal-year': onNormalYear,
   '/api/v1/plan': onPlan,       // 有料: 2年間の通しの見通し
   '/api/v1/pricing': onPricing, // 有料: 持ち帰り・店内の値付け
-  '/api/v1/pass/status': passStatus, '/api/v1/pass/checkout': passCheckout, '/api/v1/pass/claim': passClaim, '/api/v1/pass/check': passCheck, // 有料パスを買う・受け取る
+  '/api/v1/pass/status': passStatus, '/api/v1/pass/checkout': passCheckout, '/api/v1/pass/claim': passClaim, '/api/v1/pass/check': passCheck, '/api/v1/pass/recover': passRecover, // 有料パスを買う・受け取る
 };
 
 export default {
