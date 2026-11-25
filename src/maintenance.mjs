@@ -106,3 +106,67 @@ footer{text-align:center;color:var(--sub);font-size:13px;padding:0 16px 24px}
 </body>
 </html>`;
 }
+
+// ─────────────────────────────────────────────
+// 運営者だけが、休止中でも本物のページを見るための入口（2026-11-25）
+// - 専用のリンク（?preview=合言葉）を一度開くと、その端末のブラウザに30日間の印（Cookie）が付き、
+//   その間は本物のページが見える。お客様には今までどおり休止中の画面だけが見える。
+// - 合言葉そのものはここに置かない。置くのは合言葉の SHA-256 だけ（元の合言葉はこの値から戻せない）。
+//   合言葉を変える時は、新しい合言葉の SHA-256 をここに書き、専用のリンクも作り直す。
+// - ?preview=off を開くと、印を消してお客様と同じ見え方に戻る。
+// - 見ている間の画面には、左下に「運営者だけの表示」の札を出し、検索には載せない（noindex）。
+const PREVIEW_HASH = '5728054e0e3f9e17a49efa17698851aeaf0a98585813bf33116cecf512eeab83';
+const PREVIEW_COOKIE = 'ck_preview';
+const PREVIEW_DAYS = 30;
+
+async function sha256Hex(text) {
+  const d = new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text)));
+  return [...d].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+function readCookie(request, name) {
+  const raw = request.headers.get('Cookie') || '';
+  for (const part of raw.split(';')) {
+    const i = part.indexOf('=');
+    if (i > 0 && part.slice(0, i).trim() === name) return part.slice(i + 1).trim();
+  }
+  return '';
+}
+
+async function validKey(key, hash) {
+  return typeof key === 'string' && key.length >= 16 && key.length <= 200 && (await sha256Hex(key)) === hash;
+}
+
+/** 合言葉のリンクで来た時は印を付けて（または消して）元の住所へ戻す。印のある人は ok:true。 */
+export async function previewGate(request, url, hash = PREVIEW_HASH) { // hash はテストで差し替えるため
+  const q = url.searchParams.get('preview');
+  if (q !== null) {
+    const back = new URL(url.toString());
+    back.searchParams.delete('preview');
+    const headers = { Location: back.toString(), 'Cache-Control': 'no-store', 'Referrer-Policy': 'no-referrer' };
+    if (q === 'off') {
+      headers['Set-Cookie'] = `${PREVIEW_COOKIE}=; Path=/; Max-Age=0; Secure; HttpOnly; SameSite=Lax`;
+      return { ok: false, redirect: new Response(null, { status: 302, headers }) };
+    }
+    if (await validKey(q, hash)) {
+      headers['Set-Cookie'] = `${PREVIEW_COOKIE}=${q}; Path=/; Max-Age=${PREVIEW_DAYS * 86400}; Secure; HttpOnly; SameSite=Lax`;
+      return { ok: true, redirect: new Response(null, { status: 302, headers }) };
+    }
+    return { ok: false, redirect: null }; // 合言葉が違う時は、ふつうのお客様と同じ扱い
+  }
+  return { ok: await validKey(readCookie(request, PREVIEW_COOKIE), hash), redirect: null };
+}
+
+const BADGE = '<div style="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#1c1c1a;color:#fff;font:600 12px/1.4 system-ui,sans-serif;padding:6px 10px;border-radius:6px;opacity:.85">運営者だけの表示（お客様には休止中の画面）・<a href="?preview=off" style="color:#fff">ふつうの表示に戻す</a></div>';
+
+/** 運営者が見ている本物のページに、札を付けて検索に載せない印を付ける */
+export function markPreview(res) {
+  const out = new Response(res.body, res);
+  out.headers.set('X-Robots-Tag', 'noindex');
+  out.headers.set('Cache-Control', 'private, no-store');
+  const type = out.headers.get('Content-Type') || '';
+  if (type.includes('text/html') && typeof HTMLRewriter !== 'undefined') {
+    return new HTMLRewriter().on('body', { element(el) { el.append(BADGE, { html: true }); } }).transform(out);
+  }
+  return out;
+}

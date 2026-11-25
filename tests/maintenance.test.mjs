@@ -47,3 +47,53 @@ test('止めた時（MAINTENANCE を false にした時と同じ）は、元の�
   assert.equal(res.status, 200);
   assert.equal(await res.text(), 'asset');
 });
+
+// 運営者だけが見る入口（合言葉の本物はテストに置かない。テスト用の合言葉で確かめる）
+import { previewGate, markPreview } from '../src/maintenance.mjs';
+import { createHash } from 'node:crypto';
+const TKEY = 'test-only-preview-key-0123456789';
+const THASH = createHash('sha256').update(TKEY).digest('hex');
+const req = (path, cookie) => new Request('https://shohizei-check.com' + path, cookie ? { headers: { Cookie: cookie } } : {});
+
+test('合言葉のリンクを開くと、30日の印を付けて合言葉を外した住所へ戻す', async () => {
+  const r = req('/guide/?preview=' + TKEY);
+  const g = await previewGate(r, new URL(r.url), THASH);
+  assert.equal(g.redirect.status, 302);
+  assert.equal(g.redirect.headers.get('Location'), 'https://shohizei-check.com/guide/');
+  const c = g.redirect.headers.get('Set-Cookie');
+  assert.match(c, /^ck_preview=/);
+  assert.match(c, /HttpOnly/);
+  assert.match(c, /Secure/);
+  assert.match(c, /Max-Age=2592000/);
+});
+
+test('印がある人だけ通す。違う合言葉・印なしは通さない', async () => {
+  const ok = req('/', 'a=1; ck_preview=' + TKEY);
+  assert.equal((await previewGate(ok, new URL(ok.url), THASH)).ok, true);
+  const bad = req('/', 'ck_preview=wrong-key-wrong-key-wrong');
+  assert.equal((await previewGate(bad, new URL(bad.url), THASH)).ok, false);
+  const none = req('/');
+  assert.equal((await previewGate(none, new URL(none.url), THASH)).ok, false);
+  const wrongLink = req('/?preview=wrong-key-wrong-key-wrong');
+  const g = await previewGate(wrongLink, new URL(wrongLink.url), THASH);
+  assert.equal(g.ok, false);
+  assert.equal(g.redirect, null);
+});
+
+test('?preview=off で印を消す', async () => {
+  const r = req('/?preview=off', 'ck_preview=' + TKEY);
+  const g = await previewGate(r, new URL(r.url), THASH);
+  assert.match(g.redirect.headers.get('Set-Cookie'), /Max-Age=0/);
+});
+
+test('本物の入口でも、違う合言葉ではお客様と同じ休止中の画面のまま', { skip: !MAINTENANCE }, async () => {
+  assert.equal((await get('/?preview=wrong-key-wrong-key-wrong')).status, 503);
+  const res = await worker.fetch(new Request('https://shohizei-check.com/', { headers: { Cookie: 'ck_preview=wrong-key-wrong-key-wrong' } }), env, ctx);
+  assert.equal(res.status, 503);
+});
+
+test('運営者が見ているページは検索に載せない', () => {
+  const res = markPreview(new Response('<html><body>x</body></html>', { headers: { 'Content-Type': 'text/html' } }));
+  assert.equal(res.headers.get('X-Robots-Tag'), 'noindex');
+  assert.match(res.headers.get('Cache-Control'), /no-store/);
+});
