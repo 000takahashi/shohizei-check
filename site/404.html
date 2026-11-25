@@ -27,10 +27,17 @@ li:first-child a{background:var(--accent);border-color:var(--accent);color:#fff}
 li:first-child a span{color:#fff;opacity:.85}
 @media (prefers-color-scheme:dark){li:first-child a,li:first-child a span{color:#0b1017}}
 footer{color:var(--muted);font-size:.8rem;text-align:center;padding:20px}
+/* 落ち着いた計器の見た目（2026-11-25） */
+:root{--bg:#f4f4f2;--ink:#1c1d1f;--ink-2:#3a3c40;--muted:#5b5e64;--line:#e3e3de;--accent:#1d4ed8}
+@media (prefers-color-scheme:dark){:root{--bg:#141517;--paper:#1b1c1f;--line:#2c2e32;--accent:#7aa2ff}}
+header{background:#23262b;border-bottom:1px solid #3a3e45}
+.brand{color:#fff}
+.mark{width:32px;height:32px;flex:none;display:grid;place-items:center;background:#1d4ed8;color:#fff;border-radius:4px;font-size:18px;line-height:1}
+li a{border-radius:4px}
 </style>
 </head>
 <body>
-<header><div class="bar"><a class="brand" href="/"><img src="/favicon.svg" alt="" width="32" height="32">消費税1%チェッカー</a></div></header>
+<header><div class="bar"><a class="brand" href="/"><span class="mark" aria-hidden="true">消</span>消費税1%チェッカー</a></div></header>
 <main>
 <p class="code">404</p>
 <h1>このページは見つかりませんでした</h1>
