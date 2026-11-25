@@ -1408,13 +1408,15 @@ footer p { margin: 0 0 6px; max-width: 110ch; }
 .ps-col h4 { margin: 0 0 6px; font-size: .95rem; }
 .ps-col ul { margin: 0; padding-left: 1.2em; line-height: 1.75; font-size: .92rem; }
 .ps-col .ps-features { margin: 0; }
-.ps-price-table { width: 100%; border-collapse: collapse; font-size: .92rem; margin: 0 0 8px; }
-.ps-price-table th, .ps-price-table td { padding: 9px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
-.ps-price-table thead th { font-size: .82rem; color: var(--muted); font-weight: 700; }
-.ps-price-table .r { text-align: right; white-space: nowrap; font-family: var(--font-num); }
-.ps-price-table tbody th { white-space: nowrap; }
+.ps-price-rows { display: grid; gap: 8px; margin: 0 0 8px; }
+.ps-pr { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 16px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--paper); }
+.ps-pr-l, .ps-pr-r { display: flex; flex-direction: column; gap: 2px; }
+.ps-pr-r { text-align: right; flex: none; }
+.ps-pr-l b { font-size: 1rem; }
+.ps-pr-l span, .ps-pr-r span { font-size: .84rem; color: var(--ink-secondary); }
+.ps-pr-r b { font-family: var(--font-num); font-size: 1.25rem; font-weight: 600; color: var(--accent); }
 .ps-price-note { margin: 0 0 16px; font-size: .88rem; color: var(--ink-secondary); }
-@media (max-width: 640px) { .ps-compare { grid-template-columns: 1fr; } .ps-price-table th, .ps-price-table td { padding: 8px 6px; } }
+@media (max-width: 640px) { .ps-compare { grid-template-columns: 1fr; } }
 .tm-body h4 { margin: 18px 0 4px; font-size: 1rem; }
 .tm-body p, .tm-body li { line-height: 1.8; }
 .tm-body ol { margin: 4px 0; padding-left: 1.4em; }
