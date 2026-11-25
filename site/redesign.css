@@ -1029,3 +1029,15 @@ footer {
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .bk-btn.primary, :root:not([data-theme="light"]) .bk-btn.primary:hover, :root:not([data-theme="light"]) #mJump { color: #0b1120; }
 }
+
+/* スマホでヘッダーを2段に折らない（2026-11-25）。名前は1行のまま、狭い幅ではボタンの文字を隠し、名前を少し小さくする */
+@media (max-width: 540px) {
+  .appbar-in { flex-wrap: nowrap; min-height: 56px; padding-left: 16px; padding-right: 16px; gap: 10px; }
+  .appbar .brand { flex: 1 1 auto; }
+  .brand-text { min-width: 0; }
+  .brand-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; overflow-wrap: normal; }
+  .appbar-actions { flex-wrap: nowrap; }
+  .appbar-actions .action-btn { flex: none; }
+}
+@media (max-width: 420px) { .brand-name { font-size: .96rem; letter-spacing: .02em; } .appbar-actions #btnMenu .lbl { display: none; } }
+@media (max-width: 350px) { .brand-name { font-size: .9rem; letter-spacing: 0; } .appbar .brand { gap: 8px; } .appbar .brand img, .appbar .brand .logo { width: 30px; height: 30px; } }
