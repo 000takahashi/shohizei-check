@@ -52,12 +52,12 @@
     $('psTerms').textContent = '';
     $('psGo').textContent = P.days + '日間 ' + P.yen.toLocaleString('ja-JP') + '円で購入する';
   [
-    ['内容', '上記の内容でご利用いただけます。計算の結果は目安でございます。法案の成立を前提としております。'],
-    ['価格', P.yen.toLocaleString('ja-JP') + '円（税込）。ほかにかかる費用は、通信料のみでございます。'],
+    ['内容', '上記の内容でご利用いただけます。計算の結果は目安です。法案の成立を前提としています。'],
+    ['価格', P.yen.toLocaleString('ja-JP') + '円（税込）。ほかにかかる費用は、通信料のみです。'],
     ['期間', 'お支払いの時点から' + P.days + '日間。自動で更新されません。' + (S.upgradeFrom(P.id) ? 'パスの有効期間中は、差額の' + S.upgradeFrom(P.id).yen.toLocaleString('ja-JP') + '円で' + S.upgradeFrom(P.id).to.days + '日間に切り替えられます。' : '')],
-    ['支払い', 'クレジットカード・デビットカード。ご購入時に確定いたします。'],
+    ['支払い', 'クレジットカード・デビットカード。ご購入時に確定します。'],
     ['ご利用開始', 'お支払いが完了次第、すぐにご利用いただけます。'],
-    ['キャンセル・返金', 'お支払い後のキャンセル・返金はお受けいたしかねます。当方の不具合によりご利用いただけなかった場合は、全額を返金いたします。'],
+    ['キャンセル・返金', 'お支払い後のキャンセル・返金はお受けいたしかねます。当方の不具合によりご利用いただけなかった場合は、全額を返金します。'],
   ].forEach(function (r) { $('psTerms').appendChild(el('dt', r[0])); $('psTerms').appendChild(el('dd', r[1])); });
   }
   terms();
@@ -76,9 +76,9 @@
       ['内容', '現在のパスを、' + u.to.days + '日間のパスに切り替えます。ご利用いただける機能は同じです。'],
       ['価格', yen + '円（税込）。' + u.to.days + '日間の価格から、' + u.from.days + '日間の価格を差し引いた金額です。'],
       ['期間', '最初のお支払いの時点から' + u.to.days + '日間（' + dateText(newExp) + ' まで）。自動で更新されません。'],
-      ['支払い', 'クレジットカード・デビットカード。ご購入時に確定いたします。'],
+      ['支払い', 'クレジットカード・デビットカード。ご購入時に確定します。'],
       ['ご利用開始', 'お支払いが完了次第、すぐに有効期限が延長されます。'],
-      ['キャンセル・返金', 'お支払い後のキャンセル・返金はお受けいたしかねます。当方の不具合によりご利用いただけなかった場合は、全額を返金いたします。'],
+      ['キャンセル・返金', 'お支払い後のキャンセル・返金はお受けいたしかねます。当方の不具合によりご利用いただけなかった場合は、全額を返金します。'],
     ].forEach(function (r) { $('psUpTerms').appendChild(el('dt', r[0])); $('psUpTerms').appendChild(el('dd', r[1])); });
     $('psUpGo').textContent = '差額' + yen + '円で' + u.to.days + '日間に切り替える';
     $('psUpGo').dataset.plan = u.to.id;
@@ -92,7 +92,7 @@
     if (active) $('psHaveText').textContent = 'パスをご利用いただけます。' + dateText(exp) + ' まで有効です。';
     $('psKeep').hidden = !active;
     if (active) $('psKeepCode').value = getPass();
-    if (!active && exp > 0) msg('以前のパスは有効期限が切れております。');
+    if (!active && exp > 0) msg('以前のパスは有効期限が切れています。');
     $('psBuy').hidden = !(sale && sale.onSale) || active;
     $('psSoon').hidden = !!(sale && sale.onSale) || active;
     if (S.freeOpen()) $('psSoon').textContent = S.freeText() + 'までは、パスなしですべての機能をご利用いただけます。パスは、' + S.paidStartText() + 'からご購入いただけます。';
@@ -116,21 +116,21 @@
 
   $('psGo').addEventListener('click', function () {
     if (busy) return;
-    busy = true; $('psGo').disabled = true; msg('お支払いの画面を開いております…');
+    busy = true; $('psGo').disabled = true; msg('お支払いの画面を開いています…');
     post('/api/v1/pass/checkout', { plan: chosen }).then(function (r) {
       if (r.status === 200 && r.data.url && r.data.url.indexOf('https://checkout.stripe.com/') === 0) { location.href = r.data.url; return; }
-      msg(r.status === 503 ? '現在、販売を開始しておりません。' : 'お支払いの画面を開けませんでした。恐れ入りますが、しばらくしてからもう一度お試しください。', true);
+      msg(r.status === 503 ? '現在、販売を開始していません。' : 'お支払いの画面を開けませんでした。恐れ入りますが、しばらくしてからもう一度お試しください。', true);
       busy = false; $('psGo').disabled = false;
     }).catch(function () { msg('通信できませんでした。恐れ入りますが、電波の良い場所でもう一度お試しください。', true); busy = false; $('psGo').disabled = false; });
   });
 
   $('psUpGo').addEventListener('click', function () {
     if (busy) return;
-    busy = true; $('psUpGo').disabled = true; msg('お支払いの画面を開いております…');
+    busy = true; $('psUpGo').disabled = true; msg('お支払いの画面を開いています…');
     var again = function () { busy = false; $('psUpGo').disabled = false; };
     post('/api/v1/pass/checkout', { plan: $('psUpGo').dataset.plan, upgrade: true }, getPass()).then(function (r) {
       if (r.status === 200 && r.data.url && r.data.url.indexOf('https://checkout.stripe.com/') === 0) { location.href = r.data.url; return; }
-      msg(r.status === 409 ? 'このパスは切り替えられません。有効期限が切れている場合は、新たにお求めください。' : r.status === 503 ? '現在、販売を開始しておりません。' : 'お支払いの画面を開けませんでした。恐れ入りますが、しばらくしてからもう一度お試しください。', true);
+      msg(r.status === 409 ? 'このパスは切り替えられません。有効期限が切れている場合は、新たにお求めください。' : r.status === 503 ? '現在、販売を開始していません。' : 'お支払いの画面を開けませんでした。恐れ入りますが、しばらくしてからもう一度お試しください。', true);
       again();
     }).catch(function () { msg('通信できませんでした。恐れ入りますが、電波の良い場所でもう一度お試しください。', true); again(); });
   });
@@ -158,7 +158,7 @@
     var id = pendingSid();
     if (!id || busy) return;
     busy = true; $('psRetry').hidden = true; $('psRetryGo').disabled = true;
-    msg('お支払いを確認しております…');
+    msg('お支払いを確認しています…');
     var done = function () { busy = false; $('psRetryGo').disabled = false; };
     var retry = function (text) { msg(text, true); $('psRetry').hidden = false; done(); };
     var finish = function () { setPending(''); memSid = ''; done(); };
@@ -168,22 +168,22 @@
         try { localStorage.setItem(PASS_KEY, r.data.token); } catch (e) { saved = false; }
         if (!saved) {
           // パスを残せない端末。控えだけは画面に出して、写してもらう
-          retry('お支払いは完了しておりますが、この端末にパスを保存できませんでした。ブラウザの設定（プライベートモードなど）をご確認のうえ、「パスを再度受け取る」を押してください。');
+          retry('お支払いは完了していますが、この端末にパスを保存できませんでした。ブラウザの設定（プライベートモードなど）をご確認のうえ、「パスを再度受け取る」を押してください。');
           $('psKeep').hidden = false; $('psKeepCode').value = r.data.token;
           return;
         }
         finish();
-        msg('ご購入いただき、誠にありがとうございます。パスを発行いたしました。' + dateText(Number(r.data.expiresAt) || expiryOf(r.data.token)) + ' まで有効です。下の「パスの控え」を保存しておいてください。');
+        msg('ご購入いただき、誠にありがとうございます。パスを発行しました。' + dateText(Number(r.data.expiresAt) || expiryOf(r.data.token)) + ' まで有効です。下の「パスの控え」を保存しておいてください。');
         if (window.AdsUI) window.AdsUI.hideAll();
         releaseAds();
         render(null);
         return;
       }
       if (r.status === 402) { finish(); releaseAds(); msg('お支払いを確認できませんでした。お支払いがお済みでない場合は、もう一度お手続きください。', true); return; }
-      if (r.status === 410) { finish(); releaseAds(); msg('このお支払いのパスは、有効期限が切れております。', true); return; }
+      if (r.status === 410) { finish(); releaseAds(); msg('このお支払いのパスは、有効期限が切れています。', true); return; }
       if (r.status === 400 || r.status === 404) { finish(); releaseAds(); msg('お支払いの情報が見つかりませんでした。お支払いがお済みの場合は、お手数ですがお問い合わせください。', true); return; }
-      retry('パスを発行できませんでした。お支払いの情報はこの端末に残っておりますので、しばらくしてから「パスを再度受け取る」を押してください。');
-    }).catch(function () { retry('通信できませんでした。お支払いの情報はこの端末に残っておりますので、電波の良い場所で「パスを再度受け取る」を押してください。'); });
+      retry('パスを発行できませんでした。お支払いの情報はこの端末に残っていますので、しばらくしてから「パスを再度受け取る」を押してください。');
+    }).catch(function () { retry('通信できませんでした。お支払いの情報はこの端末に残っていますので、電波の良い場所で「パスを再度受け取る」を押してください。'); });
   }
   $('psRetryGo').addEventListener('click', claim);
   if (pendingSid()) { window.AdsHold = true; claim(); }
@@ -198,8 +198,8 @@
   $('psRestoreGo').addEventListener('click', function () {
     var code = $('psRestoreCode').value.replace(/\s+/g, '');
     if (!/^v1\.\d{1,12}\.[A-Za-z0-9_-]{1,40}\.[A-Za-z0-9_-]{20,80}$/.test(code)) { rmsg('控えの形が正しくありません。「v1.」から最後まで、すべて貼り付けてください。', true); return; }
-    if (expiryOf(code) <= Date.now()) { rmsg('この控えのパスは、有効期限（' + dateText(expiryOf(code)) + '）が切れております。', true); return; }
-    $('psRestoreGo').disabled = true; rmsg('控えを確認しております…');
+    if (expiryOf(code) <= Date.now()) { rmsg('この控えのパスは、有効期限（' + dateText(expiryOf(code)) + '）が切れています。', true); return; }
+    $('psRestoreGo').disabled = true; rmsg('控えを確認しています…');
     post('/api/v1/pass/check', {}, code).then(function (r) {
       $('psRestoreGo').disabled = false;
       if (r.status === 200 && r.data.ok) {
@@ -210,7 +210,7 @@
         render(null);
         return;
       }
-      rmsg(r.status === 410 ? 'この控えのパスは、有効期限が切れております。' : r.status === 503 ? '現在、パスを確認できません。恐れ入りますが、しばらくしてからもう一度お試しください。' : 'この控えは確認できませんでした。お手数ですが、控えが途中で切れていないかご確認ください。', true);
+      rmsg(r.status === 410 ? 'この控えのパスは、有効期限が切れています。' : r.status === 503 ? '現在、パスを確認できません。恐れ入りますが、しばらくしてからもう一度お試しください。' : 'この控えは確認できませんでした。お手数ですが、控えが途中で切れていないかご確認ください。', true);
     }).catch(function () { $('psRestoreGo').disabled = false; rmsg('通信できませんでした。恐れ入りますが、電波の良い場所でもう一度お試しください。', true); });
   });
 

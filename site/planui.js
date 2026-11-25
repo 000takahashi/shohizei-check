@@ -63,7 +63,7 @@
     li.appendChild(el('span', wa(f.deadline) + ' まで', 'pl-date'));
     li.appendChild(el('p', perText(r.periods[f.index]) + ' の期間から、' + (f.elect ? '課税事業者を選んで' + LABEL[f.to] + 'で申告します。' : LABEL[f.from] + 'を' + LABEL[f.to] + 'に変更します。')
       + (f.special ? '特例により、この期間の中にご提出いただければ間に合います。届出書の参考事項の欄には「飲食料品特例」とご記入ください。' : 'この期間が始まる前日が期限です。')
-      + (f.to === 'simple' ? '簡易課税は、選択すると2年間は継続していただく必要がございます。' : '')
+      + (f.to === 'simple' ? '簡易課税は、選択すると2年間は継続していただく必要があります。' : '')
       + (f.from === 'exempt' ? '課税事業者を選択すると、2年間は課税事業者のままとなります（一定の場合は3年）。' : '')
       + (f.to === 'exempt' ? '課税事業者を選んだ期間の初日から2年を経過する日の属する課税期間が始まるまでは、この届出を出せません。' : '')));
     return li;
@@ -148,7 +148,7 @@
     })));
 
     if (r.notes.length) { var ul = el('ul', null, 'pl-notes'); r.notes.forEach(function (t) { ul.appendChild(el('li', t)); }); box.appendChild(ul); }
-    box.appendChild(el('p', '前提：売上と仕入れは毎年同じとし、1%の月と8%の月を月数で按分しております。1%が終わる時の届出の特例はまだ公表されていないため、通常の期限で計算しております。高額な設備を購入した場合の3年間の継続義務、インボイスの2割・3割特例、75%ルール、端数処理は含めておりません。結果は目安でございます。届出と申告につきましては、税理士または税務署にご確認ください。', 'bk-hint'));
+    box.appendChild(el('p', '前提：売上と仕入れは毎年同じとし、1%の月と8%の月を月数で按分しています。1%が終わる時の届出の特例はまだ公表されていないため、通常の期限で計算しています。高額な設備を購入した場合の3年間の継続義務、インボイスの2割・3割特例、75%ルール、端数処理は含めていません。結果は目安です。届出と申告につきましては、税理士または税務署にご確認ください。', 'bk-hint'));
 
     var act = el('div', null, 'bk-actions pl-noprint');
     var pb = el('button', '印刷する（税理士の先生へのご相談用）', 'bk-btn'); pb.type = 'button';
@@ -172,7 +172,7 @@
     var input = sample ? null : (window.ShohizeiInput ? window.ShohizeiInput() : null);
     if (!sample && !input) { msg('plMsg', 'お手数ですが、先に「申告方式の試算」で売上と仕入れをご入力ください。', true); $('plOut').hidden = true; $('plLock').hidden = true; return; }
     if (input) { input = Object.assign({}, input); input.since = $('plSince') ? $('plSince').value : 'old'; input.elected = $('plElected') ? $('plElected').value : 'unknown'; }
-    msg('plMsg', '計算しております…');
+    msg('plMsg', '計算しています…');
     post('/api/v1/plan', sample ? { sample: true } : input).then(function (r) {
       if (r.status === 200) { msg('plMsg', ''); renderPlan(r.data.result, !!r.data.sample); return; }
       if (r.status === 402) {
@@ -247,7 +247,7 @@
       })));
       box.appendChild(el('p', '「同じにする値段」は、店内で召し上がるお客様が' + r.eatInShare + '%の場合に、売上の本体の合計が現在と変わらない税込み価格です。' + sameNote(both) + '同じ価格にする場合も、店内と持ち帰りで税率が異なる点をレジに設定してください。', 'bk-hint'));
     }
-    box.appendChild(el('p', '価格は1円単位で四捨五入しております。最終的な価格は、お店でお決めください。値札の表示方法（税込みの表示）につきましては、税務署や商工会のご案内もあわせてご確認ください。', 'bk-hint'));
+    box.appendChild(el('p', '価格は1円単位で四捨五入しています。最終的な価格は、お店でお決めください。値札の表示方法（税込みの表示）につきましては、税務署や商工会のご案内もあわせてご確認ください。', 'bk-hint'));
     var act = el('div', null, 'bk-actions pl-noprint');
     var cb = el('button', 'CSVで保存', 'bk-btn'); cb.type = 'button';
     cb.addEventListener('click', function () {
@@ -266,7 +266,7 @@
   function runPrice(sample) {
     var items = readRows();
     if (!sample && !items.length) { msg('prMsg', '商品の現在の税込み価格を、1つ以上ご入力ください。', true); return; }
-    msg('prMsg', '計算しております…');
+    msg('prMsg', '計算しています…');
     post('/api/v1/pricing', sample ? { sample: true } : { items: items, eatInShare: Number($('prShare').value) }).then(function (r) {
       if (r.status === 200) {
         msg('prMsg', '');

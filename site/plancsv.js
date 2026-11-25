@@ -37,7 +37,7 @@
       r.ifElected.filings.forEach(function (f) { out.push(row(f)); });
     }
     out.push([]);
-    out.push(['前提：売上と仕入れは毎年同じとし、1%の月と8%の月を月数で按分しております。結果は目安でございます。届出と申告につきましては、税理士または税務署にご確認ください。']);
+    out.push(['前提：売上と仕入れは毎年同じとし、1%の月と8%の月を月数で按分しています。結果は目安です。届出と申告につきましては、税理士または税務署にご確認ください。']);
     return out;
   }
   function csv(r, today) { return K.toCsv(rows(r, today)); }

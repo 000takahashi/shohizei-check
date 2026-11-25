@@ -2531,6 +2531,9 @@ footer {
 
 
 
+
+
+
 /* ==========================================================================
    落ち着いた計器の見た目（2026-11-25 高橋さん決定・3チェッカー共通）
    黒に近い上の帯・漢字の印・細い線・数字は等幅・答えは薄い色の枠。
@@ -2632,6 +2635,14 @@ button, input, select, textarea { font-family: inherit; }
 .hero-cell .sub-v { font-family: var(--font-body); }
 .appbar .action-btn.primary { background: var(--c-ac); border-color: var(--c-ac); color: #fff; }
 .appbar .action-btn.primary .ic { color: #fff; }
+
+/* 最初の画面の「結果の見本」の1行（2026-11-25） */
+.peek { margin: 12px 0 0; padding: 10px 14px; background: var(--paper); border: 1px solid var(--line); border-left: 4px solid var(--c-ac); border-radius: 4px; font-size: .92rem; line-height: 1.75; color: var(--ink-secondary); max-width: 760px; }
+.peek b { font-family: var(--font-num); font-weight: 600; font-size: 1.12em; color: var(--c-ac); }
+.peek-btn { margin-left: 6px; padding: 2px 10px; min-height: 32px; font: inherit; font-size: .86rem; font-weight: 700; color: var(--c-ac); background: transparent; border: 1px solid var(--c-border); border-radius: 4px; cursor: pointer; white-space: nowrap; }
+.peek-btn:hover { background: var(--c-soft); }
+@media (max-width: 640px) { .peek { font-size: .88rem; padding: 9px 12px; } .page-head-text > .free-note { font-size: .84rem; padding: 6px 10px; font-weight: 600; } }
+.sheet { scroll-margin-top: 68px; }
 /* 解説ページの枠 */
 body.g-body { display: block; margin: 0; background: var(--bg); color: var(--ink); }
 .g-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; background: var(--paper); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 5; }

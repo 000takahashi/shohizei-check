@@ -18,7 +18,7 @@ test("見本の結果を、年ごとの表と届出の表にしてCSVにする",
   assert.ok(fi > head);
   if (r.best.filings.length) assert.equal(rows[fi + 1][1], r.best.filings[0].deadline);
   // 目安である旨を必ず入れる
-  assert.ok(text.includes("結果は目安でございます"));
+  assert.ok(text.includes("結果は目安です"));
 });
 
 test("届出が無い時は「不要」と書く", () => {
