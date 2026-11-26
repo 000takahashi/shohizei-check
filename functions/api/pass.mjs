@@ -200,15 +200,19 @@ export async function onCheck(context, deps = {}) {
   const read = await readJson(request, 2000);
   const dev = cleanDevice(read.body && read.body.device);
   const m = /(?:^|-)(pi_[A-Za-z0-9]{8,40})$/.exec(v.id || '');
+  let receipt = '';
   if (dev && m && env.STRIPE_SECRET_KEY) {
     try {
-      const res = await stripeGet(env, deps, `/payment_intents/${m[1]}`);
+      // 領収書のアドレスも一緒にもらう（控えから別の端末に戻した時も、その端末で領収書を開けるように）
+      const res = await stripeGet(env, deps, `/payment_intents/${m[1]}?expand[]=latest_charge`);
       if (res.ok) {
-        const b = await bindDevice(env, deps, await res.json(), dev);
+        const pi = await res.json();
+        const b = await bindDevice(env, deps, pi, dev);
         if (!b.ok) return json({ ok: false, reason: 'device_limit', message: LIMIT_MESSAGE }, 403);
+        receipt = receiptUrl(pi);
       }
       // Stripe に聞けない時は、払った方を止めない
     } catch (e) { /* 同上 */ }
   }
-  return json({ ok: true, expiresAt: v.expiresAt });
+  return json(receipt ? { ok: true, expiresAt: v.expiresAt, receiptUrl: receipt } : { ok: true, expiresAt: v.expiresAt });
 }

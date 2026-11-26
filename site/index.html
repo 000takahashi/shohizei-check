@@ -7,7 +7,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="description" content="令和9年4月からの食料品の消費税1%（案）で、飲食店・食品の卸・小売の税額が本則課税・簡易課税・免税でいくらになるかを比べ、出す届出と期限の目安をお示しする無料ツールです。">
 <meta property="og:title" content="消費税1%チェッカー｜食料品1%の申告方式と届出の期限">
-<meta property="og:description" content="食料品の消費税が1%になる2年間、本則・簡易・免税のどれが少ないか。届出の期限まで目安を示します。">
+<meta property="og:description" content="食料品の消費税を1%にする法案（参議院で審議中）が成立した場合の2年間、本則・簡易・免税のどれが少ないか。届出の期限まで目安を示します。">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://shohizei-check.com/">
 <meta property="og:image" content="https://shohizei-check.com/og.png">
@@ -1610,7 +1610,7 @@ p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
     <div class="top-actions">
       <button type="button" class="action-btn" id="btnResetExample" title="計算例（年商4,000万円の飲食店）に戻す"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg><span class="lbl">計算例</span></button>
       <button type="button" class="action-btn" id="btnClearForm" title="入力の数字をすべて消去し、空欄から入力し直します（この端末に保存された入力内容も消去されます）"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg><span class="lbl">すべてクリア</span></button>
-      <button type="button" class="action-btn" id="btnShareUrl" title="現在の条件のURLをコピーします"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg><span class="lbl">URL共有</span></button>
+      <button type="button" class="action-btn" id="btnShareUrl" title="売上・仕入れなど、今入れている数字が入ったURLをコピーします。サイトのご紹介には、下の「URLをコピー」をお使いください"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg><span class="lbl">数字ごとURLで渡す</span></button>
     </div>
   </div>
 
@@ -1620,7 +1620,17 @@ p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
       <span>年商4,000万円ほどの、店内飲食が中心の個人経営の飲食店を例として入力しています。</span>
     </div>
     <div class="example-actions">
+      <button type="button" class="mini-btn" id="btnBackMine" hidden>自分の入力に戻す</button>
       <button type="button" class="mini-btn" id="btnClearBanner">数値をクリアして入力</button>
+    </div>
+  </div>
+  <div class="example-banner" id="sharedNote" hidden>
+    <div class="example-banner-text">
+      <span class="example-pill">受け取ったリンクの数字を表示中</span>
+      <span>あなたが前に入れた数字は、そのまま残してあります。この数字を書き直すと、あなたの入力として保存します。</span>
+    </div>
+    <div class="example-actions">
+      <button type="button" class="mini-btn" id="btnBackMine2">自分の入力に戻す</button>
     </div>
   </div>
 
@@ -1973,7 +1983,7 @@ p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
       <div class="bk-sum" id="bkSum"></div>
       <div class="tablewrap">
         <table class="bk-table bk-small">
-          <thead><tr><th>試算の欄</th><th class="r">件数</th><th class="r">帳簿の分</th><th class="r">試算に入れる額</th></tr></thead>
+          <thead><tr><th>試算の欄</th><th class="r">件数</th><th class="r">帳簿の分</th><th class="r">試算に入れる額（税抜き）</th></tr></thead>
           <tbody id="bkBody"></tbody>
         </table>
       </div>
@@ -2073,7 +2083,7 @@ p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
       <div id="psBuy" hidden>
         <div class="ps-plans" id="psPlans" role="radiogroup" aria-label="ご購入になるパスを選ぶ"></div>
         <dl class="ps-terms" id="psTerms"></dl>
-        <p class="bk-hint">ほかの端末ですでに買った方は、もう一度買わずに、下の「控えが無い時に取り戻す」から、この端末でもお使いください（3台まで）。</p>
+        <p class="bk-hint">ほかの端末ですでに買った方は、もう一度買わずに、下の「控えが無い時に取り戻す」から、この端末でもお使いください（3台まで）。お支払いのあとに画面を閉じてしまった時も、もう一度買わずに、同じ方法で取り戻せます。もし2回請求されてしまった時は、お支払いの日時と金額を書いて、<a href="#legal" data-view="legal">特定商取引法に基づく表記</a>のメールアドレスまでお知らせください。</p>
         <div class="bk-actions"><button type="button" class="bk-btn primary" id="psGo">お支払いへ進む</button></div>
         <p class="bk-hint">お支払いは Stripe の画面で行っていただきます。カード番号が当サイトに届くことはありません。お支払いの画面のアドレスは https://checkout.stripe.com/ で始まります。<a href="#legal" data-view="legal">特定商取引法に基づく表記</a>・<a href="#terms" data-view="terms">利用規約</a></p>
       </div>
@@ -2346,7 +2356,7 @@ p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
       </details>
       <details>
         <summary>免税事業者ですが、還付を受けられますか？</summary>
-        <p>課税事業者を選択し、本則課税で申告すれば受けられます。特例により、令和9年4月1日を含む課税期間の中に課税事業者選択届出書を出せば、その期間から課税事業者になれます。原則2年間は課税事業者のままです。</p>
+        <p>還付になるのは、仕入れや経費にかかった消費税が、売上にかかった消費税より多い場合だけです。食料品の売上が1%になっても、10%の店内飲食の売上が多いお店では、ふつうは還付になりません。還付を受けるには、課税事業者を選び、本則課税で申告します。課税事業者選択届出書は、ふだんは課税事業者になりたい課税期間が始まる前日までに出します。飲食料品を販売している事業者（持ち帰り・出前を含みます）は特例により、令和9年4月1日を含む課税期間の中に出せば、その期間から課税事業者になれます。店内飲食だけで飲食料品の販売がないお店は、この特例を使えません。どちらの場合も、原則として2年間は課税事業者のままです。還付になるかは「申告方式の試算」でお確かめください。</p>
       </details>
       <details>
         <summary>2割特例や3割特例は入っていますか？</summary>
@@ -2370,7 +2380,7 @@ p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
       </details>
       <details>
         <summary>入れた数字は、どこかに送られますか？</summary>
-        <p>送られません。計算はお使いのブラウザの中で行い、入れた数字はその端末にだけ保存します。「すべてクリア」で消せます。</p>
+        <p>無料の試算（申告方式の比べ方・1%の前とあとの年）と帳簿のCSVの読み込みは、お使いのブラウザの中で計算し、どこにも送りません。入れた数字はその端末にだけ保存し、「すべてクリア」で消せます。有料の機能（2年間の通しの見通し・持ち帰りの値付け）だけは、計算に必要な数字を当サイトのサーバーへ送ります。送るのは計算のボタンを押した時だけで、数字と結果は保存しません。</p>
       </details>
 </section>
   </section>
@@ -2500,6 +2510,7 @@ p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
   $('dlMonth').value = '3';
 
   var state = { who: 'individual', per: 'year', tax: 'excl' };
+  var holdSave = false; // true の間は入力を保存しない（計算例・受け取ったリンクの表示中）
   // 入れた金額を、計算に使う「1年分・税抜」にする
   function flowVal(id, x) {
     if (FLOWS.indexOf(id) < 0) return x;
@@ -2626,7 +2637,8 @@ p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
     setPlaceholders();
     var v = readForm();
     // 入力は計算より先に残す（空にした時・入力の誤りの時も、次に開いた時に古い数字が戻らないように）
-    try { localStorage.setItem(STORE_KEY, JSON.stringify(v)); } catch (e) {}
+    // 計算例や受け取ったリンクを見ている間は、自分の入力を上書きしない
+    if (!holdSave) { try { localStorage.setItem(STORE_KEY, JSON.stringify(v)); } catch (e) {} }
     var errs = [];
     var vals = {};
     MONEY.forEach(function (id) {
@@ -2674,7 +2686,13 @@ p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
     // 判定
     var change = c.changeIfStay;
     var changeText = '今の1年分より' + man(Math.abs(change)) + (change >= 0 ? '増えます' : '減ります');
-    if (!c.currentAllowed) {
+    var baseBlank = vals.baseSales === '' || vals.baseSales === undefined;
+    if (!c.currentAllowed && c.currentInput === 'exempt' && baseBlank) {
+      // 2年前の売上が空欄の時は、免税かどうかを判定できないだけ。「選べない」と言い切らない
+      setVerdict('warn', '免税事業者かどうかは、2年前の売上を入れると判定できます',
+        '「2年前の課税売上高（税抜）」の欄に入れてください（「かんたん」の時は「くわしく」に切り替えると出ます）。1,000万円以下で、インボイスの登録が無ければ、免税事業者として比べます。それまでは本則課税を今の方式とみなして比べています。',
+        '2年前の売上を入れてください');
+    } else if (!c.currentAllowed) {
       setVerdict('bad', LABEL[c.currentInput] + 'は、現在の条件では選択できません',
         (c.bestKey === 'general' ? '本則課税で申告していただくことになります。' : LABEL[c.bestKey] + 'が最も少なくなります。')
         + (st.need && st.deadline ? '届出の期限は' + wa(st.deadline) + 'です。' : ''),
@@ -2794,7 +2812,24 @@ p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
   var EMPTY = Object.assign({}, EXAMPLE, { tax: 'incl', baseSales: '', eatIn: '', foodSales: '', otherSales: '', foodBuy: '', otherBuy: '' });
   writeForm(fromUrl || saved || EMPTY);
   $('exampleNote').hidden = true;
+  if (fromUrl) { holdSave = true; $('sharedNote').hidden = false; $('btnBackMine2').hidden = !saved; }
   render();
+  function ownSaved() {
+    var o = null;
+    try { o = JSON.parse(localStorage.getItem(STORE_KEY) || 'null'); } catch (e) {}
+    if (o && MONEY.every(function (k) { return String(o[k]) === String(EXAMPLE[k]); })) o = null;
+    return o;
+  }
+  function backToMine() {
+    holdSave = false;
+    $('exampleNote').hidden = true; $('sharedNote').hidden = true;
+    writeForm(ownSaved() || EMPTY);
+    // アドレス欄に残った共有の数字も消す（再読み込みで戻らないように）
+    if (location.search) { try { history.replaceState(null, '', location.pathname + location.hash); } catch (e) {} }
+    render(); syncKindButtons();
+  }
+  $('btnBackMine').addEventListener('click', backToMine);
+  $('btnBackMine2').addEventListener('click', backToMine);
 
   // 操作
   $('kind').addEventListener('change', function () { applyPreset(); render(); });
@@ -2842,7 +2877,7 @@ p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
   $('modeSimpleBtn').addEventListener('click', function () { setInputMode(false, true); });
   $('modeFullBtn').addEventListener('click', function () { setInputMode(true, true); });
   $('assumeEdit').addEventListener('click', function () { setInputMode(true, true); $('form').scrollIntoView({ block: 'start' }); });
-  $('form').addEventListener('input', function () { $('exampleNote').hidden = true; render(); syncKindButtons(); });
+  $('form').addEventListener('input', function () { $('exampleNote').hidden = true; $('sharedNote').hidden = true; holdSave = false; render(); syncKindButtons(); });
   $('form').addEventListener('change', function () { render(); syncKindButtons(); });
   $('form').addEventListener('submit', function (e) { e.preventDefault(); });
   syncKindButtons();
@@ -2850,10 +2885,15 @@ p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
   // 上の「例」の行のボタン：計算例を入れて、結果の欄まで送る
   $('peekBtn').addEventListener('click', function () { $('btnResetExample').click(); var sh = $('sheet'); if (sh && sh.getBoundingClientRect().top > window.innerHeight * 0.6) sh.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
   exampleLine();
-  $('btnResetExample').addEventListener('click', function () { writeForm(EXAMPLE); $('exampleNote').hidden = false; render(); syncKindButtons(); });
+  $('btnResetExample').addEventListener('click', function () {
+    holdSave = true; $('sharedNote').hidden = true;
+    $('btnBackMine').hidden = !ownSaved() || !MONEY.some(function (k) { var o = ownSaved(); return o && o[k] !== '' && o[k] !== undefined; });
+    writeForm(EXAMPLE); $('exampleNote').hidden = false; render(); syncKindButtons();
+  });
   function clearForm() {
+    holdSave = false;
     writeForm(EMPTY);
-    $('exampleNote').hidden = true;
+    $('exampleNote').hidden = true; $('sharedNote').hidden = true;
     render(); syncKindButtons();
     $('eatIn').focus();
   }
@@ -2869,7 +2909,7 @@ p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
     var lbl = $('btnShareUrl').querySelector('.lbl'), orig = lbl.textContent;
     function flash(msg) { lbl.textContent = msg; setTimeout(function () { lbl.textContent = orig; }, 2200); }
     function fallback() { try { history.replaceState(null, '', u.toString()); } catch (e) {} flash('アドレス欄のURLを共有してください'); }
-    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(u.toString()).then(function () { flash('コピーしました'); }, fallback);
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(u.toString()).then(function () { flash('数字入りのURLをコピーしました'); }, fallback);
     else fallback();
   });
 
@@ -2930,9 +2970,11 @@ p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
   window.ShohizeiApply = function (vals) {
     var v = readForm();
     Object.keys(vals).forEach(function (k) { v[k] = vals[k]; });
-    v.per = 'year';
+    // 帳簿から集めた額は税抜き・1年分。画面の「税込」のまま入れると、もう一度割り戻してしまう
+    v.per = 'year'; v.tax = 'excl';
+    holdSave = false;
     writeForm(v);
-    $('exampleNote').hidden = true;
+    $('exampleNote').hidden = true; $('sharedNote').hidden = true;
     render(); syncKindButtons();
     showView('calc', true);
   };
@@ -3079,7 +3121,7 @@ p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
       "name": "免税事業者ですが、還付を受けられますか？",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "課税事業者を選択し、本則課税で申告すれば受けられます。特例により、令和9年4月1日を含む課税期間の中に課税事業者選択届出書を出せば、その期間から課税事業者になれます。原則2年間は課税事業者のままです。"
+        "text": "還付になるのは、仕入れや経費にかかった消費税が、売上にかかった消費税より多い場合だけです。食料品の売上が1%になっても、10%の店内飲食の売上が多いお店では、ふつうは還付になりません。還付を受けるには、課税事業者を選び、本則課税で申告します。課税事業者選択届出書は、ふだんは課税事業者になりたい課税期間が始まる前日までに出します。飲食料品を販売している事業者（持ち帰り・出前を含みます）は特例により、令和9年4月1日を含む課税期間の中に出せば、その期間から課税事業者になれます。店内飲食だけで飲食料品の販売がないお店は、この特例を使えません。どちらの場合も、原則として2年間は課税事業者のままです。還付になるかは「申告方式の試算」でお確かめください。"
       }
     },
     {
@@ -3127,7 +3169,7 @@ p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
       "name": "入れた数字は、どこかに送られますか？",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "送られません。計算はお使いのブラウザの中で行い、入れた数字はその端末にだけ保存します。「すべてクリア」で消せます。"
+        "text": "無料の試算（申告方式の比べ方・1%の前とあとの年）と帳簿のCSVの読み込みは、お使いのブラウザの中で計算し、どこにも送りません。入れた数字はその端末にだけ保存し、「すべてクリア」で消せます。有料の機能（2年間の通しの見通し・持ち帰りの値付け）だけは、計算に必要な数字を当サイトのサーバーへ送ります。送るのは計算のボタンを押した時だけで、数字と結果は保存しません。"
       }
     }
   ]
