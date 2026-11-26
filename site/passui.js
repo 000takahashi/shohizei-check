@@ -86,7 +86,7 @@
   [
     ['内容', '上記の内容でご利用いただけます。計算の結果は目安です。法案の成立を前提としています。'],
     ['価格', P.yen.toLocaleString('ja-JP') + '円（税込）。ほかにかかる費用は、通信料のみです。'],
-    ['期間', 'お支払いの時点から' + P.days + '日間。自動で更新されません。' + (S.upgradeFrom(P.id) ? 'パスの有効期間中は、差額の' + S.upgradeFrom(P.id).yen.toLocaleString('ja-JP') + '円で' + S.upgradeFrom(P.id).to.days + '日間に切り替えられます。' : '')],
+    ['期間', 'お支払いの時点から' + P.days + '日間。自動で更新されません。期限の3日前から、このサイトを開いた時に画面の上でお知らせします（メールではお知らせしません）。' + (S.upgradeFrom(P.id) ? 'パスの有効期間中は、差額の' + S.upgradeFrom(P.id).yen.toLocaleString('ja-JP') + '円で' + S.upgradeFrom(P.id).to.days + '日間に切り替えられます。' : '')],
     ['支払い', 'クレジットカード・デビットカード。ご購入時に確定します。'],
     ['ご利用開始', 'お支払いが完了次第、すぐにご利用いただけます。'],
     ['キャンセル・返金', 'お支払い後のキャンセル・返金はお受けいたしかねます。当方の不具合によりご利用いただけなかった場合は、全額を返金します。'],
@@ -130,6 +130,9 @@
     $('psKeep').hidden = !active;
     if (active) $('psKeepCode').value = getPass();
     if (!active && exp > 0) msg('以前のパスは有効期限が切れています。');
+    var oldR = $('psOldReceipt'), oru = getReceipt();
+    if (!active && exp > 0 && oru && !oldR) { oldR = el('a', '前のパスの領収書を開く（Stripe）', 'bk-btn'); oldR.id = 'psOldReceipt'; oldR.href = oru; oldR.target = '_blank'; oldR.rel = 'noopener'; var ob = el('div', '', 'bk-actions'); ob.appendChild(oldR); $('psMsg').parentNode.insertBefore(ob, $('psMsg').nextSibling); }
+    if (oldR) oldR.parentNode.hidden = active;
     $('psBuy').hidden = !(sale && sale.onSale) || active;
     $('psSoon').hidden = !!(sale && sale.onSale) || active;
     if (S.freeOpen()) $('psSoon').textContent = S.freeText() + 'までは、パスなしですべての機能をご利用いただけます。パスは、' + S.paidStartText() + 'からご購入いただけます。';
@@ -243,6 +246,7 @@
       $('psRestoreGo').disabled = false;
       if (r.status === 200 && r.data.ok) {
         try { localStorage.setItem(PASS_KEY, code); } catch (e) { rmsg('この端末にパスを保存できませんでした。ブラウザの設定（プライベートモードなど）をご確認ください。', true); return; }
+        setReceipt(r.data.receiptUrl);
         $('psRestoreCode').value = '';
         rmsg('パスを戻しました。' + dateText(r.data.expiresAt) + ' まで有効です。');
         if (window.AdsUI) window.AdsUI.hideAll();

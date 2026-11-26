@@ -15,10 +15,10 @@ test('更新中の時、トップと下のページは 503 と Retry-After で�
     assert.ok(Number(res.headers.get('Retry-After')) > 0, p);
     assert.equal(res.headers.get('X-Robots-Tag'), null, p);
     const html = await res.text();
-    assert.match(html, /公開を休止しております/);
-    assert.match(html, /消費税1%チェッカー/);
+    assert.match(html, p.startsWith('/en') ? /temporarily closed/ : /公開を休止しております/);
+    if (!p.startsWith('/en')) assert.match(html, /消費税1%チェッカー/);
     assert.match(html, /contact@shohizei-check.com/);
-    assert.match(html, /チェッカー編集室/);
+    assert.match(html, p.startsWith('/en') ? /Checker Henshushitsu/ : /チェッカー編集室/);
     assert.doesNotMatch(html, /noindex/);
   }
 });
@@ -46,4 +46,14 @@ test('止めた時（MAINTENANCE を false にした時と同じ）は、元の�
   const res = await get('/', { ...env, MAINTENANCE: 'off' });
   assert.equal(res.status, 200);
   assert.equal(await res.text(), 'asset');
+});
+
+test('休止中の画面に、何のサイトかの一文・案内の更新日・押せる問い合わせ先がある', { skip: !MAINTENANCE }, async () => {
+  const html = await (await get('/')).text();
+  assert.match(html, /class="what"/);
+  assert.match(html, /この案内の更新日/);
+  assert.match(html, /<a class="contact" href="mailto:/);
+  const en = await (await get('/en/')).text();
+  assert.match(en, /lang="en"/);
+  assert.match(en, /Notice updated/);
 });
