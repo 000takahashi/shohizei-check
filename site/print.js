@@ -2,6 +2,8 @@
  * 印刷の部品（3サイト共通・直す時は3つそろえる）
  * data-print の付いたボタンで印刷する。印刷の直前に、紙の上に
  * 「どのサイトで・いつ作ったか」の1行を入れる（何も送らない・何も保存しない）。
+ * data-print="brief" は簡易版（結果だけ）、それ以外は詳細版（入力と内訳まで）。
+ * ブラウザのメニューから印刷した時は、詳細版になる。
  */
 (function (root) {
   'use strict';
@@ -29,10 +31,12 @@
     h.appendChild(a); h.appendChild(b);
     view.insertBefore(h, view.firstChild);
     // くわしい内訳（data-print-open）は、紙では開いた形で出す。印刷のあとで元に戻す
+    if (doc.documentElement.classList.contains('print-brief')) return;
     var ds = view.querySelectorAll('details[data-print-open]:not([open])');
     for (var k = 0; k < ds.length; k++) { ds[k].open = true; ds[k].setAttribute('data-print-opened', ''); }
   }
   function restore() {
+    doc.documentElement.classList.remove('print-brief');
     var ds = doc.querySelectorAll('details[data-print-opened]');
     for (var i = 0; i < ds.length; i++) { ds[i].open = false; ds[i].removeAttribute('data-print-opened'); }
   }
@@ -42,6 +46,7 @@
     var t = e.target && e.target.closest ? e.target.closest('[data-print]') : null;
     if (!t) return;
     e.preventDefault();
+    doc.documentElement.classList.toggle('print-brief', t.getAttribute('data-print') === 'brief');
     addHead();
     root.print();
   });

@@ -2,6 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
+<script>/* 計算の画面で選んだ「表示（ライト／ダーク）」を、ほかのページでも同じにする */try{var t=localStorage.getItem('ck-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>消費税1%チェッカー｜食料品1%の申告方式と届出の期限</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -1276,7 +1277,9 @@ footer { max-width: 1440px; margin: 40px auto 0; padding-left: max(20px, env(saf
   .page-head h1, .page-title { font-size: 1.4rem; }
   .page-head .lead { font-size: .88rem; }
   .trust { gap: 4px 12px; font-size: .76rem; margin-top: 10px; }
-  .page-head .top-actions { width: 100%; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .page-head .top-actions { width: 100%; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  /* 3つ並べると「数字ごとURLで渡す」がはみ出す。次の行に1つで置く（文言はそのまま） */
+  .page-head .top-actions #btnShareUrl { grid-column: 1 / -1; }
   .doc-card { padding: 16px; }
   .doc .tablewrap table { min-width: 0; }
   .doc .hide-sm { display: none; }
@@ -1852,7 +1855,8 @@ p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
       </details>
 
       <button type="button" class="jump" id="toInput">↑ 入力欄に戻る</button>
-      <div class="bk-actions sheet-print"><button type="button" class="bk-btn" data-print>印刷する（税理士の先生へのご相談用）</button></div>
+      <div class="bk-actions sheet-print"><button type="button" class="bk-btn" data-print="brief">結果だけ印刷する</button><button type="button" class="bk-btn" data-print="full">くわしく印刷する（入力と内訳まで）</button></div>
+      <p class="bk-hint sheet-print no-print">税理士の先生へのご相談には、くわしい方が便利です。</p>
       <p class="disclaimer">結果は目安です。国と地方を合わせた税率で計算しており、端数処理・75%ルール・インボイスの2割特例や3割特例・8%のまま残る取引は含めていません。届出と申告につきましては、税理士または<a href="https://www.nta.go.jp/" target="_blank" rel="noopener">税務署</a>に確認してください。</p>
     </aside>
   </div>
@@ -1954,6 +1958,7 @@ p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
         <button type="button" class="bk-btn" id="bkSample">見本で試す</button>
         <button type="button" class="bk-btn" id="bkSampleDl">見本のCSVをダウンロード</button>
       </div>
+      <p class="bk-hint">Excelで開いて1列にまとまってしまう場合は、取り込みの画面で区切り文字に「カンマ」を選んでください。</p>
       <details class="bk-paste">
         <summary>表を貼り付けて読み込む（AIが出したCSVなど）</summary>
         <textarea id="bkPaste" placeholder="日付,収支区分,勘定科目,税区分,金額&#10;2026/04/01,収入,売上高,課税売上8%（軽）,216000" aria-label="表を貼り付ける"></textarea>
@@ -2917,6 +2922,7 @@ p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
     var root = document.documentElement, cur = root.getAttribute('data-theme');
     var isDark = cur === 'dark' || (!cur && matchMedia('(prefers-color-scheme: dark)').matches);
     root.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    try { localStorage.setItem('ck-theme', isDark ? 'light' : 'dark'); } catch (e) {}
   });
 
   // 左のタブ（スマホはメニュー）で画面を切り替える

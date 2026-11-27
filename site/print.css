@@ -13,7 +13,7 @@
   .wrap, .shell { display: block !important; max-width: none !important; margin: 0 !important; padding: 0 !important; }
   .view[hidden] { display: none !important; }
   .page-head { margin: 0 0 8px !important; padding: 0 !important; }
-  .page-head .lead { display: none !important; }
+  .page-head .lead, .page-head .peek { display: none !important; }
   .sheet { position: static !important; max-height: none !important; overflow: visible !important; box-shadow: none !important; }
   .doc-card, .sheet { border: 1px solid #ccc !important; box-shadow: none !important; break-inside: auto; }
   .doc-card { max-width: none !important; margin: 0 0 10px !important; }
@@ -26,5 +26,14 @@
   tr, li, .pl-verdict { break-inside: avoid; }
   h2, h3 { break-after: avoid; }
   a { color: inherit !important; text-decoration: none !important; }
+  /* 計算の画面は、結果を入力より先に置く（1枚目に利益や判定が来るように） */
+  #v-calc .grid { display: flex !important; flex-direction: column !important; }
+  #v-calc .grid > .sheet { order: -1; margin-bottom: 10px !important; width: auto !important; max-width: none !important; }
+  .page-head { display: block !important; }
+  /* 簡易版（結果だけ）：入力の欄・くわしい内訳・使い方を外す */
+  .print-brief #v-calc .grid > form, .print-brief #v-calc .breakdown, .print-brief #v-calc .guide-acc,
+  .print-brief #v-calc .example-banner,
+  .print-brief #v-calc .ch-lead, .print-brief #v-calc .ch-sub, .print-brief #v-calc .ch-tablewrap,
+  .print-brief #v-calc .ch-switch, .print-brief #v-calc .ch-note, .print-brief #v-calc .ch-lock { display: none !important; }
   .print-head { display: flex !important; justify-content: space-between; gap: 12px; font-size: 9pt; color: #444; border-bottom: 1px solid #999; margin: 0 0 10px; padding: 0 0 4px; }
 }
