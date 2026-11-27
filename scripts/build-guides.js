@@ -59,6 +59,7 @@ function shell(o) {
 <html lang="ja">
 <head>
 <meta charset="utf-8">
+<script>/* 計算の画面で選んだ「表示（ライト／ダーク）」を、ほかのページでも同じにする */try{var t=localStorage.getItem('ck-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>${esc(o.title)}｜${esc(CFG.name)}</title>
 <meta name="description" content="${esc(o.desc)}">

@@ -1250,7 +1250,9 @@ footer { max-width: 1440px; margin: 40px auto 0; padding-left: max(20px, env(saf
   .page-head h1, .page-title { font-size: 1.4rem; }
   .page-head .lead { font-size: .88rem; }
   .trust { gap: 4px 12px; font-size: .76rem; margin-top: 10px; }
-  .page-head .top-actions { width: 100%; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .page-head .top-actions { width: 100%; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  /* 3つ並べると「数字ごとURLで渡す」がはみ出す。次の行に1つで置く（文言はそのまま） */
+  .page-head .top-actions #btnShareUrl { grid-column: 1 / -1; }
   .doc-card { padding: 16px; }
   .doc .tablewrap table { min-width: 0; }
   .doc .hide-sm { display: none; }
