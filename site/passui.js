@@ -117,6 +117,7 @@
   }
 
   function render(sale) {
+    if (sale) recMode(!!sale.mail);
     if (sale) lastSale = sale; else sale = lastSale;
     var exp = expiryOf(getPass()), active = exp > Date.now();
     upgradeBox(active, exp);
@@ -259,6 +260,7 @@
 
 
   // ---------- 控えが無い時に取り戻す ----------
+  var recMode = function () {};
   (function () {
     var restore = $('psRestoreMsg') && $('psRestoreMsg').parentNode;
     if (!restore || !restore.parentNode) return;
@@ -278,6 +280,32 @@
     var w = el('div', null, 'bk-actions'); w.appendChild(go); c.appendChild(w);
     var m = el('p', null, 'bk-msg'); m.id = 'psRecMsg'; m.setAttribute('role', 'status'); c.appendChild(m);
     c.appendChild(el('p', '入れた内容は、お支払いを探すためだけに Stripe へ送ります。当サイトには保存しません。うまくいかない時は、運営者情報のメールアドレスへ、お支払いの日時と金額をお知らせください。', 'bk-hint'));
+    // メールでリンクを送る形（送る設定がある時だけ。上の欄の代わりに出す）
+    var lb = el('div', null, 'ps-rec-link'); lb.hidden = true;
+    lb.appendChild(el('p', 'お支払いの時に Stripe の画面で入れたメールアドレスを入れてください。そのアドレスに、パスを取り戻すリンクを送ります。リンクは30分だけ使えます。パスを使いたい端末で開いてください。'));
+    var lg = el('div', null, 'ps-rec-grid'), ll = el('label', 'メールアドレス'), le = document.createElement('input');
+    le.type = 'email'; le.id = 'psLinkEmail'; le.inputMode = 'email'; le.maxLength = 254; le.autocomplete = 'email'; ll.appendChild(le); lg.appendChild(ll); lb.appendChild(lg);
+    var lgo = el('button', 'リンクを送る', 'bk-btn'); lgo.type = 'button'; lgo.id = 'psLinkGo';
+    var lw = el('div', null, 'bk-actions'); lw.appendChild(lgo); lb.appendChild(lw);
+    var lm = el('p', null, 'bk-msg'); lm.setAttribute('role', 'status'); lb.appendChild(lm);
+    lb.appendChild(el('p', 'メールアドレスは、お支払いを探すためと、リンクを送るためだけに使います。当サイトには保存しません。メールが届かない時は、迷惑メールのフォルダもご確認ください。それでも届かない時は、運営者情報のメールアドレスへ、お支払いの日時と金額をお知らせください。', 'bk-hint'));
+    c.appendChild(lb);
+    var oldParts = [c.children[1], grid, w, m, c.children[c.children.length - 2]];
+    recMode = function (mail) {
+      lb.hidden = !mail;
+      for (var i = 0; i < oldParts.length; i++) if (oldParts[i] && oldParts[i] !== lb) oldParts[i].hidden = !!mail;
+    };
+    function lmsg(text, isErr) { lm.textContent = text || ''; lm.className = 'bk-msg' + (isErr ? ' err' : ''); }
+    lgo.addEventListener('click', function () {
+      var email = le.value.trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { lmsg('メールアドレスの形が正しくありません。', true); return; }
+      lgo.disabled = true; lmsg('送っています…');
+      post('/api/v1/pass/send-link', { email: email }).then(function (r) {
+        lgo.disabled = false;
+        if (r.status === 200) { lmsg('このアドレスでのお支払いが見つかれば、リンクを送りました。数分たっても届かない時は、迷惑メールのフォルダをご確認ください。続けて送れるのは10分おきです。'); return; }
+        lmsg(r.status === 400 ? 'メールアドレスの形が正しくありません。' : '現在、リンクを送れません。恐れ入りますが、しばらくしてからもう一度お試しください。', true);
+      }).catch(function () { lgo.disabled = false; lmsg('通信できませんでした。電波の良い場所でもう一度お試しください。', true); });
+    });
     restore.parentNode.insertBefore(c, restore.nextSibling);
     function cmsg(text, isErr) { m.textContent = text || ''; m.className = 'bk-msg' + (isErr ? ' err' : ''); }
     go.addEventListener('click', function () {
@@ -313,6 +341,30 @@
     var p = el('p', '有料パスの期限まで、あと' + leftText(left) + 'です（' + dateText(exp) + ' まで）。', 'ps-soon'); p.setAttribute('role', 'status');
     var a = el('a', 'パスのページへ'); a.href = '#pass'; a.setAttribute('data-view', 'pass'); p.appendChild(a);
     main.insertBefore(p, main.firstChild);
+  })();
+
+  // メールのリンクで開いた時: そのリンクでパスを受け取る（リンクはアドレス欄から消す）
+  (function () {
+    var link = '';
+    try { link = new URLSearchParams(location.search).get('link') || ''; } catch (e) {}
+    if (!/^r1\.\d{1,12}\.cs_(test|live)_[A-Za-z0-9]{10,200}\.[A-Za-z0-9_-]{20,80}$/.test(link)) return;
+    try { history.replaceState(null, '', location.pathname + '#pass'); } catch (e) {}
+    msg('リンクを確かめています…');
+    post('/api/v1/pass/claim-link', { link: link, device: deviceId() }).then(function (r) {
+      if (r.status === 200 && r.data.token) {
+        try { localStorage.setItem(PASS_KEY, r.data.token); } catch (e) { msg('この端末にパスを保存できませんでした。ブラウザの設定（プライベートモードなど）をご確認ください。', true); return; }
+        setReceipt(r.data.receiptUrl);
+        msg('パスを取り戻しました。' + dateText(Number(r.data.expiresAt) || expiryOf(r.data.token)) + ' まで有効です。下の「パスの控え」を保存しておいてください。');
+        if (window.AdsUI) window.AdsUI.hideAll();
+        render(null);
+        return;
+      }
+      msg(r.status === 403 ? ((r.data && r.data.message) || LIMIT_TEXT)
+        : r.status === 410 && r.data && r.data.error === 'link_expired' ? 'このリンクは期限（30分）が切れています。お手数ですが、下の「控えが無い時に取り戻す」から、もう一度リンクを送ってください。'
+        : r.status === 410 ? 'このお支払いのパスは、有効期限が切れています。'
+        : r.status === 400 ? 'このリンクは使えません。メールのリンクを、途中で切れないように開いてください。'
+        : 'パスを受け取れませんでした。恐れ入りますが、しばらくしてからもう一度リンクを開いてください。', true);
+    }).catch(function () { msg('通信できませんでした。電波の良い場所で、もう一度リンクを開いてください。', true); });
   })();
 
   render(null);
