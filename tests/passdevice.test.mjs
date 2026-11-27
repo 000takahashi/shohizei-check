@@ -106,3 +106,52 @@ test('取り戻す: 下4桁を外し続けると止まる。取り戻しても�
   for (let i = 0; i < MAX_RECOVER_FAILS; i++) assert.equal((await rec('1111', DEV(2))).status, 404);
   assert.equal((await rec('4242', DEV(2))).status, 429);
 });
+
+import * as MOD from '../functions/api/pass.mjs';
+const LINKLIB = '../functions/_lib/passmail.mjs';
+
+// ---------- メールで送るリンク（控えが無い時の取り戻し） ----------
+test('★リンクを送る: 支払いのメールにだけ送る。見つからなくても答えは同じ。続けて押しても1通', async () => {
+  const st = fakeStripe();
+  const mails = [];
+  const fetchAll = async (url, opt = {}) => {
+    if (String(url) === 'https://api.resend.com/emails') { mails.push(JSON.parse(opt.body)); return new Response('{"id":"x"}', { status: 200 }); }
+    return st.fetch(url, opt);
+  };
+  const menv = { ...env, RESEND_API_KEY: 're_test_x' };
+  const send = (email, t = now) => MOD.onSendLink({ request: post('/api/v1/pass/send-link', { email }), env: menv }, { fetch: fetchAll, now: t });
+  const a = await send(' Buyer@Example.com ');
+  assert.equal(a.status, 200);
+  assert.equal(mails.length, 1);
+  assert.deepEqual(mails[0].to, ['buyer@example.com']);
+  assert.match(mails[0].from, /^チェッカー編集室 <pass@[a-z.-]+\.com>$/);
+  const link = decodeURIComponent(/[?&]link=([^#\s]+)/.exec(mails[0].text)[1]);
+  const b = await send('other@example.com');
+  assert.equal(b.status, 200);
+  assert.deepEqual(await a.clone().json(), await b.json());
+  assert.equal(mails.length, 1);
+  await send('buyer@example.com', now + 60000);
+  assert.equal(mails.length, 1);
+  await send('buyer@example.com', now + 11 * 60000);
+  assert.equal(mails.length, 2);
+  // リンクで受け取る
+  const take = (l, device, t = now) => MOD.onClaimLink({ request: post('/api/v1/pass/claim-link', { link: l, device }), env }, { fetch: st.fetch, now: t });
+  const ok = await take(link, DEV(1));
+  assert.equal(ok.status, 200);
+  assert.equal((await verifyPass(env.PASS_SIGNING_SECRET, (await ok.json()).token, now)).ok, true);
+  assert.equal((await take(link, DEV(1), now + 31 * 60000)).status, 410);
+  assert.equal((await take(link.slice(0, -2) + 'xx', DEV(1))).status, 400);
+  assert.equal((await take(link, '')).status, 400);
+  // メールを送れる時は、メールと下4桁だけの取り戻しは使わない
+  assert.equal((await onRecover({ request: post('/api/v1/pass/recover', { email: 'buyer@example.com', last4: '4242', device: DEV(1) }), env: menv }, { fetch: st.fetch, now })).status, 410);
+  // 送る設定が無い間は 503
+  assert.equal((await MOD.onSendLink({ request: post('/api/v1/pass/send-link', { email: 'buyer@example.com' }), env }, { fetch: fetchAll, now })).status, 503);
+});
+
+test('リンクを送る: 4台目の端末はリンクでも断る', async () => {
+  const st = fakeStripe({ meta: { devices: [DEV(1), DEV(2), DEV(3)].join(',') } });
+  const { signLink } = await import(LINKLIB);
+  const l = await signLink(env.PASS_SIGNING_SECRET, SID, now / 1000 + 600);
+  const r = await MOD.onClaimLink({ request: post('/api/v1/pass/claim-link', { link: l, device: DEV(4) }), env }, { fetch: st.fetch, now });
+  assert.equal(r.status, 403);
+});

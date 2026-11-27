@@ -28,7 +28,7 @@ export async function stripeGet(env, deps, path) {
   return res;
 }
 
-async function setMeta(env, deps, piId, fields) {
+export async function setMeta(env, deps, piId, fields) {
   const f = new URLSearchParams();
   for (const [k, v] of Object.entries(fields)) f.set(`metadata[${k}]`, String(v));
   try {
@@ -66,6 +66,19 @@ export function cardLast4(pi) {
 }
 
 export function piIdOk(v) { return /^pi_[A-Za-z0-9]{8,40}$/.test(String(v || '')); }
+
+// メールあての、その商品の支払い済みの支払い画面（新しい順・20件まで）。見つからない時は []、聞けない時は null
+export async function findPaidByEmail(env, deps, product, email) {
+  const q = new URLSearchParams();
+  q.set('customer_details[email]', email);
+  q.set('status', 'complete');
+  q.set('limit', '20');
+  q.append('expand[]', 'data.payment_intent');
+  const res = await stripeGet(env, deps, `/checkout/sessions?${q}`);
+  if (!res.ok) return null;
+  const body = await res.json();
+  return (Array.isArray(body.data) ? body.data : []).filter((s) => s && s.metadata && s.metadata.product === product && s.payment_status === 'paid' && s.payment_intent && typeof s.payment_intent === 'object' && piIdOk(s.payment_intent.id));
+}
 
 // 取り戻し: メールでその商品の支払いを探す。下4桁が合う支払いを返す。
 // 外れた時は、そのメールの支払いそれぞれに外した回数を足す。回数を超えた支払いは、合っていても返さない

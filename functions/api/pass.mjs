@@ -5,13 +5,16 @@
 //   POST /api/v1/pass/claim     { session_id } → 支払い済みなら、署名つきのパスを返す（何度でも同じ期限で受け取り直せる）
 //   POST /api/v1/pass/check     Authorization: Bearer <パス> → 本物で期限の内か（控えからパスを戻す時に使う）
 //        { device } を付けると、その端末を数える（1つの支払いで3台まで）
-//   POST /api/v1/pass/recover   { email, last4, device } → 控えが無い時に、支払いのメールとカードの下4桁でパスを渡す
+//   POST /api/v1/pass/send-link { email } → 控えが無い時に、支払いのメールあてに30分だけ使えるリンクを送る（答えはいつも同じ）
+//   POST /api/v1/pass/claim-link { link, device } → そのリンクでパスを渡す
+//   POST /api/v1/pass/recover   { email, last4, device }（メールを送れない間だけ使う。送れる時は 410） → 控えが無い時に、支払いのメールとカードの下4桁でパスを渡す
 // 登録もデータベースも無い。支払い済みかは Stripe に聞く。パスは期限入りの印で、名前・メール・カードは入れない。
 // 鍵は Worker の秘密の値: STRIPE_SECRET_KEY・PASS_SIGNING_SECRET。どちらかが無い間と、販売者の表示が無い間は売らない（503）。
 import Shop from '../../site/shopinfo.js';
 import { json, readJson, SITE } from '../_lib/http.mjs';
 import { signPass, verifyPass, bearer } from '../_lib/pass.mjs';
-import { cleanDevice, bindDevice, receiptUrl, stripeGet, piIdOk, findForRecovery, MAX_DEVICES } from '../_lib/passdevice.mjs';
+import { cleanDevice, bindDevice, receiptUrl, stripeGet, piIdOk, findForRecovery, findPaidByEmail, setMeta, MAX_DEVICES } from '../_lib/passdevice.mjs';
+import { mailOn, mailFrom, signLink, verifyLink, sendMail, linkMail, LINK_TTL_MIN, RESEND_GAP_MIN, MAX_LINKS } from '../_lib/passmail.mjs';
 
 const STRIPE = 'https://api.stripe.com/v1';
 export const CHECKOUT_TTL_MIN = 35; // 支払い画面が開いている時間。パスはこの分を足して「お支払いから30日」を守る
@@ -66,7 +69,7 @@ export async function onStatus(context, deps = {}) {
   const { request, env } = context;
   if (request.method !== 'GET') return json({ error: 'Use GET.' }, 405, { Allow: 'GET' });
   const free = Shop.freeOpen(deps.now);
-  return json({ onSale: !free && onSale(env, deps.operator), freeUntil: free ? Shop.FREE_UNTIL : '', plans: Shop.PLANS.map((p) => ({ id: p.id, days: p.days, priceYen: p.yen })) });
+  return json({ onSale: !free && onSale(env, deps.operator), mail: mailOn(env), freeUntil: free ? Shop.FREE_UNTIL : '', plans: Shop.PLANS.map((p) => ({ id: p.id, days: p.days, priceYen: p.yen })) });
 }
 
 export async function onCheckout(context, deps = {}) {
@@ -162,6 +165,8 @@ export async function onRecover(context, deps = {}) {
   const { request, env } = context;
   if (request.method !== 'POST') return json({ error: 'Use POST.' }, 405, { Allow: 'POST' });
   if (!(env.STRIPE_SECRET_KEY && env.PASS_SIGNING_SECRET)) return json({ error: 'pass_not_configured' }, 503);
+  // メールでリンクを送れる時は、メールと下4桁だけでは渡さない（両方を知る他人に使われないように）
+  if (mailOn(env)) return json({ error: 'use_link' }, 410);
   const read = await readJson(request, 2000);
   if (read.error) return json({ error: read.error }, read.status);
   const b = read.body || {};
@@ -187,6 +192,73 @@ export async function onRecover(context, deps = {}) {
   if (best) return json(best, 200);
   if (r.found.length) return json({ error: 'pass_expired' }, 410);
   return json({ error: 'not_found' }, 404);
+}
+
+// 控えが無い時: 支払いのメールアドレスあてに、30分だけ使えるリンクを送る。
+// 見つかっても見つからなくても同じ答えを返す（メールアドレスが使われたかを探られないように）
+export async function onSendLink(context, deps = {}) {
+  const { request, env } = context;
+  if (request.method !== 'POST') return json({ error: 'Use POST.' }, 405, { Allow: 'POST' });
+  if (!(env.STRIPE_SECRET_KEY && env.PASS_SIGNING_SECRET && mailOn(env))) return json({ error: 'mail_not_configured' }, 503);
+  const read = await readJson(request, 2000);
+  if (read.error) return json({ error: read.error }, read.status);
+  const email = read.body && typeof read.body.email === 'string' ? read.body.email.trim().toLowerCase() : '';
+  if (!/^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,}$/.test(email)) return json({ error: 'bad_input' }, 400);
+  const en = false;
+  const now = deps.now || Date.now();
+  let list;
+  try {
+    list = await findPaidByEmail(env, deps, Shop.PRODUCT, email);
+  } catch (e) {
+    list = null;
+  }
+  if (!list) return json({ error: 'send_failed' }, 502);
+  // まだ期限の内の支払いのうち、いちばん新しいもの（切り替えた時は、切り替えた後の支払い）
+  const live = list.filter((s) => {
+    const m = s.metadata || {};
+    const days = Number(m.days) || (Shop.planById(m.plan) || {}).days || 0;
+    const exp = m.upgrade_exp ? Number(m.upgrade_exp) * 1000 : (Number(s.created) || 0) * 1000 + days * 86400000 + CHECKOUT_TTL_MIN * 60000;
+    return exp > now;
+  }).sort((a, b) => (Number(b.created) || 0) - (Number(a.created) || 0));
+  const s = live[0];
+  if (s) {
+    const meta = s.payment_intent.metadata || {};
+    const last = Number(meta.link_at) || 0, count = Number(meta.links) || 0;
+    // 続けて押された時と、上限を超えた時は送らない（答えは同じ）
+    if (now / 1000 - last >= RESEND_GAP_MIN * 60 && count < MAX_LINKS) {
+      const token = await signLink(env.PASS_SIGNING_SECRET, s.id, now / 1000 + LINK_TTL_MIN * 60);
+      const url = `${SITE}${'/'}?link=${encodeURIComponent(token)}#pass`;
+      const mail = linkMail(en ? 'Food 1% Consumption Tax Checker' : '消費税1%チェッカー', url, en);
+      const sent = await sendMail(env, deps, { from: mailFrom(env, SITE), to: email, subject: mail.subject, text: mail.text });
+      if (!sent.ok) return json({ error: 'send_failed' }, 502);
+      await setMeta(env, deps, s.payment_intent.id, { link_at: Math.floor(now / 1000), links: count + 1 });
+    }
+  }
+  return json({ ok: true, minutes: LINK_TTL_MIN });
+}
+
+// メールのリンクでパスを渡す（その端末を数える。1つの支払いで3台まで）
+export async function onClaimLink(context, deps = {}) {
+  const { request, env } = context;
+  if (request.method !== 'POST') return json({ error: 'Use POST.' }, 405, { Allow: 'POST' });
+  if (!(env.STRIPE_SECRET_KEY && env.PASS_SIGNING_SECRET)) return json({ error: 'pass_not_configured' }, 503);
+  const read = await readJson(request, 2000);
+  if (read.error) return json({ error: read.error }, read.status);
+  const b = read.body || {};
+  const dev = cleanDevice(b.device);
+  if (!dev) return json({ error: 'bad_input' }, 400);
+  const v = await verifyLink(env.PASS_SIGNING_SECRET, b.link, deps.now || Date.now());
+  if (!v.ok) return json({ error: v.reason === 'expired' ? 'link_expired' : 'bad_link' }, v.reason === 'expired' ? 410 : 400);
+  let s;
+  try {
+    const res = await stripeGet(env, deps, `/checkout/sessions/${v.sid}?expand[]=payment_intent.latest_charge`);
+    if (!res.ok) return json({ error: 'claim_failed' }, 502);
+    s = await res.json();
+  } catch (e) {
+    return json({ error: 'claim_failed' }, 502);
+  }
+  const [status, body] = await passFromSession(s, v.sid, env, deps, dev);
+  return json(body, status);
 }
 
 // 控えから戻すパスが本物で、期限の内かを確かめる。中身（期限）だけ返す

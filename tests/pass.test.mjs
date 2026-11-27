@@ -111,7 +111,7 @@ test('受け取る: 値段を変えた後でも、支払い画面を作った時
 
 test('状態: 売り出し中かと値段を返す（鍵は返さない）', async () => {
   const out = await (await onStatus({ request: new Request('https://shohizei-check.com/api/v1/pass/status'), env }, { operator, now })).json();
-  assert.deepEqual(out, { onSale: true, freeUntil: '', plans: Shop.PLANS.map((p) => ({ id: p.id, days: p.days, priceYen: p.yen })) });
+  assert.deepEqual(out, { onSale: true, mail: false, freeUntil: '', plans: Shop.PLANS.map((p) => ({ id: p.id, days: p.days, priceYen: p.yen })) });
   assert.equal((await (await onStatus({ request: new Request('https://shohizei-check.com/api/v1/pass/status'), env: {} })).json()).onSale, false);
 });
 
