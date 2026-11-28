@@ -5,7 +5,9 @@
  * 大綱（令和8年9月15日閣議決定）にもとづく案で、法案は成立前。
  *
  * 金額はすべて「税抜き・1年分」。税は国と地方を合わせた率で計算する目安。
- * 端数処理、75%ルール、インボイスの2割・3割特例、経過措置の8%取引は扱わない。
+ * 端数処理、75%ルール、経過措置の8%取引は扱わない。
+ * インボイスの2割・3割特例は、個人で条件に当てはまると本人が確かめた時（p.tokurei）だけ比べる。
+ *   令和8年分＝2割特例、令和9年分・10年分＝3割特例（国税庁「令和8年度税制改正特集」）。
  */
 (function (root, factory) {
   const api = factory();
@@ -30,6 +32,10 @@
   };
 
   const LIMIT = { exempt: 10_000_000, simple: 50_000_000 };
+  // インボイスの登録で免税から課税になった個人の特例（売上の税のこの割合を納める）
+  const TOKUREI = { now: 0.2, cut: 0.3 }; // 令和8年分は2割、令和9年分・10年分は3割
+  // 2割・3割特例を受けた次の課税期間から簡易課税にする時の届出の期限（その期間の申告期限まで。個人は翌年3月31日）
+  const SIMPLE_AFTER_TOKUREI = { individual: "2028-03-31" }; // 令和9年分から簡易課税にする場合
 
   // 業種ごとの初期値（画面の「おすすめの区分」）
   const PRESETS = {
@@ -62,6 +68,8 @@
    *   invoice     インボイス発行事業者の登録をしている（true なら免税は選べない）
    *   specifiedOver 特定期間（前年の1〜6月など）の売上と給与がどちらも1,000万円を超えた
    *   foodRate    飲食料品の税率（省略時 1%）
+   *   tokurei     インボイスの登録で免税から課税になった個人で、2割・3割特例の条件に当てはまる（本人が確かめた）
+   *   tokureiRate 特例の割合（省略時 0.3）
    */
   function compute(p) {
     const s = {
@@ -102,8 +110,12 @@
     const options = [
       { key: "general", label: "本則課税（一般課税）", tax: general, allowed: true },
       { key: "simple", label: "簡易課税", tax: simple, allowed: canSimple },
-      { key: "exempt", label: "免税事業者", tax: 0, allowed: canExempt },
     ];
+    // 2割・3割特例: 登録を受けていて、2年前の売上が1,000万円以下の個人だけ（申告書に書くだけで、届出は要らない）
+    const tokureiOk = truthy(p.tokurei) && truthy(p.invoice) && p.baseSales !== undefined && p.baseSales !== "" && base <= LIMIT.exempt;
+    const tRate = p.tokureiRate === undefined ? TOKUREI.cut : Number(p.tokureiRate);
+    if (truthy(p.tokurei)) options.push({ key: "tokurei", label: tRate === TOKUREI.now ? "2割特例" : "3割特例", tax: salesTaxTotal * tRate, allowed: tokureiOk });
+    options.push({ key: "exempt", label: "免税事業者", tax: 0, allowed: canExempt });
     const allowed = options.filter((o) => o.allowed);
     const best = allowed.reduce((a, b) => (b.tax < a.tax ? b : a));
 
@@ -121,17 +133,20 @@
    * （売上と仕入れが1年を通して同じ割合で出ると仮定した目安）
    */
   function compare(p) {
-    const now = compute(Object.assign({}, p, { foodRate: RATE.foodNow }));
-    const cut = compute(Object.assign({}, p, { foodRate: RATE.foodCut }));
+    // 今（8%）の1年は2割特例、比べる課税期間（令和9年分）は8%の月も1%の月も3割特例
+    const now = compute(Object.assign({}, p, { foodRate: RATE.foodNow, tokureiRate: TOKUREI.now }));
+    const nowMix = compute(Object.assign({}, p, { foodRate: RATE.foodNow, tokureiRate: TOKUREI.cut }));
+    const cut = compute(Object.assign({}, p, { foodRate: RATE.foodCut, tokureiRate: TOKUREI.cut }));
     const share = p.share === undefined ? 1 : Math.min(1, Math.max(0, Number(p.share) || 0));
-    const input = p.current && ["general", "simple", "exempt"].includes(p.current) ? p.current : "general";
+    const keys = cut.options.map((o) => o.key);
+    const input = p.current && keys.includes(p.current) ? p.current : "general";
     const pick = (r, k) => r.options.find((o) => o.key === k);
     // 今の方式が条件に合わない（2年前が1,000万円超なのに免税、5,000万円超なのに簡易など）時は、
     // 法律上は本則課税になるので、本則課税を「今」として比べる。
     const currentAllowed = pick(cut, input).allowed;
     const current = currentAllowed ? input : "general";
     const options = cut.options.map((o) => Object.assign({}, o, {
-      tax: share * o.tax + (1 - share) * pick(now, o.key).tax,
+      tax: share * o.tax + (1 - share) * pick(nowMix, o.key).tax,
     }));
     const allowed = options.filter((o) => o.allowed);
     const best = allowed.reduce((a, b) => (b.tax < a.tax ? b : a));
@@ -148,7 +163,9 @@
       shouldSwitch: best.key !== current && stayTax - best.tax >= 1,
       notes: (currentAllowed ? [] : [input === "exempt"
         ? "現在の条件では免税事業者になれません（2年前や前年前半の売上、インボイスの登録によります）。課税事業者として、本則課税を現在の方式とみなして比較しています。"
-        : "2年前の課税売上高が5,000万円を超えているため、簡易課税はご利用になれません。本則課税を現在の方式とみなして比較しています。"]).concat(notesFor({ s: { food: num(p.foodSales), eatIn: num(p.eatIn) },
+        : input === "tokurei"
+          ? "2割・3割特例は、インボイスの登録をきっかけに免税事業者から課税事業者になった個人で、2年前の課税売上高が1,000万円以下の方だけが使えます。本則課税を現在の方式とみなして比較しています。"
+          : "2年前の課税売上高が5,000万円を超えているため、簡易課税はご利用になれません。本則課税を現在の方式とみなして比較しています。"]).concat(notesFor({ s: { food: num(p.foodSales), eatIn: num(p.eatIn) },
         general: options.find((o) => o.key === "general").tax, canExempt: cut.canExempt, best })),
       full: { bestKey: cut.best.key, bestTax: cut.best.tax, stayTax: pick(cut, current).tax }, // 丸1年が1%の時
     };
@@ -206,6 +223,16 @@
     const food = sellsFood === undefined ? true : !!sellsFood;
     const before = new Date(Date.parse(pr.start + "T00:00:00Z") - 86400000).toISOString().slice(0, 10);
     const noFood = "飲食料品の販売がないため、今回の特例はご利用になれません。変更したい課税期間が始まる前日までにご提出ください。";
+    if (best === "tokurei") {
+      return { need: false, period: pr, text: "3割特例は、届出は要りません。令和9年分の確定申告書に、3割特例を受ける旨を書くだけです。翌年以降に簡易課税へ移る場合は、3割特例を受けた次の年の申告期限まで届出を出せる特例があります。" };
+    }
+    if (current === "tokurei" && best === "general") {
+      return { need: false, period: pr, text: "本則課税で申告するのに、届出は要りません。2割特例は申告の時に選ぶものなので、令和9年分は本則課税で申告すれば足ります。" };
+    }
+    if (current === "tokurei" && best === "simple" && who !== "corporate") {
+      return { need: true, form: "簡易課税制度選択届出書", deadline: SIMPLE_AFTER_TOKUREI.individual, special: true, period: pr,
+        text: "令和8年分で2割特例を受けた方は、令和9年分の申告期限（令和10年3月31日）までに届出を出せば、令和9年分から簡易課税で申告できます（2割・3割特例からの移行の特例）。原則として2年間は継続していただく必要があります。" };
+    }
     if (current === best) {
       // 売上が1,000万円以下の人は、届出をしないと免税になる。課税事業者のままでいるには選択届が要る（国税庁 No.6501）
       if (canExempt && current !== "exempt") {
@@ -241,5 +268,5 @@
     return new Date(Date.UTC(y, m, 0)).toISOString().slice(0, 10);
   }
 
-  return { RATE, KUBUN, LIMIT, PRESETS, CUT_START, CUT_END, PRICE_DISPLAY, compute, compare, period, steps, cutMonths };
+  return { RATE, KUBUN, LIMIT, TOKUREI, SIMPLE_AFTER_TOKUREI, PRESETS, CUT_START, CUT_END, PRICE_DISPLAY, compute, compare, period, steps, cutMonths };
 });

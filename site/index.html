@@ -658,6 +658,7 @@ input:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible
   border: 1px solid var(--line);
   cursor: pointer;
 }
+.check[hidden] { display: none; }
 .check input { margin-top: 4px; accent-color: var(--accent); width: 16px; height: 16px; flex: none; }
 .radios { display: flex; gap: 12px; flex-wrap: wrap; font-size: .9rem; margin-top: 4px; }
 .radios label { display: flex; gap: 6px; align-items: center; cursor: pointer; }
@@ -1663,8 +1664,9 @@ p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
                 <option value="general">本則課税（一般課税）</option>
                 <option value="simple">簡易課税</option>
                 <option value="exempt">免税事業者</option>
+                <option value="tokurei">2割特例（インボイスの登録で課税になった個人）</option>
               </select>
-              <span class="hint">分からない時は、去年の確定申告書の控えか、税理士さんに確かめてください。</span>
+              <span class="hint">分からない時は、去年の確定申告書の控えか、税理士さんに確かめてください。インボイスの登録をきっかけに課税事業者になった個人の方で、2割特例で申告している方は「2割特例」をお選びください。</span>
             </div>
             <div class="field full-mobile adv">
               <div class="field-head">
@@ -1679,6 +1681,7 @@ p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
           </div>
           <div class="stack adv" id="exemptChecks">
             <label class="check"><input type="checkbox" id="invoice"><span><b>インボイス発行事業者の登録をしている</b><br><small class="muted">ご登録中は、免税事業者になることはできません。</small></span></label>
+            <label class="check" id="tokureiRow"><input type="checkbox" id="tokurei"><span><b>インボイスの登録をきっかけに、免税事業者から課税事業者になった（個人）</b><br><small class="muted">2年前の課税売上高が1,000万円以下なら、令和9年分は3割特例（売上の税の3割を納める）も比べます。届出は要りません。法人は対象外です。</small></span></label>
             <label class="check"><input type="checkbox" id="specifiedOver"><span><b>前年の1〜6月の売上と給与が、どちらも1,000万円を超えた</b><br><small class="muted">法人の場合は、前事業年度の開始から6か月間が対象です。いずれも超えた場合は、免税事業者になることはできません。</small></span></label>
           </div>
         </div>
@@ -1858,7 +1861,7 @@ p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
       <button type="button" class="jump" id="toInput">↑ 入力欄に戻る</button>
       <div class="bk-actions sheet-print"><button type="button" class="bk-btn" data-print="brief">結果だけ印刷する</button><button type="button" class="bk-btn" data-print="full">くわしく印刷する（入力と内訳まで）</button></div>
       <p class="bk-hint sheet-print no-print">税理士の先生へのご相談には、くわしい方が便利です。</p>
-      <p class="disclaimer">結果は目安です。国と地方を合わせた税率で計算しており、端数処理・75%ルール・インボイスの2割特例や3割特例・8%のまま残る取引は含めていません。届出と申告につきましては、税理士または<a href="https://www.nta.go.jp/" target="_blank" rel="noopener">税務署</a>に確認してください。</p>
+      <p class="disclaimer">結果は目安です。国と地方を合わせた税率で計算しており、端数処理・75%ルール・8%のまま残る取引は含めていません。インボイスの2割・3割特例は、個人で条件に当てはまるとチェックした時だけ比べます。届出と申告につきましては、税理士または<a href="https://www.nta.go.jp/" target="_blank" rel="noopener">税務署</a>に確認してください。</p>
     </aside>
   </div>
 
@@ -1936,7 +1939,7 @@ p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
         <li><b>お酒は食料品に入らない</b>：お酒の販売と仕入れは10%のままです。「その他の売上」と「10%の仕入れ・経費」に入れてください。</li>
         <li><b>インボイスに登録していると免税事業者になれない</b>：2年前の課税売上高が1,000万円以下でも、登録中は課税事業者です。</li>
         <li><b>簡易課税は5,000万円まで</b>：2年前の課税売上高が5,000万円を超えると、簡易課税は選べません。</li>
-        <li><b>含めていない計算がある</b>：端数処理、75%ルール、インボイスの2割特例・3割特例、8%のまま残る取引は、この試算に入っていません。対象になりそうな方は、税理士または税務署に確かめてください。</li>
+        <li><b>含めていない計算がある</b>：端数処理、75%ルール、8%のまま残る取引は、この試算に入っていません。インボイスの2割・3割特例は、個人で条件に当てはまるとチェックした時だけ比べます。対象になりそうな方は、税理士または税務署に確かめてください。</li>
       </ul>
       <p>税率の表は「<a href="#changes" data-view="changes">何が変わるか</a>」、計算式は「<a href="#howto" data-view="howto">計算のしくみ</a>」、よくあるご質問は「<a href="#faq" data-view="faq">よくある質問</a>」にまとめています。</p>
       </div>
@@ -2109,7 +2112,7 @@ p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
       <ol class="ps-restore">
         <li><b>控えをお持ちの場合</b>：下の欄に貼り付けて「パスを戻す」を押してください。有効期限は変わりません。</li>
         <li><b>お支払いの直後で、パスの受け取りが終わっていない場合</b>：同じ端末・同じブラウザでこのページを開き直すと、自動で受け取り直します。「パスを再度受け取る」のボタンが出ている時は、そちらを押してください。</li>
-        <li><b>控えが無い場合</b>：下の「控えが無い時に取り戻す」に、お支払いの時に入れたメールアドレスを入れてください。そのアドレスに、パスを取り戻すリンクを送ります（30分だけ使えます）。有効期限は、最初のお支払いの時点から数えた日数のままです。</li>
+        <li><b>控えが無い場合</b>：下の「控えが無い時に取り戻す」に、お支払いの時に入れたメールアドレスと、画面の案内に沿ってカードの下4桁を入れてください（メールでリンクをお送りする形の時は、メールアドレスだけです）。有効期限は、最初のお支払いの時点から数えた日数のままです。</li>
       </ol>
       <label class="ps-restore-label">パスの控え<textarea id="psRestoreCode" class="ps-code" rows="3" placeholder="v1. で始まる控えを貼り付けてください" autocomplete="off" spellcheck="false"></textarea></label>
       <div class="bk-actions"><button type="button" class="bk-btn" id="psRestoreGo">パスを戻す</button></div>
@@ -2358,7 +2361,7 @@ p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
       </details>
       <details>
         <summary>簡易課税に変えるには、いつまでに届出が要りますか？</summary>
-        <p>簡易課税制度選択届出書を、適用を受けたい課税期間が始まる前日までに提出します。個人で令和9年分から適用を受ける場合は、令和8年12月31日までです。今回の特例の対象ではありません。</p>
+        <p>簡易課税制度選択届出書を、適用を受けたい課税期間が始まる前日までに提出します。個人で令和9年分から適用を受ける場合は、令和8年12月31日までです。今回の飲食料品の特例の対象ではありません。ただし、令和8年分で2割特例を受けた個人の方は、令和9年分の申告期限（令和10年3月31日）までに出せば、令和9年分から簡易課税にできます。</p>
       </details>
       <details>
         <summary>免税事業者ですが、還付を受けられますか？</summary>
@@ -2366,7 +2369,7 @@ p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
       </details>
       <details>
         <summary>2割特例や3割特例は入っていますか？</summary>
-        <p>含まれていません。インボイスの登録により課税事業者となった方の特例は、この試算には含めていません。対象となる方は、税理士または税務署に確認してください。</p>
+        <p>個人の方は比べられます。インボイスの登録をきっかけに免税事業者から課税事業者になり、2年前の課税売上高が1,000万円以下の個人の方は、令和8年分は2割特例、令和9年分・10年分は3割特例（売上の税の3割を納める）を使えます。届出は要りません。「現在の申告方式」で「2割特例」を選ぶか、「インボイスの登録をきっかけに…」にチェックを入れてください。法人は対象外です。条件は税理士または税務署にご確認ください。</p>
       </details>
           <details>
         <summary>お酒も1%になりますか？</summary>
@@ -2478,10 +2481,10 @@ p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
   var S = window.Shokuhin;
   var $ = function (id) { return document.getElementById(id); };
   var STORE_KEY = 'shohizei-check:v1';
-  var LABEL = { general: '本則課税', simple: '簡易課税', exempt: '免税事業者' };
+  var LABEL = { general: '本則課税', simple: '簡易課税', exempt: '免税事業者', tokurei: '2割・3割特例' };
   var MONEY = ['baseSales', 'eatIn', 'foodSales', 'otherSales', 'foodBuy', 'otherBuy'];
   var FLOWS = ['eatIn', 'foodSales', 'otherSales', 'foodBuy', 'otherBuy']; // 1か月で入れられる金額
-  var CHECKS = ['invoice', 'specifiedOver'];
+  var CHECKS = ['invoice', 'specifiedOver', 'tokurei'];
   var FIELDS = MONEY.concat(['kind', 'current', 'who', 'endMonth', 'per', 'tax', 'foodKubun', 'eatInKubun', 'otherKubun']).concat(CHECKS);
   // 税込で入れた時に割る数（食料品は今の8%で割る）
   var TAXR = { eatIn: 1.10, foodSales: 1.08, otherSales: 1.10, foodBuy: 1.08, otherBuy: 1.10 };
@@ -2526,7 +2529,7 @@ p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
   function setSeg(kind, val) {
     state[kind] = val;
     document.querySelectorAll('[data-' + kind + ']').forEach(function (b) { b.classList.toggle('active', b.dataset[kind] === val); });
-    if (kind === 'who') $('endMonthField').hidden = val !== 'corporate';
+    if (kind === 'who') { $('endMonthField').hidden = val !== 'corporate'; $('tokureiRow').hidden = val === 'corporate'; }
   }
 
   function applyPreset() {
@@ -2587,6 +2590,7 @@ p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
     var base = $('baseSales').value;
     var parts = [base === '' ? '2年前の課税売上高 未入力（免税事業者は比べません）' : '2年前の課税売上高 ' + man(Number(base) || 0)];
     if ($('invoice').checked) parts.push('インボイス登録あり');
+    if (state.who !== 'corporate' && ($('tokurei').checked || $('current').value === 'tokurei')) parts.push('2割・3割特例を比べる');
     parts.push($('fvWho').textContent, 'その他の売上 ' + $('fvOther').textContent, '簡易課税の区分 ' + $('fvKubun').textContent);
     $('assumeText').textContent = parts.join('・');
   }
@@ -2622,6 +2626,11 @@ p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
     $('lines').textContent = '';
   }
 
+  function tokureiWhy(base, v) {
+    if (base === '' || base === undefined) return '2年前の売上が未入力';
+    if (Number(base) > S.LIMIT.exempt) return '2年前が1,000万円超';
+    return 'インボイスの登録なし';
+  }
   function exemptWhy(base, v) {
     if (base === '' || base === undefined) return '2年前の売上が未入力';
     if (Number(base) > S.LIMIT.exempt) return '2年前が1,000万円超';
@@ -2679,6 +2688,9 @@ p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
       return;
     }
     var current = v.current;
+    // 2割・3割特例は個人だけ。「今は2割特例」を選んだ方は、登録を受けていて特例を確かめた方として扱う
+    var tokureiOn = state.who !== 'corporate' && (v.tokurei === '1' || current === 'tokurei');
+    if (state.who === 'corporate' && current === 'tokurei') current = 'general';
     var pr0 = S.period(state.who, Number(v.endMonth));
     var months = S.cutMonths(pr0.start, pr0.end);
     var share = months / 12;
@@ -2686,7 +2698,8 @@ p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
       eatIn: vals.eatIn, foodSales: vals.foodSales, otherSales: vals.otherSales,
       foodBuy: vals.foodBuy, otherBuy: vals.otherBuy, baseSales: vals.baseSales, current: current,
       foodKubun: Number(v.foodKubun), eatInKubun: Number(v.eatInKubun), otherKubun: Number(v.otherKubun),
-      invoice: v.invoice === '1', specifiedOver: v.specifiedOver === '1', share: share
+      invoice: v.invoice === '1' || tokureiOn, specifiedOver: v.specifiedOver === '1', share: share,
+      tokurei: tokureiOn
     };
     var c = S.compare(cargs);
     window.ShohizeiLast = { args: cargs, months: months, per: state.per, tax: state.tax };
@@ -2698,7 +2711,11 @@ p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
     var change = c.changeIfStay;
     var changeText = '今の1年分より' + man(Math.abs(change)) + (change >= 0 ? '増えます' : '減ります');
     var baseBlank = vals.baseSales === '' || vals.baseSales === undefined;
-    if (!c.currentAllowed && c.currentInput === 'exempt' && baseBlank) {
+    if (!c.currentAllowed && c.currentInput === 'tokurei' && baseBlank) {
+      setVerdict('warn', '2割・3割特例は、2年前の売上を入れると比べられます',
+        '「2年前の課税売上高（税抜）」の欄に入れてください（「かんたん」の時は「くわしく」に切り替えると出ます）。1,000万円以下なら、令和9年分は3割特例として比べます。それまでは本則課税を今の方式とみなして比べています。',
+        '2年前の売上を入れてください');
+    } else if (!c.currentAllowed && c.currentInput === 'exempt' && baseBlank) {
       // 2年前の売上が空欄の時は、免税かどうかを判定できないだけ。「選べない」と言い切らない
       setVerdict('warn', '免税事業者かどうかは、2年前の売上を入れると判定できます',
         '「2年前の課税売上高（税抜）」の欄に入れてください（「かんたん」の時は「くわしく」に切り替えると出ます）。1,000万円以下で、インボイスの登録が無ければ、免税事業者として比べます。それまでは本則課税を今の方式とみなして比べています。',
@@ -2709,7 +2726,7 @@ p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
         + (st.need && st.deadline ? '届出の期限は' + wa(st.deadline) + 'です。' : ''),
         LABEL[c.currentInput] + 'は選べません');
     } else if (c.shouldSwitch) {
-      setVerdict('warn', LABEL[c.bestKey] + 'に変えると、この期間に約' + man(c.saveBySwitch) + '少なくなります',
+      setVerdict('warn', (c.bestKey === 'tokurei' ? '3割特例' : LABEL[c.bestKey]) + 'に変えると、この期間に約' + man(c.saveBySwitch) + '少なくなります',
         LABEL[current] + 'のままですと、' + changeText + '。' + (st.deadline ? '届出の期限は' + wa(st.deadline) + 'です。' : ''),
         LABEL[c.bestKey] + 'で ' + man(c.saveBySwitch) + '少なく');
     } else {
@@ -2734,13 +2751,13 @@ p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
     c.options.forEach(function (o) {
       var r = document.createElement('div');
       r.className = 'opt-row' + (!o.allowed ? ' off' : o.key === c.bestKey ? ' best' : '');
-      var name = document.createElement('span'); name.className = 'opt-name'; name.textContent = LABEL[o.key] + (o.key === current ? '（今）' : '');
+      var name = document.createElement('span'); name.className = 'opt-name'; name.textContent = (o.key === 'tokurei' ? '3割特例' : LABEL[o.key]) + (o.key === current ? (o.key === 'tokurei' ? '（今は2割特例）' : '（今）') : '');
       var track = document.createElement('span'); track.className = 'opt-track';
       var fill = document.createElement('span'); fill.className = 'opt-fill' + (o.tax < 0 ? ' refund' : '');
       fill.style.width = o.allowed ? Math.max(o.tax === 0 ? 0 : 2, Math.abs(o.tax) / maxAbs * 100) + '%' : '0%';
       track.appendChild(fill);
       var val = document.createElement('span'); val.className = 'opt-val';
-      val.textContent = !o.allowed ? '選べません（' + (o.key === 'exempt' ? exemptWhy(vals.baseSales, v) : '2年前が5,000万円超') + '）' : taxText(o.tax);
+      val.textContent = !o.allowed ? '選べません（' + (o.key === 'exempt' ? exemptWhy(vals.baseSales, v) : o.key === 'tokurei' ? tokureiWhy(vals.baseSales, v) : '2年前が5,000万円超') + '）' : taxText(o.tax);
       r.appendChild(name); r.appendChild(track); r.appendChild(val);
       bars.appendChild(r);
     });
@@ -2762,7 +2779,10 @@ p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
     var p = document.createElement('span'); p.textContent = st.text; t.appendChild(p);
 
     // 気づいたこと
-    var notes = c.notes;
+    var notes = c.notes.slice();
+    // 3割特例の対象になりうる個人には、一律に方式をすすめず、条件を確かめてもらう
+    if (state.who !== 'corporate' && !tokureiOn && v.invoice === '1' && (baseBlank || Number(vals.baseSales) <= S.LIMIT.exempt))
+      notes.unshift('インボイスの登録をきっかけに免税事業者から課税事業者になった個人の方は、令和9年分に3割特例（売上の税の3割を納める。届出は不要）を使える場合があります。令和8年分で2割特例を受けた方は、令和9年分から簡易課税にする届出を令和10年3月31日まで出せます。当てはまる方は、上の「インボイスの登録をきっかけに…」にチェックを入れてください。');
     $('notice').hidden = !notes.length;
     $('notice').innerHTML = '';
     notes.forEach(function (n) { var el = document.createElement('p'); el.textContent = n; $('notice').appendChild(el); });
@@ -2780,9 +2800,17 @@ p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
     html += '<h3>簡易課税</h3><table>';
     html += row('控除できる税（食料品の税と同額＋みなし仕入率）', yen(cut.deduct));
     html += row('納税額', yen(cut.simple), 'total') + '</table>';
+    var tk = cut.options.filter(function (o) { return o.key === 'tokurei' && o.allowed; })[0];
+    if (tk) {
+      html += '<h3>3割特例（令和9年分）</h3><table>';
+      html += row('売上の税 ' + yen(cut.salesTaxTotal) + ' × 30%', yen(tk.tax), 'total') + '</table>';
+    }
     html += '<h3>今（食料品8%）</h3><table>';
     html += row('本則課税', now.general < 0 ? '還付 ' + yen(-now.general) : yen(now.general));
-    html += row('簡易課税', yen(now.simple)) + '</table>';
+    html += row('簡易課税', yen(now.simple));
+    var tkNow = now.options.filter(function (o) { return o.key === 'tokurei' && o.allowed; })[0];
+    if (tkNow) html += row('2割特例（令和8年分）', yen(tkNow.tax));
+    html += '</table>';
     $('lines').innerHTML = html;
   }
 
@@ -2801,7 +2829,15 @@ p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
       });
       tb.appendChild(tr);
     });
-    $('dlPeriod').textContent = '令和9年4月1日を含む課税期間：' + slash(pr.start) + '〜' + slash(pr.end) + '。特例の対象は、飲食料品を販売している事業者のみです。販売していない場合は、いずれも課税期間が始まる前日までです。';
+    if (who !== 'corporate') {
+      var st2 = S.steps('tokurei', 'simple', who, mon);
+      var tr2 = document.createElement('tr');
+      ['2割特例 → 簡易（令和8年分で2割特例を受けた個人）', st2.form + '（2割・3割特例からの移行の特例）', wa(st2.deadline) + '（' + slash(st2.deadline) + '）'].forEach(function (txt, i) {
+        var td = document.createElement('td'); td.textContent = txt; if (i === 2) td.className = 'num'; tr2.appendChild(td);
+      });
+      tb.appendChild(tr2);
+    }
+    $('dlPeriod').textContent = '令和9年4月1日を含む課税期間：' + slash(pr.start) + '〜' + slash(pr.end) + '。飲食料品の特例の対象は、飲食料品を販売している事業者のみです。販売していない場合は、いずれも課税期間が始まる前日までです。' + (who !== 'corporate' ? 'インボイスの登録をきっかけに課税事業者になった個人の方は、令和9年分・10年分に3割特例（届出は不要）を使える場合があります。' : '');
   }
   $('dlWho').addEventListener('change', renderDeadline);
   $('dlMonth').addEventListener('change', renderDeadline);
@@ -2976,6 +3012,7 @@ p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
     out.current = v.current; out.who = state.who; out.endMonth = state.who === 'corporate' ? Number(v.endMonth) : 12;
     ['foodKubun', 'eatInKubun', 'otherKubun'].forEach(function (k) { out[k] = Number(v[k]); });
     out.invoice = v.invoice === '1'; out.specifiedOver = v.specifiedOver === '1';
+    out.tokurei = state.who !== 'corporate' && (v.tokurei === '1' || v.current === 'tokurei');
     return out;
   };
   // 帳簿から読み込む（CSV）の画面から使う：集めた金額を試算の欄に入れて開く
@@ -3126,7 +3163,7 @@ p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
       "name": "簡易課税に変えるには、いつまでに届出が要りますか？",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "簡易課税制度選択届出書を、適用を受けたい課税期間が始まる前日までに提出します。個人で令和9年分から適用を受ける場合は、令和8年12月31日までです。今回の特例の対象ではありません。"
+        "text": "簡易課税制度選択届出書を、適用を受けたい課税期間が始まる前日までに提出します。個人で令和9年分から適用を受ける場合は、令和8年12月31日までです。今回の飲食料品の特例の対象ではありません。ただし、令和8年分で2割特例を受けた個人の方は、令和9年分の申告期限（令和10年3月31日）までに出せば、令和9年分から簡易課税にできます。"
       }
     },
     {
@@ -3142,7 +3179,7 @@ p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
       "name": "2割特例や3割特例は入っていますか？",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "含まれていません。インボイスの登録により課税事業者となった方の特例は、この試算には含めていません。対象となる方は、税理士または税務署に確認してください。"
+        "text": "個人の方は比べられます。インボイスの登録をきっかけに免税事業者から課税事業者になり、2年前の課税売上高が1,000万円以下の個人の方は、令和8年分は2割特例、令和9年分・10年分は3割特例（売上の税の3割を納める）を使えます。届出は要りません。「現在の申告方式」で「2割特例」を選ぶか、「インボイスの登録をきっかけに…」にチェックを入れてください。法人は対象外です。条件は税理士または税務署にご確認ください。"
       }
     },
     {

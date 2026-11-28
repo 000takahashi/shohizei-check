@@ -92,7 +92,8 @@ export const TOOLS = [
         notes: c.notes,
         assumptions: [
           'Sales and purchases occur evenly through the year (the period is prorated by month).',
-          'Rounding, the 75% rule of simplified taxation and the 20%/30% special rules for invoice registrants are not included.',
+          'Rounding and the 75% rule of simplified taxation are not included.',
+          'The 20%/30% special rules are not included: individuals who became taxable by registering for the invoice system, with base-period sales of 10 million yen or less, may pay 30% of the output tax for 2027 and 2028 (no notification needed). Those who used the 20%/30% rule can file for simplified taxation until the tax return deadline of the next year (for 2027, by March 31, 2028).',
         ],
         paidFeatures: 'A multi-year plan across all periods of the cut (POST /api/v1/plan) and takeout/eat-in pricing (POST /api/v1/pricing) need a paid pass (Authorization: Bearer). See ' + SITE + '/llms.txt',
         source: SOURCE, page: SITE + '/', disclaimer: DISCLAIMER,
@@ -115,7 +116,7 @@ export const TOOLS = [
         deadlines: [
           { form: '簡易課税制度選択不適用届出書', move: 'simplified → standard', deadline: pr.deadline, specialRule: true, condition: 'Only for businesses that sell food. Otherwise the day before the period starts: ' + before + '.' },
           { form: '課税事業者選択届出書', move: 'tax-exempt → taxable (standard)', deadline: pr.deadline, specialRule: true, condition: 'Only for businesses that sell food. Otherwise the day before the period starts: ' + before + '.' },
-          { form: '簡易課税制度選択届出書', move: 'standard → simplified', deadline: before, specialRule: false, condition: 'No special rule. Must be kept for 2 years.' },
+          { form: '簡易課税制度選択届出書', move: 'standard → simplified', deadline: before, specialRule: false, condition: 'No special rule. Must be kept for 2 years. Exception: an individual who used the 20% special rule for 2026 can file by ' + S.SIMPLE_AFTER_TOKUREI.individual + ' (the 2027 return deadline) to use simplified taxation from 2027.' },
         ],
         page: SITE + '/#deadline', disclaimer: DISCLAIMER,
       };

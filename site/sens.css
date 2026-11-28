@@ -50,6 +50,8 @@
 .ck-sens-svg .ck-line.ck-l3 { stroke: var(--muted); stroke-dasharray: 2 4; stroke-linecap: round; }
 .ck-sens-svg .ck-hover-dot.ck-l2 { stroke: var(--bar-tax); }
 .ck-sens-svg .ck-hover-dot.ck-l3 { stroke: var(--muted); }
+.ck-sens-svg .ck-line.ck-l4 { stroke: var(--good, #2e7d32); stroke-dasharray: 12 3 2 3; }
+.ck-sens-svg .ck-hover-dot.ck-l4 { stroke: var(--good, #2e7d32); }
 .ck-sens-svg .ck-nowline { stroke: var(--accent); stroke-opacity: .55; stroke-dasharray: 2 3; }
 .ck-sens-svg .ck-cross.ck-cross-soft { stroke: var(--ink-secondary); stroke-opacity: .6; }
 .ck-sens-svg .ck-cross-lab.ck-cross-soft { fill: var(--ink-secondary); font-weight: 600; }
@@ -59,6 +61,7 @@
 .ck-key::before { content: ""; display: inline-block; width: 22px; height: 0; margin-right: 6px; vertical-align: middle; border-top: 2.5px solid var(--accent); }
 .ck-key.ck-l2::before { border-top: 2.5px dashed var(--bar-tax); }
 .ck-key.ck-l3::before { border-top: 2.5px dotted var(--muted); }
+.ck-key.ck-l4::before { border-top: 2.5px dashed var(--good, #2e7d32); }
 .ck-sens-read b + * { margin-left: 0; }
 .ck-sens-note { margin: 0; font-size: .78rem; color: var(--ink-secondary); }
 
@@ -78,6 +81,8 @@
 .ck-sens-svg .ck-line.ck-l3 { stroke: var(--muted); stroke-dasharray: 2 4; stroke-linecap: round; }
 .ck-sens-svg .ck-hover-dot.ck-l2 { stroke: var(--bar-tax); }
 .ck-sens-svg .ck-hover-dot.ck-l3 { stroke: var(--muted); }
+.ck-sens-svg .ck-line.ck-l4 { stroke: var(--good, #2e7d32); stroke-dasharray: 12 3 2 3; }
+.ck-sens-svg .ck-hover-dot.ck-l4 { stroke: var(--good, #2e7d32); }
 .ck-sens-svg .ck-nowline { stroke: var(--accent); stroke-opacity: .55; stroke-dasharray: 2 3; }
 .ck-sens-svg .ck-cross.ck-cross-soft { stroke: var(--ink-secondary); stroke-opacity: .6; }
 .ck-sens-svg .ck-cross-lab.ck-cross-soft { fill: var(--ink-secondary); font-weight: 600; }
@@ -87,6 +92,7 @@
 .ck-key::before { content: ""; display: inline-block; width: 22px; height: 0; margin-right: 6px; vertical-align: middle; border-top: 2.5px solid var(--accent); }
 .ck-key.ck-l2::before { border-top: 2.5px dashed var(--bar-tax); }
 .ck-key.ck-l3::before { border-top: 2.5px dotted var(--muted); }
+.ck-key.ck-l4::before { border-top: 2.5px dashed var(--good, #2e7d32); }
 .ck-sens-read b + * { margin-left: 0; }
 .ck-sens-note { display: none; }
   .ck-sens-svg { max-width: 120mm; }
