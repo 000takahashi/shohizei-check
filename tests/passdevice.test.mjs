@@ -54,7 +54,9 @@ test('★受け取る: 1つの支払いで3台まで。同じ端末は何度受�
   assert.equal(st.pi.metadata.devices, [DEV(1), DEV(2), DEV(3)].join(','));
   const r = await claim(st, DEV(4));
   assert.equal(r.status, 403);
-  assert.equal((await r.json()).error, 'device_limit');
+  const body = await r.json();
+  assert.equal(body.error, 'device_limit');
+  assert.ok(body.message.includes('3つのブラウザーで登録されています') && !body.message.includes('台'));
   // 端末の番号が無い受け取りは断る（支払いの直後のアドレスを人に渡しても、数えずに使えないように）
   assert.equal((await claim(st, '')).status, 400);
 });
