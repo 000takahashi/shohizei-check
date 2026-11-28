@@ -104,7 +104,7 @@ export async function onCheckout(context, deps = {}) {
   }
 }
 
-const LIMIT_MESSAGE = `このパスは、すでに${MAX_DEVICES}台の端末で使われています。お困りの時は、運営者情報のメールアドレスへご連絡ください。`;
+const LIMIT_MESSAGE = `このパスは、すでに${MAX_DEVICES}つのブラウザーで登録されています。お困りの時は、運営者情報のメールアドレスへご連絡ください。`;
 
 // 支払い（Checkout の支払い画面）から、パスを作る。端末が分かる時は、その端末を数える
 async function passFromSession(s, sid, env, deps, dev) {
