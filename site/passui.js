@@ -11,8 +11,8 @@
   var busy = false;
 
   var DEVICE_KEY = PASS_KEY + '_device', RECEIPT_KEY = PASS_KEY + '_receipt';
-  var LIMIT_TEXT = 'このパスは、すでに3台の端末で使われています。お困りの時は、運営者情報のメールアドレスへご連絡ください。';
-  // この端末のでたらめな番号。1つのパスを使える端末は3台まで（名前などは入っていない）
+  var LIMIT_TEXT = 'このパスは、すでに3つのブラウザーで登録されています。お困りの時は、運営者情報のメールアドレスへご連絡ください。';
+  // この端末のでたらめな番号。1つのパスで登録できるブラウザーは3つまで（名前などは入っていない）
   function deviceId() {
     var d = '';
     try { d = localStorage.getItem(DEVICE_KEY) || ''; } catch (e) {}
@@ -266,7 +266,7 @@
     if (!restore || !restore.parentNode) return;
     var c = el('section', null, 'doc-card'); c.id = 'psRecover';
     c.appendChild(el('h3', '控えが無い時に取り戻す'));
-    c.appendChild(el('p', 'お支払いの時に Stripe の画面で入れたメールアドレスと、お支払いに使ったカードの下4桁を入れてください。1つのパスは、3台の端末まで使えます。'));
+    c.appendChild(el('p', 'お支払いの時に Stripe の画面で入れたメールアドレスと、お支払いに使ったカードの下4桁を入れてください。購入時のブラウザーを含め、1つのパスで登録できるブラウザーは3つまでです。登録を解除したブラウザーでも、保存済みのパスは有効期限まで使えます。'));
     var grid = el('div', null, 'ps-rec-grid');
     function field(label, id, type, mode, max, ac) {
       var l = el('label', label), i = document.createElement('input');

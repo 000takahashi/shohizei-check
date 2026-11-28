@@ -70,11 +70,11 @@ export function linkMail(siteName, url, en = false) {
   if (en) {
     return {
       subject: `${siteName}: your pass recovery link`,
-      text: `Open this link on the device where you want to use your pass:\n${url}\n\nThe link works for ${LINK_TTL_MIN} minutes. One pass can be used on up to 3 devices.\nIf you did not ask for this, you can ignore this email. Nothing changes unless the link is opened.\n\n${siteName}`,
+      text: `Open this link on the device where you want to use your pass:\n${url}\n\nThe link works for ${LINK_TTL_MIN} minutes. Including the browser you bought it on, one pass can be registered on up to 3 browsers. A browser that has been unregistered can still use its saved pass until it expires.\nIf you did not ask for this, you can ignore this email. Nothing changes unless the link is opened.\n\n${siteName}`,
     };
   }
   return {
     subject: `【${siteName}】パスを取り戻すリンク`,
-    text: `パスを使いたい端末で、次のリンクを開いてください。\n${url}\n\nこのリンクは${LINK_TTL_MIN}分だけ使えます。1つのパスは、3台の端末まで使えます。\nお心当たりが無い場合は、このメールは捨ててください。リンクを開かない限り、何も変わりません。\n\n${siteName}`,
+    text: `パスを使いたい端末で、次のリンクを開いてください。\n${url}\n\nこのリンクは${LINK_TTL_MIN}分だけ使えます。購入時のブラウザーを含め、1つのパスで登録できるブラウザーは3つまでです。登録を解除したブラウザーでも、保存済みのパスは有効期限まで使えます。\nお心当たりが無い場合は、このメールは捨ててください。リンクを開かない限り、何も変わりません。\n\n${siteName}`,
   };
 }
