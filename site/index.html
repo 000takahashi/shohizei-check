@@ -1681,7 +1681,7 @@ p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
           </div>
           <div class="stack adv" id="exemptChecks">
             <label class="check"><input type="checkbox" id="invoice"><span><b>インボイス発行事業者の登録をしている</b><br><small class="muted">ご登録中は、免税事業者になることはできません。</small></span></label>
-            <label class="check" id="tokureiRow"><input type="checkbox" id="tokurei"><span><b>インボイスの登録をきっかけに、免税事業者から課税事業者になった（個人）</b><br><small class="muted">2年前の課税売上高が1,000万円以下なら、令和9年分は3割特例（売上の税の3割を納める）も比べます。届出は要りません。法人は対象外です。</small></span></label>
+            <label class="check" id="tokureiRow"><input type="checkbox" id="tokurei"><span><b>インボイスの登録をきっかけに、免税事業者から課税事業者になった（個人）</b><br><small class="muted">2年前の課税売上高が1,000万円以下で、前年1〜6月の売上と給与がどちらも1,000万円を超えていなければ、令和9年分は3割特例（売上の税の3割を納める）も比べます。届出は要りません。法人は対象外です。</small></span></label>
             <label class="check"><input type="checkbox" id="specifiedOver"><span><b>前年の1〜6月の売上と給与が、どちらも1,000万円を超えた</b><br><small class="muted">法人の場合は、前事業年度の開始から6か月間が対象です。いずれも超えた場合は、免税事業者になることはできません。</small></span></label>
           </div>
         </div>
@@ -2629,6 +2629,7 @@ p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
   function tokureiWhy(base, v) {
     if (base === '' || base === undefined) return '2年前の売上が未入力';
     if (Number(base) > S.LIMIT.exempt) return '2年前が1,000万円超';
+    if (v.specifiedOver === '1') return '前年1〜6月が1,000万円超';
     return 'インボイスの登録なし';
   }
   function exemptWhy(base, v) {

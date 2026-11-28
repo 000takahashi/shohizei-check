@@ -26,7 +26,7 @@
     out.push([]);
     out.push([r.twoStarts ? 'ご提出いただく届出（課税事業者選択届出書をまだ出していない場合）' : 'ご提出いただく届出', '期限', '適用する課税期間', '変更前', '変更後', '特例']);
     var row = function (f) {
-      return [f.form, f.info ? f.when : f.deadline, per(r.periods[f.index]), f.elect ? '免税事業者（課税事業者を選択）' : LABEL[f.from], LABEL[f.to], f.special ? '飲食料品特例（参考事項の欄に記入）' : ''];
+      return [f.form, f.info ? f.when : f.deadline, per(r.periods[f.index]), f.elect ? '免税事業者（課税事業者を選択）' : LABEL[f.from], LABEL[f.to], f.tokurei ? '2割・3割特例の翌年の特例（申告期限まで）' : f.special ? '飲食料品特例（参考事項の欄に記入）' : ''];
     };
     if (!r.best.filings.length) out.push(['届出は不要です']);
     r.best.filings.forEach(function (f) { out.push(row(f)); });

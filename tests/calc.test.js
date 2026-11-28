@@ -167,3 +167,9 @@ test("3割特例は、登録あり・2年前1,000万円以下・本人が確か�
   assert.equal(S.compute({ ...base, invoice: true }).options.find((o) => o.key === "tokurei").allowed, false);
   assert.equal(S.compute({ eatIn: 5_000_000 }).options.some((o) => o.key === "tokurei"), false); // 確かめていなければ出さない
 });
+
+test("2割・3割特例: 前年1〜6月の売上と給与がどちらも1,000万円超の年は使えない", () => {
+  const p = { eatIn: 5_000_000, otherBuy: 1_000_000, eatInKubun: 4, tokurei: true, invoice: true, baseSales: 9_000_000 };
+  assert.equal(S.compute({ ...p, specifiedOver: true }).options.find((o) => o.key === "tokurei").allowed, false);
+  assert.equal(S.compute({ ...p, specifiedOver: false }).options.find((o) => o.key === "tokurei").allowed, true);
+});
