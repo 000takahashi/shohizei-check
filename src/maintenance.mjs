@@ -10,7 +10,7 @@
 //   - robots.txt・ads.txt・IndexNow の鍵・アイコン・OG画像だけは、そのまま返す。
 //
 // テストでは env.MAINTENANCE = 'off' を渡すと休まない（元の動きを確かめるため）。
-export const MAINTENANCE = true;
+export const MAINTENANCE = false;
 
 const SITE = {
   name: '消費税1%チェッカー',
