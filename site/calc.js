@@ -220,6 +220,16 @@
    * 期限は「令和9年4月1日を含む課税期間」から移る場合。
    * @param {boolean} sellsFood 飲食料品の販売をしているか。届出の特例は販売している事業者だけ（省略時 true）。
    */
+  /**
+   * 2割・3割特例からの移行の特例: 前の課税期間（令和8年分）に2割特例を実際に使った個人だけ、
+   * 令和9年分から簡易課税にする届出を、令和9年分の申告期限まで出せる。当てはまらなければ null。
+   * 単年の画面・2年間の見通し・CSV・カレンダーは、どれもこの判定を使う。
+   * @param current 令和8年分の申告方式（'tokurei' ＝ 2割特例を使った）
+   */
+  function simpleDeadlineAfterTokurei(current, who) {
+    return current === "tokurei" && who !== "corporate" ? SIMPLE_AFTER_TOKUREI.individual : null;
+  }
+
   function steps(current, best, who, endMonth, sellsFood, canExempt) {
     const pr = period(who, endMonth);
     const food = sellsFood === undefined ? true : !!sellsFood;
@@ -231,8 +241,8 @@
     if (current === "tokurei" && best === "general") {
       return { need: false, period: pr, text: "本則課税で申告するのに、届出は要りません。2割特例は申告の時に選ぶものなので、令和9年分は本則課税で申告すれば足ります。" };
     }
-    if (current === "tokurei" && best === "simple" && who !== "corporate") {
-      return { need: true, form: "簡易課税制度選択届出書", deadline: SIMPLE_AFTER_TOKUREI.individual, special: true, period: pr,
+    if (best === "simple" && simpleDeadlineAfterTokurei(current, who)) {
+      return { need: true, form: "簡易課税制度選択届出書", deadline: simpleDeadlineAfterTokurei(current, who), special: true, period: pr,
         text: "令和8年分で2割特例を受けた方は、令和9年分の申告期限（令和10年3月31日）までに届出を出せば、令和9年分から簡易課税で申告できます（2割・3割特例からの移行の特例）。原則として2年間は継続していただく必要があります。" };
     }
     if (current === best) {
@@ -270,5 +280,5 @@
     return new Date(Date.UTC(y, m, 0)).toISOString().slice(0, 10);
   }
 
-  return { RATE, KUBUN, LIMIT, TOKUREI, SIMPLE_AFTER_TOKUREI, PRESETS, CUT_START, CUT_END, PRICE_DISPLAY, compute, compare, period, steps, cutMonths };
+  return { RATE, KUBUN, LIMIT, TOKUREI, SIMPLE_AFTER_TOKUREI, simpleDeadlineAfterTokurei, PRESETS, CUT_START, CUT_END, PRICE_DISPLAY, compute, compare, period, steps, cutMonths };
 });

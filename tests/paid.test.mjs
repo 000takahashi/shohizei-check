@@ -328,13 +328,18 @@ test('2割・3割特例の個人: 最初の期間から簡易課税にする届�
   assert.equal(f.deadline, '2028-03-31');
   assert.equal(f.tokurei, true);
   assert.equal(f.special, false);
-  assert.ok(t.notes.some((n) => n.includes('2028年3月31日')));
+  assert.ok(t.notes.some((n) => n.includes('令和10年3月31日')));
   // 期限を過ぎた後（2027年）でも、申告期限までなら道に残る
   const late = plan(cleanPlan({ ...base, current: 'tokurei', tokurei: true }).input, '2027-06-01');
   assert.equal(late.best.path[0], 'simple');
   // 特例を使っていない人は、ふつうの期限（期間が始まる前日）
   const g = plan(cleanPlan({ ...base, current: 'general' }).input, '2026-11-28');
   assert.equal(g.best.filings.find((x) => x.index === 0 && x.to === 'simple').deadline, '2026-12-31');
+  // インボイス登録の経緯の欄にチェックがあっても、令和8年分を本則で申告した人は延びない（単年の画面と同じ）
+  const noUse = plan(cleanPlan({ ...base, current: 'general', tokurei: true }).input, '2026-11-28');
+  assert.equal(noUse.best.filings.find((x) => x.index === 0 && x.to === 'simple').deadline, '2026-12-31');
+  assert.equal(noUse.best.filings.find((x) => x.index === 0 && x.to === 'simple').tokurei, undefined);
+  assert.equal(S.steps('general', 'simple', 'individual', 12, false, false).deadline, '2026-12-31');
   // 法人には当てはめない
   assert.equal(cleanPlan({ ...base, who: 'corporate', current: 'tokurei', tokurei: true }).input.tokurei, false);
 });

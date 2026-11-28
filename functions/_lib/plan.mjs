@@ -57,9 +57,9 @@ export function cleanPlan(b) {
     invoice: b.invoice === true || b.invoice === '1' || b.invoice === 1,
     specifiedOver: b.specifiedOver === true || b.specifiedOver === '1' || b.specifiedOver === 1,
     current: KEYS.includes(b.current) ? b.current : 'general',
-    // 2割・3割特例を使っている（または使える）個人。最初の期間から簡易課税にする届出の期限が、その期間の申告期限まで延びる
-    tokurei: b.who !== 'corporate' && (b.current === 'tokurei' || b.tokurei === true || b.tokurei === '1' || b.tokurei === 1)
-      && (b.invoice === true || b.invoice === '1' || b.invoice === 1 || b.current === 'tokurei'),
+    // 前の課税期間（令和8年分）に2割特例を実際に使った個人だけ、最初の期間の簡易課税の届出の期限が申告期限まで延びる。
+    // インボイス登録の経緯の欄だけでは延びない（判定は calc.js の simpleDeadlineAfterTokurei を共有）
+    tokurei: !!S.simpleDeadlineAfterTokurei(b.current, b.who),
     who: b.who === 'corporate' ? 'corporate' : 'individual',
     endMonth: m >= 1 && m <= 12 ? m : 3,
     // 今の方式（簡易課税、または届出で選んだ課税事業者）を始めた時期。2年続ける決まりが残っているかを決める
@@ -90,7 +90,7 @@ function filing(from, to, i, per, sellsFood, tokurei) {
   }
   if (from === 'general' && to === 'simple') {
     // 2割・3割特例を受けた次の年から簡易課税にする時は、その年の申告期限（翌年3月31日）まで出せる（個人だけ）
-    if (i === 0 && tokurei) return { form: '簡易課税制度選択届出書', deadline: `${Number(per.end.slice(0, 4)) + 1}-03-31`, special: false, tokurei: true };
+    if (i === 0 && tokurei) return { form: '簡易課税制度選択届出書', deadline: S.SIMPLE_AFTER_TOKUREI.individual, special: false, tokurei: true };
     return { form: '簡易課税制度選択届出書', deadline: before, special: false };
   }
   if (from === 'exempt' && to === 'general') {
@@ -218,7 +218,7 @@ export function plan(input, today) {
   if (showElected) notes.push('この見通しは、課税事業者選択届出書をまだ出していない方の結果です。基準期間の売上が1,000万円以下のため、届出をしなければ免税事業者になります。課税事業者として申告する期間には選択届が必要で、選んだら2年間は課税事業者のままとなります。選択届をすでに出していて2年を過ぎている方は、「すでに課税事業者選択届出書を出している場合」をご覧ください。');
   if (best.path.includes('exempt') && current !== 'exempt') notes.push('免税事業者になるには、その期間の基準期間（個人は2年前、法人は2期前）の課税売上高が1,000万円以下で、特定期間（前年の1〜6月など）の判定でも免税の要件を満たし（売上に代えて給与等の支払額で判定することもできます）、インボイスの登録を受けていないことが必要です。取引先が事業者の場合は、取引先が仕入れの税を控除できなくなります。');
   if (best.path.includes('exempt') && current === 'exempt') notes.push('免税のままであれば納税はございません。取引先が事業者の場合は、値下げを求められることがございます。');
-  if (input.tokurei) notes.push('2割・3割特例を使っている方として、最初の期間から簡易課税にする届出の期限を、その期間の申告期限（' + `${Number(table[0].end.slice(0, 4)) + 1}年3月31日` + '）にしております。2割・3割特例そのものの税額は、この見通しには入れておりません。');
+  if (input.tokurei) notes.push('令和8年分で2割特例を受けた方として、令和9年分から簡易課税にする届出の期限を、令和9年分の申告期限（令和10年3月31日）にしております。2割・3割特例そのものの税額は、この見通しには入れておりません。');
   else if (input.who !== 'corporate' && input.invoice) notes.push('インボイスの登録をきっかけに免税事業者から課税事業者になった個人の方は、この見通しに含めていない2割・3割特例（令和9年分・10年分は売上の税の3割を納める。届出は不要）を使える場合があります。2割・3割特例を受けた次の年から簡易課税にする届出は、その年の申告期限まで出せます。申告方式の試算の画面でお確かめください。');
   if (best.taxes.some((t) => t < 0)) notes.push('マイナスの期間は還付（納めた税金が戻ること）となります。還付金は申告の後に振り込まれます。');
 
