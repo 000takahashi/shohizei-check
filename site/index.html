@@ -2743,7 +2743,7 @@ p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
     $('sNow').textContent = taxText(c.nowTax);
     $('sNowSub').textContent = (c.nowKey === 'tokurei' ? '2割特例' : LABEL[c.nowKey]) + 'で計算';
     // 令和8年分の方式が令和9年分には使えない時は、「今のまま」と書かない（2割特例が続くように読めるため）
-    $('sStayK').textContent = c.nowKey !== current ? '令和9年分を' + LABEL[current] + 'で申告した場合' : '今の方式のまま（この期間）';
+    $('sStayK').textContent = c.nowKey !== current ? '2027年分を' + LABEL[current] + 'で申告した場合' : '今の方式のまま（この期間）';
     $('sStay').textContent = taxText(c.stayTax);
     $('sStaySub').textContent = '今より ' + (change >= 0 ? '+' : '−') + man(Math.abs(change)).replace('−', '');
 
