@@ -62,7 +62,7 @@
   var S = root.Shokuhin;
   if (!S || !$('form') || !$('sheet')) return;
   var SVGNS = 'http://www.w3.org/2000/svg';
-  var LABEL = { general: '本則課税', simple: '簡易課税', exempt: '免税事業者' };
+  var LABEL = { general: '本則課税', simple: '簡易課税', exempt: '免税事業者', tokurei: '3割特例' };
   function el(tag, cls, text) { var e = doc.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
   function sv(tag, attrs) { var e = doc.createElementNS(SVGNS, tag); for (var k in attrs) e.setAttribute(k, attrs[k]); return e; }
   function yen(v) { return (v < 0 ? '−' : '') + Math.abs(Math.round(v)).toLocaleString('ja-JP') + '円'; }
@@ -127,7 +127,7 @@
   var anchor = doc.querySelector('.cost-bar-wrap');
   anchor.parentNode.insertBefore(box, anchor.nextSibling);
 
-  var CLS = { general: 'ck-l1', simple: 'ck-l2', exempt: 'ck-l3' };
+  var CLS = { general: 'ck-l1', simple: 'ck-l2', exempt: 'ck-l3', tokurei: 'ck-l4' };
   var W = 640, H = 210, L = 70, R = 14, T = 14, B = 30;
   var last = null, cur = null, hover = null;
   function nice(raw) { var p = Math.pow(10, Math.floor(Math.log10(Math.max(raw, 1e-9)))); var ms = [1, 2, 2.5, 5, 10]; for (var i = 0; i < ms.length; i++) if (ms[i] * p >= raw) return ms[i] * p; return 10 * p; }

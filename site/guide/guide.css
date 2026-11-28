@@ -631,6 +631,7 @@ input:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible
   border: 1px solid var(--line);
   cursor: pointer;
 }
+.check[hidden] { display: none; }
 .check input { margin-top: 4px; accent-color: var(--accent); width: 16px; height: 16px; flex: none; }
 .radios { display: flex; gap: 12px; flex-wrap: wrap; font-size: .9rem; margin-top: 4px; }
 .radios label { display: flex; gap: 6px; align-items: center; cursor: pointer; }

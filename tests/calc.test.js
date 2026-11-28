@@ -137,3 +137,33 @@ test("今の方式が条件に合わない時は、本則課税を今として�
   assert.equal(d.current, "general");
   assert.equal(d.bestKey, "general");
 });
+
+test("インボイスの登録で課税になった個人：令和9年分は3割特例、令和8年分は2割特例（Codex の例）", () => {
+  const p = { eatIn: 5_000_000, otherBuy: 1_000_000, eatInKubun: 4, baseSales: 0, invoice: true, tokurei: true, current: "tokurei", share: 9 / 12 };
+  const c = S.compare(p);
+  close(c.options.find((o) => o.key === "general").tax, 400_000);
+  close(c.options.find((o) => o.key === "simple").tax, 200_000);
+  close(c.options.find((o) => o.key === "tokurei").tax, 150_000);
+  close(c.nowTax, 100_000); // 令和8年分の2割特例
+  assert.equal(c.bestKey, "tokurei");
+  const st = S.steps(c.current, c.bestKey, "individual", 12, false, c.cut.canExempt);
+  assert.equal(st.need, false);
+  assert.match(st.text, /届出は要りません/);
+});
+
+test("2割特例から令和9年分に簡易課税へ移る届出は、令和10年3月31日まで", () => {
+  const st = S.steps("tokurei", "simple", "individual", 12, true, false);
+  assert.equal(st.form, "簡易課税制度選択届出書");
+  assert.equal(st.deadline, "2028-03-31");
+  // 特例を使わない人は、これまでどおり前の日まで
+  assert.equal(S.steps("general", "simple", "individual", 12, true, false).deadline, "2026-12-31");
+});
+
+test("3割特例は、登録あり・2年前1,000万円以下・本人が確かめた時だけ選べる", () => {
+  const base = { eatIn: 5_000_000, otherBuy: 1_000_000, eatInKubun: 4, tokurei: true };
+  assert.equal(S.compute({ ...base, invoice: true, baseSales: 9_000_000 }).options.find((o) => o.key === "tokurei").allowed, true);
+  assert.equal(S.compute({ ...base, invoice: false, baseSales: 9_000_000 }).options.find((o) => o.key === "tokurei").allowed, false);
+  assert.equal(S.compute({ ...base, invoice: true, baseSales: 11_000_000 }).options.find((o) => o.key === "tokurei").allowed, false);
+  assert.equal(S.compute({ ...base, invoice: true }).options.find((o) => o.key === "tokurei").allowed, false);
+  assert.equal(S.compute({ eatIn: 5_000_000 }).options.some((o) => o.key === "tokurei"), false); // 確かめていなければ出さない
+});
