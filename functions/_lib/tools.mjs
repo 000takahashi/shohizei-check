@@ -82,7 +82,7 @@ export const TOOLS = [
         currentMethod: c.current, currentMethodInput: c.currentInput, currentMethodAllowed: c.currentAllowed,
         methods: c.options.map(method),
         best: { key: c.bestKey, label: LABEL[c.bestKey], labelEn: LABEL_EN[c.bestKey], taxYen: yen(c.bestTax) },
-        nowTaxYen: yen(c.nowTax),
+        nowMethod: c.nowKey, nowTaxYen: yen(c.nowTax),
         stayTaxYen: yen(c.stayTax),
         changeIfStayYen: yen(c.changeIfStay),
         saveBySwitchYen: yen(c.saveBySwitch),
