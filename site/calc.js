@@ -112,7 +112,9 @@
       { key: "simple", label: "簡易課税", tax: simple, allowed: canSimple },
     ];
     // 2割・3割特例: 登録を受けていて、2年前の売上が1,000万円以下の個人だけ（申告書に書くだけで、届出は要らない）
-    const tokureiOk = truthy(p.tokurei) && truthy(p.invoice) && p.baseSales !== undefined && p.baseSales !== "" && base <= LIMIT.exempt;
+    // 前年1〜6月（特定期間）の売上と給与がどちらも1,000万円を超えて課税になる年は使えない
+    const tokureiOk = truthy(p.tokurei) && truthy(p.invoice) && p.baseSales !== undefined && p.baseSales !== "" && base <= LIMIT.exempt
+      && !truthy(p.specifiedOver);
     const tRate = p.tokureiRate === undefined ? TOKUREI.cut : Number(p.tokureiRate);
     if (truthy(p.tokurei)) options.push({ key: "tokurei", label: tRate === TOKUREI.now ? "2割特例" : "3割特例", tax: salesTaxTotal * tRate, allowed: tokureiOk });
     options.push({ key: "exempt", label: "免税事業者", tax: 0, allowed: canExempt });

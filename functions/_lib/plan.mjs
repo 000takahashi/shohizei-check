@@ -57,6 +57,9 @@ export function cleanPlan(b) {
     invoice: b.invoice === true || b.invoice === '1' || b.invoice === 1,
     specifiedOver: b.specifiedOver === true || b.specifiedOver === '1' || b.specifiedOver === 1,
     current: KEYS.includes(b.current) ? b.current : 'general',
+    // 2割・3割特例を使っている（または使える）個人。最初の期間から簡易課税にする届出の期限が、その期間の申告期限まで延びる
+    tokurei: b.who !== 'corporate' && (b.current === 'tokurei' || b.tokurei === true || b.tokurei === '1' || b.tokurei === 1)
+      && (b.invoice === true || b.invoice === '1' || b.invoice === 1 || b.current === 'tokurei'),
     who: b.who === 'corporate' ? 'corporate' : 'individual',
     endMonth: m >= 1 && m <= 12 ? m : 3,
     // 今の方式（簡易課税、または届出で選んだ課税事業者）を始めた時期。2年続ける決まりが残っているかを決める
@@ -77,7 +80,7 @@ export const SAMPLE = {
 };
 
 // 方式を変える時の届出と期限。出せない移り方は null。
-function filing(from, to, i, per, sellsFood) {
+function filing(from, to, i, per, sellsFood, tokurei) {
   const before = dayBefore(per.start);
   const special = i === 0 && sellsFood;
   if (from === 'simple' && to === 'general') {
@@ -85,7 +88,11 @@ function filing(from, to, i, per, sellsFood) {
       ? { form: '簡易課税制度選択不適用届出書', deadline: per.end, special: true }
       : { form: '簡易課税制度選択不適用届出書', deadline: before, special: false };
   }
-  if (from === 'general' && to === 'simple') return { form: '簡易課税制度選択届出書', deadline: before, special: false };
+  if (from === 'general' && to === 'simple') {
+    // 2割・3割特例を受けた次の年から簡易課税にする時は、その年の申告期限（翌年3月31日）まで出せる（個人だけ）
+    if (i === 0 && tokurei) return { form: '簡易課税制度選択届出書', deadline: `${Number(per.end.slice(0, 4)) + 1}-03-31`, special: false, tokurei: true };
+    return { form: '簡易課税制度選択届出書', deadline: before, special: false };
+  }
   if (from === 'exempt' && to === 'general') {
     return special
       ? { form: '課税事業者選択届出書', deadline: per.end, special: true }
@@ -163,7 +170,7 @@ export function plan(input, today) {
       if (lockSimple > 0) lockSimple--;
       if (lockTaxable > 0) lockTaxable--;
       if (m !== prev) {
-        const f = filing(prev, m, i, table[i], sellsFood);
+        const f = filing(prev, m, i, table[i], sellsFood, input.tokurei);
         if (!f) return null;
         if (f.deadline < today) return null;                   // 期限が過ぎた届出は出せない
         filings.push({ index: i, from: prev, to: m, ...f, ...(prev === 'exempt' && current !== 'exempt' ? { elect: true } : {}) });
@@ -211,7 +218,8 @@ export function plan(input, today) {
   if (showElected) notes.push('この見通しは、課税事業者選択届出書をまだ出していない方の結果です。基準期間の売上が1,000万円以下のため、届出をしなければ免税事業者になります。課税事業者として申告する期間には選択届が必要で、選んだら2年間は課税事業者のままとなります。選択届をすでに出していて2年を過ぎている方は、「すでに課税事業者選択届出書を出している場合」をご覧ください。');
   if (best.path.includes('exempt') && current !== 'exempt') notes.push('免税事業者になるには、その期間の基準期間（個人は2年前、法人は2期前）の課税売上高が1,000万円以下で、特定期間（前年の1〜6月など）の判定でも免税の要件を満たし（売上に代えて給与等の支払額で判定することもできます）、インボイスの登録を受けていないことが必要です。取引先が事業者の場合は、取引先が仕入れの税を控除できなくなります。');
   if (best.path.includes('exempt') && current === 'exempt') notes.push('免税のままであれば納税はございません。取引先が事業者の場合は、値下げを求められることがございます。');
-  if (input.who !== 'corporate' && input.invoice) notes.push('インボイスの登録をきっかけに免税事業者から課税事業者になった個人の方は、この見通しに含めていない2割・3割特例（令和9年分・10年分は売上の税の3割を納める。届出は不要）を使える場合があります。2割・3割特例を受けた次の年から簡易課税にする届出は、その年の申告期限まで出せます。申告方式の試算の画面でお確かめください。');
+  if (input.tokurei) notes.push('2割・3割特例を使っている方として、最初の期間から簡易課税にする届出の期限を、その期間の申告期限（' + `${Number(table[0].end.slice(0, 4)) + 1}年3月31日` + '）にしております。2割・3割特例そのものの税額は、この見通しには入れておりません。');
+  else if (input.who !== 'corporate' && input.invoice) notes.push('インボイスの登録をきっかけに免税事業者から課税事業者になった個人の方は、この見通しに含めていない2割・3割特例（令和9年分・10年分は売上の税の3割を納める。届出は不要）を使える場合があります。2割・3割特例を受けた次の年から簡易課税にする届出は、その年の申告期限まで出せます。申告方式の試算の画面でお確かめください。');
   if (best.taxes.some((t) => t < 0)) notes.push('マイナスの期間は還付（納めた税金が戻ること）となります。還付金は申告の後に振り込まれます。');
 
   return {

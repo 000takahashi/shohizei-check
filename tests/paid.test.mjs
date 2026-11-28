@@ -318,3 +318,23 @@ test('★無料開放: 12月31日（日本時間）の終わりまでは、パ�
   assert.equal((await onPlan({ request: req('/api/v1/plan', SAMPLE), env }, { now: next })).status, 402);
   assert.equal((await onPricing({ request: req('/api/v1/pricing', PRICE_SAMPLE), env }, { now: next })).status, 402);
 });
+
+test('2割・3割特例の個人: 最初の期間から簡易課税にする届出の期限は、その期間の申告期限', () => {
+  const base = { eatIn: 8_000_000, foodSales: 0, otherSales: 0, foodBuy: 0, otherBuy: 1_000_000, baseSales: 9_000_000,
+    eatInKubun: 4, invoice: true, specifiedOver: false, who: 'individual', endMonth: 12, since: 'old', elected: 'yes' };
+  const t = plan(cleanPlan({ ...base, current: 'tokurei', tokurei: true }).input, '2026-11-28');
+  assert.equal(t.best.path[0], 'simple');
+  const f = t.best.filings.find((x) => x.index === 0 && x.to === 'simple');
+  assert.equal(f.deadline, '2028-03-31');
+  assert.equal(f.tokurei, true);
+  assert.equal(f.special, false);
+  assert.ok(t.notes.some((n) => n.includes('2028年3月31日')));
+  // 期限を過ぎた後（2027年）でも、申告期限までなら道に残る
+  const late = plan(cleanPlan({ ...base, current: 'tokurei', tokurei: true }).input, '2027-06-01');
+  assert.equal(late.best.path[0], 'simple');
+  // 特例を使っていない人は、ふつうの期限（期間が始まる前日）
+  const g = plan(cleanPlan({ ...base, current: 'general' }).input, '2026-11-28');
+  assert.equal(g.best.filings.find((x) => x.index === 0 && x.to === 'simple').deadline, '2026-12-31');
+  // 法人には当てはめない
+  assert.equal(cleanPlan({ ...base, who: 'corporate', current: 'tokurei', tokurei: true }).input.tokurei, false);
+});
