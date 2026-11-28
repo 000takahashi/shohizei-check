@@ -2741,7 +2741,7 @@ p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
     $('sSave').className = 'v' + (c.saveBySwitch >= 1 ? ' pos' : '');
     $('sSaveSub').textContent = c.saveBySwitch >= 1 ? LABEL[current] + 'のままと比べて' : '今の方式が一番少ない';
     $('sNow').textContent = taxText(c.nowTax);
-    $('sNowSub').textContent = LABEL[current] + 'で計算';
+    $('sNowSub').textContent = (c.nowKey === 'tokurei' ? '2割特例' : LABEL[c.nowKey]) + 'で計算';
     $('sStay').textContent = taxText(c.stayTax);
     $('sStaySub').textContent = '今より ' + (change >= 0 ? '+' : '−') + man(Math.abs(change)).replace('−', '');
 

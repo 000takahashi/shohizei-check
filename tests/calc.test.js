@@ -186,3 +186,17 @@ test("2割特例を令和8年分に使い、令和9年分は特定期間で3割�
   const g = S.compare({ ...p, current: "general" });
   assert.equal(S.steps(g.current, g.bestKey, "individual", 12, false, g.cut.canExempt, g.currentInput).deadline, "2026-12-31");
 });
+
+test("今の納税（令和8年分）は、令和9年分に3割特例の対象外でも、令和8年分に使った2割特例で計算する", () => {
+  const p = { foodSales: 20_000_000, foodBuy: 5_000_000, foodKubun: 2, baseSales: 9_000_000, invoice: true, tokurei: true, current: "tokurei", specifiedOver: true, share: 9 / 12 };
+  const c = S.compare(p);
+  assert.equal(c.currentAllowed, false);
+  assert.equal(c.nowKey, "tokurei");
+  close(c.nowTax, 320_000);
+  assert.equal(c.changeIfStay, c.stayTax - 320_000);
+  const st = S.steps(c.current, c.bestKey, "individual", 12, true, c.cut.canExempt, c.currentInput);
+  if (c.bestKey === "simple") assert.equal(st.deadline, "2028-03-31");
+  // 対象外にならない時は、今までどおり
+  const ok = S.compare({ ...p, specifiedOver: false });
+  close(ok.nowTax, 320_000);
+});

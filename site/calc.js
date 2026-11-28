@@ -152,10 +152,14 @@
     }));
     const allowed = options.filter((o) => o.allowed);
     const best = allowed.reduce((a, b) => (b.tax < a.tax ? b : a));
-    const nowTax = pick(now, current).tax;
+    // 「今の納税」は令和8年分。本人が選んだ今の方式で計算する（令和9年分の条件で使えなくなる方式でも、令和8年分には使っている）。
+    // 令和9年分の比較（stayTax・best）だけに、令和9年分の条件をかける
+    const nowKey = pick(now, input) ? input : current;
+    const nowTax = pick(now, nowKey).tax;
     const stayTax = options.find((o) => o.key === current).tax;
     return {
       now, cut, current, currentInput: input, currentAllowed, share, options, best,
+      nowKey,                     // 令和8年分の方式（本人が選んだ今の方式）
       nowTax,                     // 今の方式で、今の税率（1年）
       stayTax,                    // 今の方式のまま、比べる課税期間
       bestTax: best.tax,          // 比べる課税期間に一番少ない方式
