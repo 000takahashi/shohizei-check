@@ -2705,7 +2705,7 @@ p .nw,li .nw,.lead .nw,td .nw{white-space:normal}
     var c = S.compare(cargs);
     window.ShohizeiLast = { args: cargs, months: months, per: state.per, tax: state.tax };
     current = c.current; // 条件に合わない方式を選んだ時は、本則課税を「今」として扱う
-    var st = S.steps(current, c.bestKey, state.who, Number(v.endMonth), vals.foodSales > 0, c.cut.canExempt);
+    var st = S.steps(current, c.bestKey, state.who, Number(v.endMonth), vals.foodSales > 0, c.cut.canExempt, c.currentInput);
     $('periodChip').textContent = slash(st.period.start) + '〜' + slash(st.period.end);
 
     // 判定

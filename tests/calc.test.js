@@ -173,3 +173,16 @@ test("2割・3割特例: 前年1〜6月の売上と給与がどちらも1,000万
   assert.equal(S.compute({ ...p, specifiedOver: true }).options.find((o) => o.key === "tokurei").allowed, false);
   assert.equal(S.compute({ ...p, specifiedOver: false }).options.find((o) => o.key === "tokurei").allowed, true);
 });
+
+test("2割特例を令和8年分に使い、令和9年分は特定期間で3割特例の対象外でも、簡易課税の届出の期限は令和10年3月31日", () => {
+  const p = { eatIn: 8_000_000, otherBuy: 1_000_000, eatInKubun: 4, baseSales: 9_000_000, invoice: true, tokurei: true, current: "tokurei", specifiedOver: true, share: 9 / 12 };
+  const c = S.compare(p);
+  assert.equal(c.currentAllowed, false);
+  assert.equal(c.current, "general");
+  assert.equal(c.bestKey, "simple");
+  const st = S.steps(c.current, c.bestKey, "individual", 12, false, c.cut.canExempt, c.currentInput);
+  assert.equal(st.deadline, "2028-03-31");
+  // 令和8年分を本則で申告した人は、ふつうの期限
+  const g = S.compare({ ...p, current: "general" });
+  assert.equal(S.steps(g.current, g.bestKey, "individual", 12, false, g.cut.canExempt, g.currentInput).deadline, "2026-12-31");
+});
