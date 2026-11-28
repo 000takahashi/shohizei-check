@@ -230,8 +230,11 @@
     return current === "tokurei" && who !== "corporate" ? SIMPLE_AFTER_TOKUREI.individual : null;
   }
 
-  function steps(current, best, who, endMonth, sellsFood, canExempt) {
+  // usedBefore: 令和8年分に実際に使った方式（省略時 current）。今年は条件に合わず本則とみなす時も、
+  // 令和8年分に2割特例を使っていれば、簡易課税の届出の期限の延長は残る
+  function steps(current, best, who, endMonth, sellsFood, canExempt, usedBefore) {
     const pr = period(who, endMonth);
+    const prev = usedBefore || current;
     const food = sellsFood === undefined ? true : !!sellsFood;
     const before = new Date(Date.parse(pr.start + "T00:00:00Z") - 86400000).toISOString().slice(0, 10);
     const noFood = "飲食料品の販売がないため、今回の特例はご利用になれません。変更したい課税期間が始まる前日までにご提出ください。";
@@ -241,8 +244,8 @@
     if (current === "tokurei" && best === "general") {
       return { need: false, period: pr, text: "本則課税で申告するのに、届出は要りません。2割特例は申告の時に選ぶものなので、令和9年分は本則課税で申告すれば足ります。" };
     }
-    if (best === "simple" && simpleDeadlineAfterTokurei(current, who)) {
-      return { need: true, form: "簡易課税制度選択届出書", deadline: simpleDeadlineAfterTokurei(current, who), special: true, period: pr,
+    if (best === "simple" && simpleDeadlineAfterTokurei(prev, who)) {
+      return { need: true, form: "簡易課税制度選択届出書", deadline: simpleDeadlineAfterTokurei(prev, who), special: true, period: pr,
         text: "令和8年分で2割特例を受けた方は、令和9年分の申告期限（令和10年3月31日）までに届出を出せば、令和9年分から簡易課税で申告できます（2割・3割特例からの移行の特例）。原則として2年間は継続していただく必要があります。" };
     }
     if (current === best) {

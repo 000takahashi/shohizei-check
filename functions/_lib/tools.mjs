@@ -76,7 +76,7 @@ export const TOOLS = [
       const pr = S.period(who(a), endMonth(a));
       const months = S.cutMonths(pr.start, pr.end);
       const c = S.compare({ ...p, share: months / 12 });
-      const st = S.steps(c.current, c.bestKey, who(a), endMonth(a), p.foodSales > 0, c.cut.canExempt);
+      const st = S.steps(c.current, c.bestKey, who(a), endMonth(a), p.foodSales > 0, c.cut.canExempt, c.currentInput);
       return {
         taxablePeriod: { start: pr.start, end: pr.end, monthsAt1Percent: months },
         currentMethod: c.current, currentMethodInput: c.currentInput, currentMethodAllowed: c.currentAllowed,
